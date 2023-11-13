@@ -29,7 +29,7 @@ public:
     int totalConnNum;
     len_t chipWidth, chipHeight;
     std::vector<Tessera> softTesserae;
-    std::vector<Tessera> hardTesserae;
+    std::vector<Tessera> fixedTesserae;
     
     globalPhaseAdapter() = delete;
     globalPhaseAdapter(std::string fileName);
@@ -38,6 +38,8 @@ public:
     void readGlobalResult();
     void detectGlobalOverlaps();
     void splitGlobalOverlaps();
+
+    void printStatus();
     
 };
 
