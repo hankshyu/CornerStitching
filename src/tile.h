@@ -1,7 +1,6 @@
 #ifndef __TILE_H__
 #define __TILE_H__
 
-#include <vector>
 #include "boost/polygon/polygon.hpp"
 #include "units.h"
 #include "cord.h"
@@ -83,5 +82,5 @@ namespace std{
 }
 
 std::ostream &operator << (std::ostream &os, const Tile &t);
-
+std::ostream &operator << (std::ostream &os, const enum tileType &t);
 #endif // __TILE_H__

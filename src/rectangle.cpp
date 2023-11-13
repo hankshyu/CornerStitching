@@ -6,7 +6,8 @@ size_t std::hash<Rectangle>::operator()(const Rectangle &key) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const Rectangle &c) {
-    os << "R[" << boost::polygon::ll(c) << ", " << boost::polygon::ur(c) << ", ";
-    os << rec::getWidth(c) << ", " << rec::getHeight(c) << "]";
+    os << "R[" << boost::polygon::ll(c) << ", ";
+    os << rec::getWidth(c) << ", " << rec::getHeight(c) <<", ";
+    os << boost::polygon::ur(c) << "]";
     return os;
 }

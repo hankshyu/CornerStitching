@@ -8,12 +8,13 @@
 #include "line.h"
 #include "rectangle.h"
 #include "tile.h"
+#include "globalPhaseAdapter.h"
 
 
-int main(int argc, char const *argv[])
-{
-    namespace gtl = boost::polygon;
+int main(int argc, char const *argv[]) {
 
-    Tile arr [3];
-    arr[0] = Tile()
+    std::cout << 1 << " " << argv[0] << std::endl;
+    std::cout << 2 << " " << argv[1] << std::endl;
+    globalPhaseAdapter gpa(argv[1]);
+    gpa.readGlobalResult();
 }

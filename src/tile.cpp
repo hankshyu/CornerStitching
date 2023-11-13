@@ -86,7 +86,7 @@ void Tile::setLowerLeft(Cord lowerLeft) {
 };
 
 double Tile::calAspectRatio() const {
-    return getWidth() / getHeight();
+    return double(getWidth()) / double(getHeight());
 };
 
 area_t Tile::calArea() const {
@@ -97,9 +97,16 @@ size_t std::hash<Tile>::operator()(const Tile &key) const {
     return (std::hash<int>()((int)key.getType())) ^ (std::hash<Rectangle>()(key.getRectangle()));
 }
 
-std::ostream &operator<<(std::ostream &os, const Tile &t) {
+std::ostream &operator<<(std::ostream &os, const Tile &tile) {
     os << "T[";
-    switch (t.getType())
+    os << tile.mType << ", " << tile.mRectangle;
+    os << "]";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const enum tileType &t) {
+
+    switch (t)
     {
         case tileType::BLOCK:
             os << "BLOCK";
@@ -111,8 +118,7 @@ std::ostream &operator<<(std::ostream &os, const Tile &t) {
             os << "OVERLAP";
             break;
         default:
-            throw std::out_of_range("tile's mType attribute out of Range");
+            throw std::out_of_range("tileType out of Range");
     }
-    os << ", " << t.getRectangle();
     return os;
 }
