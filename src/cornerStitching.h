@@ -5,7 +5,6 @@
 #include "cord.h"
 #include "tile.h"
 
-
 class CornerStitching {
 private:
     
@@ -42,8 +41,6 @@ public:
     void insertTile(Tile &tile);
     void removeTile(Tile &tile);
 
-
     void visualiseArtpiece(const std::string ouputFileName);
-
 };
 #endif // __CORNERSTITCHING_H__

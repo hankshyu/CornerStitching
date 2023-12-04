@@ -26,6 +26,9 @@ private:
 public:
 
     Tile *rt, *tr, *bl, *lb;
+
+    std::vector <int> OverlapFixedTesseraeIdx;
+    std::vector <int> OverlapSoftTesseraeIdx;
     
     Tile();
     Tile(tileType t, Rectangle rect);
@@ -83,4 +86,6 @@ namespace std{
 
 std::ostream &operator << (std::ostream &os, const Tile &t);
 std::ostream &operator << (std::ostream &os, const enum tileType &t);
+
+std::vector<Tile> mergeCutTiles(std::vector<Tile> toMerge, std::vector<Tile> toCut);
 #endif // __TILE_H__

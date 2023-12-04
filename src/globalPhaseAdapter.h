@@ -6,19 +6,7 @@
 #include <vector>
 
 #include "tile.h"
-
-enum class tesseraType{
-    EMPTY ,SOFT, HARD, OVERLAP
-};
-
-struct Tessera{
-    std::string name;
-    tesseraType type;
-    Rectangle origBox;
-
-    std::vector <Tile *> TileArr;
-    std::vector <Tile *> OverlapArr; 
-};
+#include "tessera.h"
 
 class globalPhaseAdapter{
 
@@ -28,8 +16,8 @@ public:
     int totalTesseraeNum;
     int totalConnNum;
     len_t chipWidth, chipHeight;
-    std::vector<Tessera> softTesserae;
-    std::vector<Tessera> fixedTesserae;
+    std::vector<Tessera *> softTesserae;
+    std::vector<Tessera *> fixedTesserae;
     
     globalPhaseAdapter() = delete;
     globalPhaseAdapter(std::string fileName);
