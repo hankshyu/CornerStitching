@@ -17,7 +17,7 @@ private:
     std::unordered_map <Cord, Tile*> allNonBlankTilesMap;
 
     // Pick-up all tiles(include BLANK) inside the data structure 
-    void collectAllTiles(std::unordered_set<Tile *> &allTiles)noexcept const;
+    void collectAllTiles(std::unordered_set<Tile *> &allTiles) const;
     void collectAllTilesDFS(Tile *tile, std::unordered_set<Tile *> &allTiles) const;
 
 public:
