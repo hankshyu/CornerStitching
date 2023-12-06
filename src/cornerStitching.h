@@ -1,6 +1,9 @@
 #ifndef __CORNERSTITCHING_H__
 #define __CORNERSTITCHING_H__
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include "units.h"
 #include "cord.h"
 #include "tile.h"
@@ -9,9 +12,13 @@ class CornerStitching {
 private:
     
     len_t mCanvasWidth, mCanvasHeight;
+    Tile *mCanvasSizeBlankTile;
 
-    // The seed always contains some tile in the block, may be blank/non-blank tile
-    Tile *mSeed;
+    std::unordered_map <Cord, Tile*> allNonBlankTilesMap;
+
+    // Pick-up all tiles(include BLANK) inside the data structure 
+    void collectAllTiles(std::unordered_set<Tile *> &allTiles)noexcept const;
+    void collectAllTilesDFS(Tile *tile, std::unordered_set<Tile *> &allTiles) const;
 
 public:
     CornerStitching() = delete;
@@ -35,11 +42,12 @@ public:
     // Determine if there is any nonblank tiles in the box area
     bool searchArea(Rectangle box, Tile &target) const;
 
-    // Enumerates all nonblank tiles in a given box area, each tile is visited only after all the tiles above and to its left does
+    // Enumerates all nonblank tiles in a given box area, 
+    // each tile is visited only after all the tiles above and to its left does
     void enumerateDirectArea(Rectangle box, std::vector <Tile *> &allTiles) const;
 
     void insertTile(Tile &tile);
-    void removeTile(Tile &tile);
+    void removeTile(Tile *tile);
 
     void visualiseArtpiece(const std::string ouputFileName);
 };
