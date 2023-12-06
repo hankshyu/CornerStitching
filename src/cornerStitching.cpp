@@ -140,4 +140,4 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
     }
     
     return index;
-}
+}   
