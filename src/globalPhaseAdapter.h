@@ -28,6 +28,9 @@ public:
     void splitGlobalOverlaps();
 
     void printStatus();
+    // prints wherter insertion is valid
+    std::vector<Tile *> printFlowStatus();
+
     
 };
 

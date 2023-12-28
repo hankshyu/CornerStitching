@@ -1,4 +1,5 @@
 #include <cmath>
+#include <unordered_set>
 #include "globalPhaseAdapter.h"
 #include "rectangle.h"
 
@@ -304,4 +305,76 @@ void globalPhaseAdapter::printStatus(){
             }
         }
     }
+}
+
+std::vector<Tile *> globalPhaseAdapter::printFlowStatus(){
+    // This records the inserted Rectangels
+    std::unordered_set<Rectangle> record;    
+    std::vector <Tile *> answer;
+
+    for(Tessera *tess: this->softTesserae){
+        Tessera t = *tess;
+        std::cout << t.name << t.origBox << std::endl;
+        std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
+        std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        if(!t.TileArr.empty()){
+            for(Tile *til : t.TileArr){
+                std::cout << *til << std::endl;
+                Rectangle trec = til->getRectangle();
+                if(record.find(trec) == record.end()){
+                    record.insert(til->getRectangle());
+                    answer.push_back(til);
+
+                }else{
+                    std::cout << "(Tile existed)" << std::endl;
+                }
+            }
+        }
+        std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
+        if(!t.OverlapArr.empty()){
+            for(Tile *til : t.OverlapArr){
+                std::cout << *til << std::endl;
+                Rectangle trec = til->getRectangle();
+                if(record.find(trec) == record.end()){
+                    record.insert(til->getRectangle());
+                    answer.push_back(til);
+                }else{
+                    std::cout << "(Tile existed)" << std::endl;
+                }
+            }
+        }
+    }
+    for(Tessera *tess: this->fixedTesserae){
+        Tessera t = *tess;
+        std::cout << t.name << t.origBox << std::endl;
+        std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
+        std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        if(!t.TileArr.empty()){
+            for(Tile *til : t.TileArr){
+                std::cout << *til << std::endl;
+                Rectangle trec = til->getRectangle();
+                if(record.find(trec) == record.end()){
+                    record.insert(til->getRectangle());
+                    answer.push_back(til);
+                }else{
+                    std::cout << "(Tile existed)" << std::endl;
+                }
+            }
+        }
+        std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
+        if(!t.OverlapArr.empty()){
+            for(Tile *til : t.OverlapArr){
+                std::cout << *til << std::endl;
+                Rectangle trec = til->getRectangle();
+                if(record.find(trec) == record.end()){
+                    record.insert(til->getRectangle());
+                    answer.push_back(til);
+                }else{
+                    std::cout << "(Tile existed)" << std::endl;
+                }
+            }
+        }
+    } 
+
+    return answer;
 }
