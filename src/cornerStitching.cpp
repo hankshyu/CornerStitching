@@ -101,41 +101,41 @@ len_t CornerStitching::getCanvasHeight() const{
     return this->mCanvasHeight;
 }
 
-// Tile *CornerStitching::findPoint(const Cord &key) const{
+Tile *CornerStitching::findPoint(const Cord &key) const{
 
-//     // work on the exception handling....
-//     assert(key.x() >= 0);
-//     assert(key.y() >= 0);
-//     assert(key.x < getCanvasWidth());
-//     assert(key.y < getCanvasHeight());
+    // work on the exception handling....
+    assert(key.x() >= 0);
+    assert(key.y() >= 0);
+    assert(key.x < getCanvasWidth());
+    assert(key.y < getCanvasHeight());
 
-//     if((key.x() < 0) || (key.x() < 0) || (key.) || ()){
-//         throw 
-//     }
+    if((key.x() < 0) || (key.x() < 0) || (key.) || ()){
+        throw 
+    }
 
-//     Tile *index = getRandomTile();
+    Tile *index = getRandomTile();
     
-//     while(!(index->checkCordInTile(key))){
-//         if(!index->checkYCordInTile(key)){
-//             // Adjust vertical range
-//             if(key.y >= index->getLowerLeft().y){
-//                 assert(index->rt != nullptr);
-//                 index = index->rt;
-//             }else{
-//                 assert(index->lb != nullptr);
-//                 index = index->lb;
-//             }
-//         }else{
-//             // Vertical range correct! adjust horizontal range
-//             if(key.x >= index->getLowerLeft().x){
-//                 assert(index->tr != nullptr);
-//                 index = index->tr;
-//             }else{
-//                 assert(index->bl != nullptr);
-//                 index = index->bl;
-//             }
-//         }
-//     }
+    while(!(index->checkCordInTile(key))){
+        if(!index->checkYCordInTile(key)){
+            // Adjust vertical range
+            if(key.y >= index->getLowerLeft().y){
+                assert(index->rt != nullptr);
+                index = index->rt;
+            }else{
+                assert(index->lb != nullptr);
+                index = index->lb;
+            }
+        }else{
+            // Vertical range correct! adjust horizontal range
+            if(key.x >= index->getLowerLeft().x){
+                assert(index->tr != nullptr);
+                index = index->tr;
+            }else{
+                assert(index->bl != nullptr);
+                index = index->bl;
+            }
+        }
+    }
     
-//     return index;
-// }   
+    return index;
+}   
