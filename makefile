@@ -15,7 +15,7 @@ debug: csrun_debug
 LINKFLAGS = -O3
 
 _OBJS =	main.o \
-		cord.o line.o rectangle.o tile.o globalPhaseAdapter.o tessera.o cornerStitching.o
+		cord.o line.o rectangle.o tile.o globalPhaseAdapter.o tessera.o cornerStitching.o cSException.o
 
 OBJS = $(patsubst %,$(OBJPATH)/%,$(_OBJS))
 DBG_OBJS = $(patsubst %.o, $(OBJPATH)/%_dbg.o, $(_OBJS))

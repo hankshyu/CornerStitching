@@ -11,6 +11,7 @@
 #include "tile.h"
 #include "globalPhaseAdapter.h"
 #include "cornerStitching.h"
+#include "cSException.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -33,4 +34,10 @@ int main(int argc, char const *argv[]) {
 	std::cout << "This is upper left: " << tt.getUpperLeft() << ", " << tt.getContainedUpperLeft() << std::endl;
 	std::cout << "This is lower right: " << tt.getLowerRight() << ", " << tt.getContainedLowerRight() << std::endl;
 	std::cout << "This is upper right: " << tt.getUpperRight() << ", " << tt.getContainedUpperRight() << std::endl;
+
+	try{
+		throw CSException("TILE_01");
+	}catch(CSException cs){
+		std::cout << cs.what() << std::endl;
+	}
 }

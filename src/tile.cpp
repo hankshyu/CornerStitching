@@ -1,4 +1,5 @@
 #include "tile.h"
+#include "cSException.h"
 
 #include <iostream>
 
@@ -151,7 +152,7 @@ std::ostream &operator<<(std::ostream &os, const enum tileType &t) {
             os << "OVERLAP";
             break;
         default:
-            throw std::out_of_range("tileType out of Range");
+            throw CSException("TILE_01");
     }
     return os;
 }

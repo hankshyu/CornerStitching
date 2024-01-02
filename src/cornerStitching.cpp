@@ -1,4 +1,5 @@
 #include "cornerStitching.h"
+#include "cSException.h"
 
 bool CornerStitching::checkPointInCanvas(const Cord &point) const{
     return mCanvasSizeBlankTile->checkCordInTile(point);
@@ -119,7 +120,7 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
 
     // throw exception if point finding (key) out of canvas range
     if(checkPointInCanvas(key)){
-        throw std::runtime_error("findPoint's target out of canvas");
+        throw CSException("CORNERSTITCHING_01");
     }
 
     // Find a seed to start, if empty just return the blank tile.
@@ -213,37 +214,37 @@ void CornerStitching::findAllNeighbors(Tile *centre, std::vector<Tile *> &neighb
     findRightNeighbors(centre, neighbors);
 }
 
-bool CornerStitching::searchArea(Rectangle box, Tile &target) const{
+// bool CornerStitching::searchArea(Rectangle box, Tile &target) const{
 
 
-    if(!checkRectangleInCanvas(box)){
-        throw std::runtime_error("Searching Area's box out of canvas ");
-    }
+//     if(!checkRectangleInCanvas(box)){
+//         throw std::runtime_error("Searching Area's box out of canvas ");
+//     }
 
-    // Use point-finding algo to locate the tile containin the upperleft corner of AOI
-    len_t searchRBorderHeight = boost::polygon::xh(box) - 1;
-    Tile *currentFind = findPoint(Cord(lowerleft.x, searchRBorderHeight));
-    std::cout << "Init found:" <<std::endl;
+//     // Use point-finding algo to locate the tile containin the upperleft corner of AOI
+//     len_t searchRBorderHeight = boost::polygon::xh(box) - 1;
+//     Tile *currentFind = findPoint(Cord(lowerleft.x, searchRBorderHeight));
+//     std::cout << "Init found:" <<std::endl;
 
-    while(currentFind->getUpperLeft().y > lowerleft.y){
-        // See if the tile is solid
-        if(currentFind->getType() != tileType::BLANK){
-            // This is an edge of a solid tile
-            target = *currentFind;
-            return true;
-        }else if(currentFind->getUpperRight().x < lowerleft.x + width){
-            // See if the right edge within AOI, right must be a tile
-            target = *(currentFind->tr);
-            return true;
-        }else{
-            // Move down to the next tile touching the left edge of AOI
-            if(currentFind->getLowerLeft().y <= 1){
-                break;
-            }
-            currentFind = findPoint(Cord(lowerleft.x, currentFind->getLowerLeft().y -1));
-        }
-    }
+//     while(currentFind->getUpperLeft().y > lowerleft.y){
+//         // See if the tile is solid
+//         if(currentFind->getType() != tileType::BLANK){
+//             // This is an edge of a solid tile
+//             target = *currentFind;
+//             return true;
+//         }else if(currentFind->getUpperRight().x < lowerleft.x + width){
+//             // See if the right edge within AOI, right must be a tile
+//             target = *(currentFind->tr);
+//             return true;
+//         }else{
+//             // Move down to the next tile touching the left edge of AOI
+//             if(currentFind->getLowerLeft().y <= 1){
+//                 break;
+//             }
+//             currentFind = findPoint(Cord(lowerleft.x, currentFind->getLowerLeft().y -1));
+//         }
+//     }
 
-    return false;
+//     return false;
 
-}
+// }

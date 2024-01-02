@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "globalPhaseAdapter.h"
 #include "rectangle.h"
+#include "cSException.h"
 
 
 globalPhaseAdapter::globalPhaseAdapter(std::string fileName){
@@ -46,7 +47,7 @@ void globalPhaseAdapter::readGlobalResult() {
             nT->type = tesseraType::HARD;
             this->fixedTesserae.push_back(nT);
         }else{
-            throw std::out_of_range("Module not marked as SOFT or FIXED");
+            throw CSException("GLOBALPHASEADAPTER_01");
         }
 
     }
