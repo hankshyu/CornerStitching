@@ -1,5 +1,19 @@
 #include "cornerStitching.h"
 
+bool CornerStitching::checkPointInCanvas(const Cord &point) const{
+    return mCanvasSizeBlankTile->checkCordInTile(point);
+}
+
+bool CornerStitching::checkRectangleInCanvas(const Rectangle &rect) const{
+
+    Tile tempTile(tileType::BLANK, rect);
+
+    bool realLLIn = mCanvasSizeBlankTile->checkCordInTile(tempTile.getLowerLeft());
+    bool realURIn = mCanvasSizeBlankTile->checkCordInTile(tempTile.getContainedUpperRight());
+
+    return realLLIn && realURIn;
+}
+
 void CornerStitching::collectAllTiles(std::unordered_set<Tile *> &allTiles) const{
     allTiles.clear();
     if(allNonBlankTilesMap.empty()){
@@ -103,22 +117,22 @@ len_t CornerStitching::getCanvasHeight() const{
 
 Tile *CornerStitching::findPoint(const Cord &key) const{
 
-    // work on the exception handling....
-    assert(key.x() >= 0);
-    assert(key.y() >= 0);
-    assert(key.x < getCanvasWidth());
-    assert(key.y < getCanvasHeight());
-
-    if((key.x() < 0) || (key.x() < 0) || (key.) || ()){
-        throw 
+    // throw exception if point finding (key) out of canvas range
+    if(checkPointInCanvas(key)){
+        throw std::runtime_error("findPoint's target out of canvas");
     }
 
-    Tile *index = getRandomTile();
-    
+    // Find a seed to start, if empty just return the blank tile.
+    if(allNonBlankTilesMap.empty()){
+        return this->mCanvasSizeBlankTile;
+    }
+
+    Tile *index = allNonBlankTilesMap.begin()->second;
+
     while(!(index->checkCordInTile(key))){
         if(!index->checkYCordInTile(key)){
             // Adjust vertical range
-            if(key.y >= index->getLowerLeft().y){
+            if(key.y() >= index->getLowerLeft().y()){
                 assert(index->rt != nullptr);
                 index = index->rt;
             }else{
@@ -127,7 +141,7 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
             }
         }else{
             // Vertical range correct! adjust horizontal range
-            if(key.x >= index->getLowerLeft().x){
+            if(key.x() >= index->getLowerLeft().x()){
                 assert(index->tr != nullptr);
                 index = index->tr;
             }else{
@@ -139,3 +153,97 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
     
     return index;
 }   
+
+void CornerStitching::findTopNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
+    if(centre == nullptr) return;
+    if(centre->rt == nullptr) return;
+
+    Tile *n = centre->rt;
+    while(n->getLowerLeft().x() > centre->getLowerLeft().x()){
+        neighbors.push_back(n);
+        n = n->bl;
+    }
+    neighbors.push_back(n);
+}
+
+void CornerStitching::findDownNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
+    if(centre == nullptr) return;
+    if(centre->lb == nullptr) return;
+
+    Tile *n = centre->lb;
+    while(n->getUpperRight().x() < centre->getUpperRight().x()){
+        neighbors.push_back(n);
+        n = n->tr;
+    }
+    neighbors.push_back(n);
+}
+
+void CornerStitching::findLeftNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
+    if(centre == nullptr) return;
+    if(centre->bl == nullptr) return;
+
+    Tile *n = centre->bl;
+    while(n->getUpperRight().y() < centre->getUpperRight().y()){
+        neighbors.push_back(n);
+        n = n->rt;
+    }
+    neighbors.push_back(n);
+}
+
+void CornerStitching::findRightNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
+    if(centre == nullptr) return;
+    if(centre->tr == nullptr) return;
+
+    Tile *n = centre->tr;
+    // the last neighbor is the first tile encountered whose lower y cord <= lower y cord of starting tile
+    while(n->getLowerLeft().y() > centre->getLowerLeft().y()){
+        neighbors.push_back(n);
+        n = n->lb;
+    }
+    neighbors.push_back(n);
+    
+}
+
+void CornerStitching::findAllNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
+    if(centre == nullptr) return;
+
+    findTopNeighbors(centre, neighbors);
+    findDownNeighbors(centre, neighbors);
+    findLeftNeighbors(centre, neighbors);
+    findRightNeighbors(centre, neighbors);
+}
+
+bool CornerStitching::searchArea(Rectangle box, Tile &target) const{
+
+
+    if(!checkRectangleInCanvas(box)){
+        throw std::runtime_error("Searching Area's box out of canvas ");
+    }
+
+    // Use point-finding algo to locate the tile containin the upperleft corner of AOI
+    len_t searchRBorderHeight = boost::polygon::xh(box) - 1;
+    Tile *currentFind = findPoint(Cord(lowerleft.x, searchRBorderHeight));
+    std::cout << "Init found:" <<std::endl;
+
+    while(currentFind->getUpperLeft().y > lowerleft.y){
+        // See if the tile is solid
+        if(currentFind->getType() != tileType::BLANK){
+            // This is an edge of a solid tile
+            target = *currentFind;
+            return true;
+        }else if(currentFind->getUpperRight().x < lowerleft.x + width){
+            // See if the right edge within AOI, right must be a tile
+            target = *(currentFind->tr);
+            return true;
+        }else{
+            // Move down to the next tile touching the left edge of AOI
+            if(currentFind->getLowerLeft().y <= 1){
+                break;
+            }
+            currentFind = findPoint(Cord(lowerleft.x, currentFind->getLowerLeft().y -1));
+        }
+    }
+
+    return false;
+
+}

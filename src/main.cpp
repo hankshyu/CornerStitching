@@ -10,6 +10,7 @@
 #include "rectangle.h"
 #include "tile.h"
 #include "globalPhaseAdapter.h"
+#include "cornerStitching.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -26,5 +27,10 @@ int main(int argc, char const *argv[]) {
 		std::cout << *t << std::endl;
 	}
 
-
+	Tile tt(tileType::BLOCK, Cord(3, 7), 4, 5);
+	std::cout << "This is the tt: " << tt << std::endl;
+	std::cout << "This is lower left: " << tt.getLowerLeft() << std::endl;
+	std::cout << "This is upper left: " << tt.getUpperLeft() << ", " << tt.getContainedUpperLeft() << std::endl;
+	std::cout << "This is lower right: " << tt.getLowerRight() << ", " << tt.getContainedLowerRight() << std::endl;
+	std::cout << "This is upper right: " << tt.getUpperRight() << ", " << tt.getContainedUpperRight() << std::endl;
 }

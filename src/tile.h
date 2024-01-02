@@ -45,11 +45,18 @@ public:
 
     len_t getWidth() const;
     len_t getHeight() const;
-    
+
+     
     Cord getLowerLeft() const;
+    // The "contours" of the rectange, containing the upper,right row of non-owning blocks.
+    // More often as representation of the entire tile 
     Cord getUpperLeft() const;
     Cord getLowerRight() const;
     Cord getUpperRight() const;
+    // Are the exact blocks that the tile contains
+    Cord getContainedUpperLeft() const;
+    Cord getContainedLowerRight() const;
+    Cord getContainedUpperRight() const;
     
     void setType(tileType type);
     void setWidth(len_t width);
@@ -59,16 +66,10 @@ public:
     double calAspectRatio() const;
     area_t calArea() const;
     
-
-    // inline bool checkXCordInTile(const Cord &point) const{
-    //     return (point.x >= this->mLowerLeft.x) && (point.x < this->mLowerLeft.x + this->mWidth);
-    // }
-    // inline bool checkYCordInTile(const Cord &point) const{
-    //     return (point.y >= this->mLowerLeft.y) && (point.y < this->mLowerLeft.y + this->mHeight);
-    // }
-    // inline bool checkCordInTile(const Cord &point) const{
-    //     return (checkXCordInTile(point) && checkYCordInTile(point));
-    // }
+    // checks if a point is contained inside the tile
+    bool checkXCordInTile(const Cord &point) const;
+    bool checkYCordInTile(const Cord &point) const;
+    bool checkCordInTile(const Cord &point) const;
 
     // if input Tile's lower-left touches the right edge of current tile (used in Directed Area Enumeration)
     // bool checkTRLLTouch(Tile *right) const;

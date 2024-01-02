@@ -48,25 +48,40 @@ Rectangle Tile::getRectangle() const {
     return this->mRectangle;
 }
 
-len_t Tile::getWidth() const {
+len_t Tile::getWidth() const{
     return rec::getWidth(this->mRectangle);
 }
-len_t Tile::getHeight() const {
+len_t Tile::getHeight() const{
     return rec::getHeight(this->mRectangle);
 };
 
-Cord Tile::getLowerLeft() const {
+Cord Tile::getLowerLeft() const{
     return boost::polygon::ll(this->mRectangle);
 };
-Cord Tile::getUpperLeft() const {
+Cord Tile::getUpperLeft() const{
     return boost::polygon::ul(this->mRectangle);
 };
-Cord Tile::getLowerRight() const {
+Cord Tile::getLowerRight() const{
     return boost::polygon::lr(this->mRectangle);
 };
-Cord Tile::getUpperRight() const {
+Cord Tile::getUpperRight() const{
     return boost::polygon::ur(this->mRectangle);
 };
+Cord Tile::getContainedUpperLeft() const{
+    len_t ansX = boost::polygon::xl(this->mRectangle);
+    len_t ansY = boost::polygon::yh(this->mRectangle) - 1;
+    return Cord(ansX, ansY);
+}
+Cord Tile::getContainedLowerRight() const{
+    len_t ansX = boost::polygon::xh(this->mRectangle) - 1;
+    len_t ansY = boost::polygon::yl(this->mRectangle);
+    return Cord(ansX, ansY);
+}
+Cord Tile::getContainedUpperRight() const{
+    len_t ansX = boost::polygon::xh(this->mRectangle) - 1;
+    len_t ansY = boost::polygon::yh(this->mRectangle) - 1;
+    return Cord(ansX, ansY);
+}
 
 void Tile::setType(tileType type) {
     this->mType = type;
@@ -92,6 +107,24 @@ double Tile::calAspectRatio() const {
 area_t Tile::calArea() const {
     return getWidth() * getHeight();
 };
+
+bool Tile::checkXCordInTile(const Cord &point) const{
+    Rectangle thisRec = this->getRectangle();
+    bool xLeftInRange = (point.x() >= boost::polygon::xl(thisRec));
+    bool xRightInRange = (point.x() < boost::polygon::xh(thisRec));
+    return(xLeftInRange && xRightInRange);
+}
+
+bool Tile::checkYCordInTile(const Cord &point) const{
+    Rectangle thisRec = this->getRectangle();
+    bool yDownInRange = (point.y() >= boost::polygon::yl(thisRec));
+    bool yUpInRange = (point.y() < boost::polygon::yh(thisRec));
+    return(yDownInRange && yUpInRange);
+}
+
+bool Tile::checkCordInTile(const Cord &point) const{
+    return (checkXCordInTile(point) && checkYCordInTile(point));
+}
 
 size_t std::hash<Tile>::operator()(const Tile &key) const {
     return (std::hash<int>()((int)key.getType())) ^ (std::hash<Rectangle>()(key.getRectangle()));

@@ -16,9 +16,14 @@ private:
 
     std::unordered_map <Cord, Tile*> allNonBlankTilesMap;
 
+    // return true if the object is inside the canvas, else return false
+    bool checkPointInCanvas(const Cord &point) const;
+    bool checkRectangleInCanvas(const Rectangle &rect) const;
+
     // Pick-up all tiles(include BLANK) inside the data structure 
     void collectAllTiles(std::unordered_set<Tile *> &allTiles) const;
     void collectAllTilesDFS(Tile *tile, std::unordered_set<Tile *> &allTiles) const;
+
 
 public:
     CornerStitching() = delete;
