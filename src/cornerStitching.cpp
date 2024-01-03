@@ -7,10 +7,11 @@ bool CornerStitching::checkPointInCanvas(const Cord &point) const{
 
 bool CornerStitching::checkRectangleInCanvas(const Rectangle &rect) const{
 
-    Tile tempTile(tileType::BLANK, rect);
+    bool realLLIn = mCanvasSizeBlankTile->checkCordInTile(boost::polygon::ll(rect));
 
-    bool realLLIn = mCanvasSizeBlankTile->checkCordInTile(tempTile.getLowerLeft());
-    bool realURIn = mCanvasSizeBlankTile->checkCordInTile(tempTile.getContainedUpperRight());
+    len_t containedURX = boost::polygon::xh(rect) - 1;
+    len_t containedURY = boost::polygon::yh(rect) - 1;
+    bool realURIn = mCanvasSizeBlankTile->checkCordInTile(Cord(containedURX, containedURY));
 
     return realLLIn && realURIn;
 }
@@ -202,49 +203,125 @@ void CornerStitching::findRightNeighbors(Tile *centre, std::vector<Tile *> &neig
         n = n->lb;
     }
     neighbors.push_back(n);
-    
 }
 
 void CornerStitching::findAllNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const{
     if(centre == nullptr) return;
 
     findTopNeighbors(centre, neighbors);
-    findDownNeighbors(centre, neighbors);
     findLeftNeighbors(centre, neighbors);
+    findDownNeighbors(centre, neighbors);
     findRightNeighbors(centre, neighbors);
 }
 
-// bool CornerStitching::searchArea(Rectangle box, Tile &target) const{
+bool CornerStitching::searchArea(Rectangle box) const{
+
+    if(!checkRectangleInCanvas(box)){
+        throw CSException("CORNERSTITCHING_02");
+    }
 
 
-//     if(!checkRectangleInCanvas(box)){
-//         throw std::runtime_error("Searching Area's box out of canvas ");
-//     }
+    // Use point-finding algo to locate the tile containin the upperleft corner of AOI
+    len_t searchRBorderHeight = boost::polygon::yh(box) - 1;
+    Tile *currentFind = findPoint(Cord(boost::polygon::xl(box), searchRBorderHeight));
 
-//     // Use point-finding algo to locate the tile containin the upperleft corner of AOI
-//     len_t searchRBorderHeight = boost::polygon::xh(box) - 1;
-//     Tile *currentFind = findPoint(Cord(lowerleft.x, searchRBorderHeight));
-//     std::cout << "Init found:" <<std::endl;
+    while(currentFind->getUpperLeft().y() > boost::polygon::yl(box)){
+        // check if the tile is solid
+        if(currentFind->getType() != tileType::BLANK){
+            // This is an edge of a solid tile
+            return true;
+        }else if(currentFind->getUpperRight().x() < boost::polygon::xh(box)){
+            // See if the right edge within AOI, right must be a tile
+            return true;
+        }
 
-//     while(currentFind->getUpperLeft().y > lowerleft.y){
-//         // See if the tile is solid
-//         if(currentFind->getType() != tileType::BLANK){
-//             // This is an edge of a solid tile
-//             target = *currentFind;
-//             return true;
-//         }else if(currentFind->getUpperRight().x < lowerleft.x + width){
-//             // See if the right edge within AOI, right must be a tile
-//             target = *(currentFind->tr);
-//             return true;
-//         }else{
-//             // Move down to the next tile touching the left edge of AOI
-//             if(currentFind->getLowerLeft().y <= 1){
-//                 break;
-//             }
-//             currentFind = findPoint(Cord(lowerleft.x, currentFind->getLowerLeft().y -1));
-//         }
-//     }
+        // Move down to the next tile touching the left edge of AOI
+        if(currentFind->getLowerLeft().y() < 1) break;
 
-//     return false;
+        currentFind = findPoint(Cord(boost::polygon::xl(box), currentFind->getLowerLeft().y() - 1));
+    }
 
-// }
+    return false;
+
+}
+
+bool CornerStitching::searchArea(Rectangle box, Tile *target) const{
+
+    if(!checkRectangleInCanvas(box)){
+        throw CSException("CORNERSTITCHING_02");
+    }
+
+    target = nullptr;
+
+    // Use point-finding algo to locate the tile containin the upperleft corner of AOI
+    len_t searchRBorderHeight = boost::polygon::yh(box) - 1;
+    Tile *currentFind = findPoint(Cord(boost::polygon::xl(box), searchRBorderHeight));
+
+    while(currentFind->getUpperLeft().y() > boost::polygon::yl(box)){
+        // check if the tile is solid
+        if(currentFind->getType() != tileType::BLANK){
+            // This is an edge of a solid tile
+            target = currentFind;
+            return true;
+        }else if(currentFind->getUpperRight().x() < boost::polygon::xh(box)){
+            // See if the right edge within AOI, right must be a tile
+            target = (currentFind->tr);
+            return true;
+        }
+
+        // Move down to the next tile touching the left edge of AOI
+        if(currentFind->getLowerLeft().y() < 1) break;
+
+        currentFind = findPoint(Cord(boost::polygon::xl(box), currentFind->getLowerLeft().y() - 1));
+    }
+
+    return false;
+
+}
+
+void CornerStitching::enumerateDirectArea(Rectangle box, std::vector <Tile *> &allTiles) const{
+
+    if(!checkRectangleInCanvas(box)){
+        throw CSException("CORNERSTITCHING_03");
+    }
+
+    // Use point-finding algo to locate the tile containin the upperleft corner of AOI
+    len_t searchRBorderHeight = boost::polygon::yh(box) - 1;
+    Tile *leftTouchTile = findPoint(Cord(boost::polygon::xl(box), searchRBorderHeight));
+
+    while(leftTouchTile->getUpperLeft().y() > boost::polygon::yl(box)){
+        enumerateDirectAreaRProcedure(box, allTiles, leftTouchTile);
+        if(leftTouchTile->getLowerLeft().y() < 1) break;
+        leftTouchTile = findPoint(Cord(boost::polygon::xl(box), leftTouchTile->getLowerLeft().y() - 1));
+    }
+}
+
+void CornerStitching::enumerateDirectAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const{
+    
+    // R1) Enumerate the tile
+    if(targetTile->getType() == tileType::BLOCK || targetTile->getType() == tileType::OVERLAP){
+        allTiles.push_back(targetTile);
+    }
+
+    // R2) If the right edge of the tile is outside of the seearch area, return
+    if(targetTile->getLowerRight().x() >= boost::polygon::xh(box)) return;
+
+    // R3) Use neighbor-finding algo to locate all the tiles that touch the right side of the current tile and also intersect the search area
+    std::vector<Tile *> rightNeighbors;
+    findRightNeighbors(targetTile, rightNeighbors);
+    for(Tile *t : rightNeighbors){
+
+        // R4) If bottom left corner of the neighbor touches the current tile
+        Cord rightLL = t->getLowerLeft();
+        Rectangle targetTileRect = targetTile->getRectangle();
+        bool xAligned = (boost::polygon::xh(targetTileRect) == rightLL.x());
+        bool yInRange = (rightLL.y() >= boost::polygon::yl(targetTileRect));
+        bool R4 = (xAligned && yInRange);
+
+        // R5) If the bottom edge ofthe search area cuts both the urrent tile and the neighbor
+        bool R5 = (targetTile->cutHeight(lowerleft.y)) && (t->cutHeight(lowerleft.y));
+
+        if(R4 || R5) enumerateDirectAreaRProcedure(box, allTiles, t);
+    }
+
+}

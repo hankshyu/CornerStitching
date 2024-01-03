@@ -24,6 +24,8 @@ private:
     void collectAllTiles(std::unordered_set<Tile *> &allTiles) const;
     void collectAllTilesDFS(Tile *tile, std::unordered_set<Tile *> &allTiles) const;
 
+    // Helper function of enumerateDirectArea
+    void enumerateDirectAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const;
 
 public:
     CornerStitching() = delete;
@@ -34,18 +36,24 @@ public:
     len_t getCanvasWidth() const;
     len_t getCanvasHeight() const;
 
-    // Given a Cord, find the tile(could be balnk or block) that includes it.
+    // Given a Cord, find the tile (could be balnk or block) that includes it.
     Tile *findPoint(const Cord &key) const;
     
-    // Pushes all neighbors of Tile "centre" to vector "neighbors".
+    // Pushes all top neighbors of Tile "centre" to vector "neighbors"
     void findTopNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const;
+    // Pushes all down neighbors of Tile "centre" to vector "neighbors"
     void findDownNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const;
+    // Pushes all left neighbors of Tile "centre" to vector "neighbors"
     void findLeftNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const;
+    // Pushes all right neighbors of Tile "centre" to vector "neighbors"
     void findRightNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const;
+    // Pushes all neighbors (in the order of top, left, down, right) of Tile "centre" to vector "neighbors"
     void findAllNeighbors(Tile *centre, std::vector<Tile *> &neighbors) const;
 
     // Determine if there is any nonblank tiles in the box area
-    bool searchArea(Rectangle box, Tile &target) const;
+    bool searchArea(Rectangle box) const;
+    // Determine if there is any nonblank tiles in the box area, return any tile in the region if found, nullptr otherwise 
+    bool searchArea(Rectangle box, Tile *target) const;
 
     // Enumerates all nonblank tiles in a given box area, 
     // each tile is visited only after all the tiles above and to its left does
