@@ -21,23 +21,17 @@ int main(int argc, char const *argv[]) {
 	gpa.readGlobalResult();
 	gpa.detectGlobalOverlaps();
 	// gpa.printStatus();
-	std::vector <Tile *> insertArr = gpa.printFlowStatus();
+	std::vector <Tile *> insertArr = gpa.printFlowStatus(true);
 	std::cout << "This is inset Arr: " << std::endl;
 
 	for(Tile *t : insertArr){
 		std::cout << *t << std::endl;
 	}
 
-	Tile tt(tileType::BLOCK, Cord(3, 7), 4, 5);
-	std::cout << "This is the tt: " << tt << std::endl;
-	std::cout << "This is lower left: " << tt.getLowerLeft() << std::endl;
-	std::cout << "This is upper left: " << tt.getUpperLeft() << ", " << tt.getContainedUpperLeft() << std::endl;
-	std::cout << "This is lower right: " << tt.getLowerRight() << ", " << tt.getContainedLowerRight() << std::endl;
-	std::cout << "This is upper right: " << tt.getUpperRight() << ", " << tt.getContainedUpperRight() << std::endl;
+	Tile t1 (tileType::BLANK, Cord(2, 6), Cord(7, 11));
+	Rectangle rt = t1.getRectangle(); 
+	std::cout << rt << std::endl;
+	std::cout << t1.getLowerLeft().x() + t1.getWidth() << std::endl;
+	std::cout << boost::polygon::xh(rt) << std::endl;
 
-	try{
-		throw CSException("TILE_01");
-	}catch(CSException cs){
-		std::cout << cs.what() << std::endl;
-	}
 }

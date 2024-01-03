@@ -53,10 +53,6 @@ public:
     Cord getUpperLeft() const;
     Cord getLowerRight() const;
     Cord getUpperRight() const;
-    // Are the exact blocks that the tile contains
-    Cord getContainedUpperLeft() const;
-    Cord getContainedLowerRight() const;
-    Cord getContainedUpperRight() const;
     
     void setType(tileType type);
     void setWidth(len_t width);
