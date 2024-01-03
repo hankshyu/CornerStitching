@@ -13,6 +13,7 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"GLOBALPHASEADAPTER_01", "realGlobalResult(): Module not marked as SOFT or FIXED"},
     {"CORNERSTITCHING_01", "findPoint(): function's input key, the finding target, is out of canvas"},
     {"CORNERSTITCHING_02", "searchArea(): function's input box, the searching area, is out of canvas"},
+    {"CORNERSTITCHING_03", "enumerateDirectArea(): function's input box, the searching area, is out of canvas"},
 
 };
 

@@ -68,21 +68,6 @@ Cord Tile::getLowerRight() const{
 Cord Tile::getUpperRight() const{
     return boost::polygon::ur(this->mRectangle);
 };
-Cord Tile::getContainedUpperLeft() const{
-    len_t ansX = boost::polygon::xl(this->mRectangle);
-    len_t ansY = boost::polygon::yh(this->mRectangle) - 1;
-    return Cord(ansX, ansY);
-}
-Cord Tile::getContainedLowerRight() const{
-    len_t ansX = boost::polygon::xh(this->mRectangle) - 1;
-    len_t ansY = boost::polygon::yl(this->mRectangle);
-    return Cord(ansX, ansY);
-}
-Cord Tile::getContainedUpperRight() const{
-    len_t ansX = boost::polygon::xh(this->mRectangle) - 1;
-    len_t ansY = boost::polygon::yh(this->mRectangle) - 1;
-    return Cord(ansX, ansY);
-}
 
 void Tile::setType(tileType type) {
     this->mType = type;
