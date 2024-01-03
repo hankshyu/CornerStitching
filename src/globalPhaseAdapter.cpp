@@ -48,7 +48,7 @@ void globalPhaseAdapter::readGlobalResult() {
             this->fixedTesserae.push_back(nT);
         }else{
             throw CSException("GLOBALPHASEADAPTER_01");
-        }
+}
 
     }
 
@@ -308,70 +308,77 @@ void globalPhaseAdapter::printStatus(){
     }
 }
 
-std::vector<Tile *> globalPhaseAdapter::printFlowStatus(){
+std::vector<Tile *> globalPhaseAdapter::printFlowStatus(bool verbose){
     // This records the inserted Rectangels
     std::unordered_set<Rectangle> record;    
     std::vector <Tile *> answer;
 
     for(Tessera *tess: this->softTesserae){
         Tessera t = *tess;
-        std::cout << t.name << t.origBox << std::endl;
-        std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
-        std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        if(verbose){
+            std::cout << t.name << t.origBox << std::endl;
+            std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
+            std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        }
         if(!t.TileArr.empty()){
             for(Tile *til : t.TileArr){
-                std::cout << *til << std::endl;
+                if(verbose) std::cout << *til;
                 Rectangle trec = til->getRectangle();
                 if(record.find(trec) == record.end()){
                     record.insert(til->getRectangle());
                     answer.push_back(til);
-
+                    if(verbose) std::cout << std::endl;
                 }else{
-                    std::cout << "(Tile existed)" << std::endl;
+                    if(verbose) std::cout << "(Tile existed)" << std::endl;
                 }
             }
         }
-        std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
+        if(verbose) std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
         if(!t.OverlapArr.empty()){
             for(Tile *til : t.OverlapArr){
-                std::cout << *til << std::endl;
+                if(verbose) std::cout << *til;
                 Rectangle trec = til->getRectangle();
                 if(record.find(trec) == record.end()){
                     record.insert(til->getRectangle());
                     answer.push_back(til);
+                    if(verbose) std::cout << std::endl;
                 }else{
-                    std::cout << "(Tile existed)" << std::endl;
+                    if(verbose) std::cout << "(Tile existed)" << std::endl;
                 }
             }
         }
     }
     for(Tessera *tess: this->fixedTesserae){
         Tessera t = *tess;
-        std::cout << t.name << t.origBox << std::endl;
-        std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
-        std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        if(verbose){
+            std::cout << t.name << t.origBox << std::endl;
+            std::cout << "(" << t.TileArr.size() <<  "/" << t.OverlapArr.size() << "):";
+            std::cout << "TileArr(" << t.TileArr.size() << "):" << std::endl;
+        }
         if(!t.TileArr.empty()){
             for(Tile *til : t.TileArr){
-                std::cout << *til << std::endl;
+                if(verbose) std::cout << *til;
                 Rectangle trec = til->getRectangle();
                 if(record.find(trec) == record.end()){
                     record.insert(til->getRectangle());
                     answer.push_back(til);
+                    if(verbose) std::cout << std::endl;
                 }else{
-                    std::cout << "(Tile existed)" << std::endl;
+                    if(verbose) std::cout << "(Tile existed)" << std::endl;
                 }
             }
         }
-        std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
+        if(verbose) std::cout << "OverlapArr(" << t.OverlapArr.size() << "):" << std::endl;
         if(!t.OverlapArr.empty()){
             for(Tile *til : t.OverlapArr){
-                std::cout << *til << std::endl;
+                if(verbose) std::cout << *til;
                 Rectangle trec = til->getRectangle();
                 if(record.find(trec) == record.end()){
                     record.insert(til->getRectangle());
                     answer.push_back(til);
+                    if(verbose) std::cout << std::endl;
                 }else{
-                    std::cout << "(Tile existed)" << std::endl;
+                    if(verbose) std::cout << "(Tile existed)" << std::endl;
                 }
             }
         }
