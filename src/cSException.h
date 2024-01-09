@@ -18,7 +18,6 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_03", "enumerateDirectArea(): function's input box, the searching area, is out of canvas"},
     {"CORNERSTITCHING_04", "CornerStitching(): input chipWidth or chipHeight should > 0"},
     {"CORNERSTITCHING_05", "visualiseArtpiece(): outputFileName invalid, cannot open file"},
-    {"CORNERSTITCHING_05", "enumerateDirectedAreaRProcedure(): targetTile does not intersects with box"},
 
 };
 
