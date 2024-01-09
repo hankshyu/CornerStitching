@@ -56,17 +56,30 @@ len_t Tile::getHeight() const{
     return rec::getHeight(this->mRectangle);
 };
 
-Cord Tile::getLowerLeft() const{
-    return boost::polygon::ll(this->mRectangle);
+len_t Tile::getXLow() const{
+    return rec::getXL(this->mRectangle);
 };
-Cord Tile::getUpperLeft() const{
-    return boost::polygon::ul(this->mRectangle);
+len_t Tile::getXHigh() const{
+    return rec::getXH(this->mRectangle);
+};
+len_t Tile::getYLow() const{
+    return rec::getYL(this->mRectangle);
+};
+len_t Tile::getYHigh() const{
+    return rec::getYH(this->mRectangle);
+};
+
+Cord Tile::getLowerLeft() const{
+    return rec::getLL(this->mRectangle);
 };
 Cord Tile::getLowerRight() const{
-    return boost::polygon::lr(this->mRectangle);
+    return rec::getLR(this->mRectangle);
+};
+Cord Tile::getUpperLeft() const{
+    return rec::getUL(this->mRectangle);
 };
 Cord Tile::getUpperRight() const{
-    return boost::polygon::ur(this->mRectangle);
+    return rec::getUR(this->mRectangle);
 };
 
 void Tile::setType(tileType type) {

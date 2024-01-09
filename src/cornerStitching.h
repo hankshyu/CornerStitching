@@ -62,6 +62,7 @@ public:
     void insertTile(Tile &tile);
     void removeTile(Tile *tile);
 
+    // Output format for presenting software
     void visualiseArtpiece(const std::string ouputFileName) const;
 };
 #endif // __CORNERSTITCHING_H__

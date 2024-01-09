@@ -15,8 +15,41 @@ namespace rec{
     inline len_t getWidth(Rectangle rec){
         return boost::polygon::delta(boost::polygon::horizontal(rec));
     }
+
     inline len_t getHeight(Rectangle rec){
         return boost::polygon::delta(boost::polygon::vertical(rec));
+    }
+
+    inline len_t getXL(Rectangle rec){
+        return boost::polygon::xl(rec);
+    } 
+
+    inline len_t getXH(Rectangle rec){
+        return boost::polygon::xh(rec);
+    } 
+
+    inline len_t getYL(Rectangle rec){
+        return boost::polygon::yl(rec);
+    } 
+
+    inline len_t getYH(Rectangle rec){
+        return boost::polygon::yh(rec);
+    } 
+
+    inline Cord getLL(Rectangle rec){
+        return boost::polygon::ll(rec);
+    }
+
+    inline Cord getLR(Rectangle rec){
+        return boost::polygon::lr(rec);
+    }
+
+    inline Cord getUL(Rectangle rec){
+        return boost::polygon::ul(rec);
+    }
+
+    inline Cord getUR(Rectangle rec){
+        return boost::polygon::ur(rec);
     }
 }
 

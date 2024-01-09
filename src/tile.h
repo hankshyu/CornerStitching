@@ -46,10 +46,12 @@ public:
     len_t getWidth() const;
     len_t getHeight() const;
 
+    len_t getXLow() const;
+    len_t getXHigh() const;
+    len_t getYLow() const;
+    len_t getYHigh() const;
      
     Cord getLowerLeft() const;
-    // The "contours" of the rectange, containing the upper,right row of non-owning blocks.
-    // More often as representation of the entire tile 
     Cord getUpperLeft() const;
     Cord getLowerRight() const;
     Cord getUpperRight() const;
