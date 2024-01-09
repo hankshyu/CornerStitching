@@ -1,6 +1,7 @@
 boost_1_83_0/
 inputs/Global_Floorplanning/
 outputs/*
-bin/csrun*
+bin/csrun
+bin/csrun_debug
 obj/*.o
 .DS_Store
