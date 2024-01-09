@@ -14,8 +14,8 @@ private:
     len_t mCanvasWidth, mCanvasHeight;
     Tile *mCanvasSizeBlankTile;
 
-    std::unordered_map <Cord, Tile*> allNonBlankTilesMap;
-
+    std::unordered_map <Cord, Tile*> mAllNonBlankTilesMap;
+public:
     // return true if the object is inside the canvas, else return false
     bool checkPointInCanvas(const Cord &point) const;
     bool checkRectangleInCanvas(const Rectangle &rect) const;
@@ -27,7 +27,7 @@ private:
     // Helper function of enumerateDirectArea
     void enumerateDirectedAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const;
 
-public:
+// public:
     CornerStitching() = delete;
     CornerStitching(len_t chipWidth, len_t chipHeight);
     CornerStitching(const CornerStitching &other);

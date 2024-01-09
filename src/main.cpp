@@ -34,29 +34,26 @@ int main(int argc, char const *argv[]) {
 	// std::cout << t1.getLowerLeft().x() + t1.getWidth() << std::endl;
 	// std::cout << boost::polygon::xh(rt) << std::endl;
 
-	Rectangle mr (4, 5, 7, 9);
-	std::cout << rec::getWidth(mr) << std::endl;
-	std::cout << rec::getHeight(mr) << std::endl;
-	std::cout << rec::getXL(mr) << std::endl;
-	std::cout << rec::getXH(mr) << std::endl;
-	std::cout << rec::getYL(mr) << std::endl;
-	std::cout << rec::getYH(mr) << std::endl;
-	std::cout << rec::getLL(mr) << std::endl;
-	std::cout << rec::getLR(mr) << std::endl;
-	std::cout << rec::getUL(mr) << std::endl;
-	std::cout << rec::getUR(mr) << std::endl;
+	CornerStitching cs(6, 8);
+	
+	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 4, 3)) << std::endl;
+	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 7)) << std::endl;
+	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 8)) << std::endl;
+	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 9)) << std::endl;
+	std::cout << cs.checkRectangleInCanvas(Rectangle(5, 3, 6, 8)) << std::endl;
+	std::cout << cs.checkRectangleInCanvas(Rectangle(5, 3, 7, 8)) << std::endl;
 
-	Tile tt (tileType::BLANK, mr);
-	std::cout << tt.getWidth() << std::endl;
-	std::cout << tt.getHeight() << std::endl;
-	std::cout << tt.getXLow() << std::endl;
-	std::cout << tt.getXHigh() << std::endl;
-	std::cout << tt.getYLow() << std::endl;
-	std::cout << tt.getYHigh() << std::endl;
+	Rectangle r1(7, 8, 9, 11);
+	Rectangle r2(10, 12, 12, 16);
 
-	std::cout << tt.getLowerLeft() << std::endl;
-	std::cout << tt.getLowerRight() << std::endl;
-	std::cout << tt.getUpperLeft() << std::endl;
-	std::cout << tt.getUpperRight() << std::endl;
+	std::cout << "aotehr" << std::endl;
+	std::cout << rec::hasIntersection(r1, r2, false) << std::endl;
+	std::cout << rec::hasIntersection(r1, r2, true) << std::endl;
+	
+	Rectangle r3(7, 8, 9, 11);
+	Rectangle r4(9, 11, 12, 16);
 
+	std::cout << "aotehr" << std::endl;
+	std::cout << rec::hasIntersection(r3, r4, false) << std::endl;
+	std::cout << rec::hasIntersection(r3, r4, true) << std::endl;
 }

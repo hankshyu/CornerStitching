@@ -51,6 +51,10 @@ namespace rec{
     inline Cord getUR(Rectangle rec){
         return boost::polygon::ur(rec);
     }
+    // Returns true if two objects overlap, parameter considerTouch is true touching at the sides or corners is considered overlap.
+    inline bool hasIntersection(const Rectangle &rec1, const Rectangle &rec2, bool considerTouch){
+        return boost::polygon::intersects(rec1, rec2, considerTouch);
+    }
 }
 
 // Implement hash function for map and set data structure
