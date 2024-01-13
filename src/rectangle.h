@@ -52,8 +52,19 @@ namespace rec{
         return boost::polygon::ur(rec);
     }
     // Returns true if two objects overlap, parameter considerTouch is true touching at the sides or corners is considered overlap.
-    inline bool hasIntersection(const Rectangle &rec1, const Rectangle &rec2, bool considerTouch){
+    inline bool hasIntersect(const Rectangle &rec1, const Rectangle &rec2, bool considerTouch){
         return boost::polygon::intersects(rec1, rec2, considerTouch);
+    }
+
+    // Returns true if smallRec is contained (completely within) BigRec
+    inline bool isContained(const Rectangle &BigRec, const Rectangle &smallRec){
+        return boost::polygon::contains(BigRec, smallRec, true);
+    }
+
+    //Returns true if the point is contained inside the rectangle
+    inline bool isContained(const Rectangle &rec, Cord point){
+        Rectangle actualRectangle =  Rectangle(getXL(rec), getYL(rec), getXH(rec) - 1, getYH(rec) - 1);
+        return boost::polygon::contains(actualRectangle, point, true);
     }
 }
 

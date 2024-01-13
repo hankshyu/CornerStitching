@@ -36,24 +36,33 @@ int main(int argc, char const *argv[]) {
 
 	CornerStitching cs(6, 8);
 	
-	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 4, 3)) << std::endl;
-	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 7)) << std::endl;
-	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 8)) << std::endl;
-	std::cout << cs.checkRectangleInCanvas(Rectangle(0, 0, 1, 9)) << std::endl;
-	std::cout << cs.checkRectangleInCanvas(Rectangle(5, 3, 6, 8)) << std::endl;
-	std::cout << cs.checkRectangleInCanvas(Rectangle(5, 3, 7, 8)) << std::endl;
+	Rectangle r1(6, 3, 11, 7);
 
-	Rectangle r1(7, 8, 9, 11);
-	Rectangle r2(10, 12, 12, 16);
-
-	std::cout << "aotehr" << std::endl;
-	std::cout << rec::hasIntersection(r1, r2, false) << std::endl;
-	std::cout << rec::hasIntersection(r1, r2, true) << std::endl;
+	Rectangle r2(7, 4, 8, 6);
+	Rectangle r3(10, 2, 11, 4);
+	Rectangle r4(11, 4, 12, 6);
+	Rectangle r5(4, 7, 6, 11);
+	Rectangle r6(9, 5, 11, 7);
+	Rectangle r7(6, 3, 7, 4);
+	Rectangle r8(7, 8, 8, 9);
 	
-	Rectangle r3(7, 8, 9, 11);
-	Rectangle r4(9, 11, 12, 16);
+	// for(int i = 5; i<= 13; ++i){
+	// 	for(int j = 2; j <= 9; ++j){
+	// 		std::cout << "(" << i << ", " << j << ")";
+	// 		std::cout << (rec::isContained(r1,Cord(i, j))? "o" : "x") << "\t";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 
-	std::cout << "aotehr" << std::endl;
-	std::cout << rec::hasIntersection(r3, r4, false) << std::endl;
-	std::cout << rec::hasIntersection(r3, r4, true) << std::endl;
+	bool consTouch  = false;
+	std::cout << rec::hasIntersect(r1, r2, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r3, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r4, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r5, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r6, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r7, consTouch) << std::endl;
+	std::cout << rec::hasIntersect(r1, r8, consTouch) << std::endl;
+
+
+
 }
