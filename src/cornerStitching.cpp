@@ -3,17 +3,18 @@
 #include "cSException.h"
 
 bool CornerStitching::checkPointInCanvas(const Cord &point) const{
-    return mCanvasSizeBlankTile->checkCordInTile(point);
+    return rec::isContained(mCanvasSizeBlankTile->getRectangle(), point);
 }
 
 bool CornerStitching::checkRectangleInCanvas(const Rectangle &rect) const{
 
-    bool realLLIn = mCanvasSizeBlankTile->checkCordInTile(boost::polygon::ll(rect));
+    bool realLLIn = rec::isContained(mCanvasSizeBlankTile->getRectangle(), rec::getLL(rect));
 
     len_t containedURX = rec::getXH(rect) - 1;
     len_t containedURY = rec::getYH(rect) - 1;
-    bool realURIn = mCanvasSizeBlankTile->checkCordInTile(Cord(containedURX, containedURY));
-
+    Cord containedUR (containedURX, containedURY);
+    bool realURIn = rec::isContained(mCanvasSizeBlankTile->getRectangle(), containedUR);
+    
     return realLLIn && realURIn;
 }
 
@@ -53,15 +54,17 @@ void CornerStitching::collectAllTilesDFS(Tile *currentSearch, std::unordered_set
         }
     }
 }
+
 // this function is not yet rewritten done
 void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const{
 
     // R1) Enumerate the tile
-    if(targetTile->getType() == tileType::BLOCK || targetTile->getType() == tileType::OVERLAP){
+    tileType targetTileType = targetTile->getType();
+    if((targetTileType == tileType::BLOCK) ||(targetTileType == tileType::OVERLAP)){
         allTiles.push_back(targetTile);
     }
 
-    // R2) If the right edge of the tile is outside of the seearch area, return
+    // R2) If the right edge of the tile is outside (or touch) the seearch area, return
     if(targetTile->getXHigh() >= rec::getXH(box)) return;
 
     // R3) Use neighbor-finding algo to locate all the tiles that touch the right side of the current tile and also intersect the search area
@@ -72,29 +75,15 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
 
     for(Tile *t : rightNeighbors){
         // make sure the tile is in the AOI
-        Rectangle trec = t->getRectangle();
-        len_t Containedyl = boost::polygon::yl(trec);
-        len_t Containedyh = boost::polygon::yh(trec) - 1;
-        len_t Containedxl = boost::polygon::xl(trec);
-        Tile boxSizeTile(tileType::BLANK, box);
-        bool containedylInBox = boxSizeTile.checkCordInTile(Cord(Containedxl, Containedyl));
-        bool containedyhInBox = boxSizeTile.checkCordInTile(Cord(Containedxl, Containedyh));
-        if(!((containedylInBox) || (containedyhInBox))) break;
+        if(!rec::hasIntersect(t->getRectangle(), box, false)) continue;
 
         // R4) If bottom left corner of the neighbor touches the current tile
-        Cord rightLL = t->getLowerLeft();
-        bool R4 = (rightLL.y() >= boost::polygon::yl(targetTileRect));
+        bool R4 = (t->getYLow() >= targetTile->getYLow());
 
         // R5) If the bottom edge ofthe search area cuts both the target tile and its neighbor
-        len_t bottomEdge = boost::polygon::yl(targetTileRect);
-
-        len_t targetTileyl = boost::polygon::yl(targetTileRect);
-        len_t targetTileyh = boost::polygon::yh(targetTileRect);
-        bool cutTargetTile = (targetTileyl <= bottomEdge) && (targetTileyh > bottomEdge); 
-
-        len_t tyl = boost::polygon::yl(trec);
-        len_t tyh = boost::polygon::yh(trec);
-        bool cutNeighbor = (tyl <= bottomEdge) && (tyh > bottomEdge); 
+        len_t bottomEdge = targetTile->getYLow();
+        bool cutTargetTile = (targetTile->getYLow() <= bottomEdge) && (targetTile->getYHigh() > bottomEdge);
+        bool cutNeighbor = (t->getYLow() <= bottomEdge) && (t->getYHigh() > bottomEdge);
         bool R5 = cutTargetTile && cutNeighbor;
 
         if(R4 || R5) enumerateDirectedAreaRProcedure(box, allTiles, t);
@@ -176,16 +165,23 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
     }
 
     // Find a seed to start, if empty just return the blank tile.
+    Tile *index;
     if(mAllNonBlankTilesMap.empty()){
-        return this->mCanvasSizeBlankTile;
-    }
+        return mCanvasSizeBlankTile;
+    }else{
+        index = mAllNonBlankTilesMap.begin()->second; 
+    } 
 
-    Tile *index = mAllNonBlankTilesMap.begin()->second;
+    while(!(rec::isContained(index->getRectangle(), key))){
 
-    while(!(index->checkCordInTile(key))){
-        if(!index->checkYCordInTile(key)){
+        Rectangle indexRec = index->getRectangle();
+        bool yDownInRange = (key.y() >= rec::getYL(indexRec));
+        bool yUpInRange = (key.y() < rec::getYH(indexRec));
+        bool YCordInTile = (yDownInRange && yUpInRange);
+
+        if(!YCordInTile){
             // Adjust vertical range
-            if(key.y() >= index->getLowerLeft().y()){
+            if(key.y() >= index->getYLow()){
                 assert(index->rt != nullptr);
                 index = index->rt;
             }else{

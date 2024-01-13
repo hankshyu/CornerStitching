@@ -107,23 +107,23 @@ area_t Tile::calArea() const {
     return getWidth() * getHeight();
 };
 
-bool Tile::checkXCordInTile(const Cord &point) const{
-    Rectangle thisRec = this->getRectangle();
-    bool xLeftInRange = (point.x() >= boost::polygon::xl(thisRec));
-    bool xRightInRange = (point.x() < boost::polygon::xh(thisRec));
-    return(xLeftInRange && xRightInRange);
-}
+// bool Tile::checkXCordInTile(const Cord &point) const{
+//     Rectangle thisRec = this->getRectangle();
+//     bool xLeftInRange = (point.x() >= boost::polygon::xl(thisRec));
+//     bool xRightInRange = (point.x() < boost::polygon::xh(thisRec));
+//     return(xLeftInRange && xRightInRange);
+// }
 
-bool Tile::checkYCordInTile(const Cord &point) const{
-    Rectangle thisRec = this->getRectangle();
-    bool yDownInRange = (point.y() >= boost::polygon::yl(thisRec));
-    bool yUpInRange = (point.y() < boost::polygon::yh(thisRec));
-    return(yDownInRange && yUpInRange);
-}
+// bool Tile::checkYCordInTile(const Cord &point) const{
+//     Rectangle thisRec = this->getRectangle();
+//     bool yDownInRange = (point.y() >= boost::polygon::yl(thisRec));
+//     bool yUpInRange = (point.y() < boost::polygon::yh(thisRec));
+//     return(yDownInRange && yUpInRange);
+// }
 
-bool Tile::checkCordInTile(const Cord &point) const{
-    return (checkXCordInTile(point) && checkYCordInTile(point));
-}
+// bool Tile::checkCordInTile(const Cord &point) const{
+//     return (checkXCordInTile(point) && checkYCordInTile(point));
+// }
 
 size_t std::hash<Tile>::operator()(const Tile &key) const {
     return (std::hash<int>()((int)key.getType())) ^ (std::hash<Rectangle>()(key.getRectangle()));

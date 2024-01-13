@@ -65,13 +65,11 @@ public:
     area_t calArea() const;
     
     // checks if a point is contained inside the tile
-    bool checkXCordInTile(const Cord &point) const;
-    bool checkYCordInTile(const Cord &point) const;
-    bool checkCordInTile(const Cord &point) const;
+    // bool checkXCordInTile(const Cord &point) const;
+    // bool checkYCordInTile(const Cord &point) const;
+    // bool checkCordInTile(const Cord &point) const;
 
-    // if input Tile's lower-left touches the right edge of current tile (used in Directed Area Enumeration)
-    // bool checkTRLLTouch(Tile *right) const;
-    // bool cutHeight (len_t cut) const;
+
 
 };
 
