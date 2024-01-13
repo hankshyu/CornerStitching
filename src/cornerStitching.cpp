@@ -190,7 +190,7 @@ Tile *CornerStitching::findPoint(const Cord &key) const{
             }
         }else{
             // Vertical range correct! adjust horizontal range
-            if(key.x() >= index->getLowerLeft().x()){
+            if(key.x() >= index->getXLow()){
                 assert(index->tr != nullptr);
                 index = index->tr;
             }else{
@@ -208,7 +208,8 @@ void CornerStitching::findTopNeighbors(Tile *centre, std::vector<Tile *> &neighb
     if(centre->rt == nullptr) return;
 
     Tile *n = centre->rt;
-    while(n->getLowerLeft().x() > centre->getLowerLeft().x()){
+    while(n->getXLow() > centre->getXLow()){
+    
         neighbors.push_back(n);
         n = n->bl;
     }
@@ -220,7 +221,7 @@ void CornerStitching::findDownNeighbors(Tile *centre, std::vector<Tile *> &neigh
     if(centre->lb == nullptr) return;
 
     Tile *n = centre->lb;
-    while(n->getUpperRight().x() < centre->getUpperRight().x()){
+    while(n->getXHigh() < centre->getXHigh()){
         neighbors.push_back(n);
         n = n->tr;
     }
@@ -232,7 +233,7 @@ void CornerStitching::findLeftNeighbors(Tile *centre, std::vector<Tile *> &neigh
     if(centre->bl == nullptr) return;
 
     Tile *n = centre->bl;
-    while(n->getUpperRight().y() < centre->getUpperRight().y()){
+    while(n->getYHigh() < centre->getYHigh()){
         neighbors.push_back(n);
         n = n->rt;
     }
@@ -245,7 +246,7 @@ void CornerStitching::findRightNeighbors(Tile *centre, std::vector<Tile *> &neig
 
     Tile *n = centre->tr;
     // the last neighbor is the first tile encountered whose lower y cord <= lower y cord of starting tile
-    while(n->getLowerLeft().y() > centre->getLowerLeft().y()){
+    while(n->getYLow() > centre->getYLow()){
         neighbors.push_back(n);
         n = n->lb;
     }
@@ -267,63 +268,56 @@ bool CornerStitching::searchArea(Rectangle box) const{
         throw CSException("CORNERSTITCHING_02");
     }
 
-
     // Use point-finding algo to locate the tile containin the upperleft corner of AOI
-    len_t searchRBorderHeight = boost::polygon::yh(box) - 1;
-    Tile *currentFind = findPoint(Cord(boost::polygon::xl(box), searchRBorderHeight));
+    Tile *currentFind = findPoint(Cord(rec::getXL(box), rec::getYH(box) - 1));
 
-    while(currentFind->getUpperLeft().y() > boost::polygon::yl(box)){
+    while(currentFind->getYHigh() > rec::getYL(box)){
         // check if the tile is solid
         if(currentFind->getType() != tileType::BLANK){
             // This is an edge of a solid tile
             return true;
-        }else if(currentFind->getUpperRight().x() < boost::polygon::xh(box)){
+        }else if(currentFind->getXHigh() < rec::getXH(box)){
             // See if the right edge within AOI, right must be a tile
             return true;
         }
 
         // Move down to the next tile touching the left edge of AOI
-        if(currentFind->getLowerLeft().y() < 1) break;
+        if(currentFind->getYLow() < 1) break;
 
-        currentFind = findPoint(Cord(boost::polygon::xl(box), currentFind->getLowerLeft().y() - 1));
+        currentFind = findPoint(Cord(rec::getXL(box), currentFind->getYLow() - 1));
     }
 
     return false;
-
 }
 
-bool CornerStitching::searchArea(Rectangle box, Tile *target) const{
+bool CornerStitching::searchArea(Rectangle box, Tile *someTile) const{
 
     if(!checkRectangleInCanvas(box)){
         throw CSException("CORNERSTITCHING_02");
     }
 
-    target = nullptr;
-
     // Use point-finding algo to locate the tile containin the upperleft corner of AOI
-    len_t searchRBorderHeight = boost::polygon::yh(box) - 1;
-    Tile *currentFind = findPoint(Cord(boost::polygon::xl(box), searchRBorderHeight));
+    Tile *currentFind = findPoint(Cord(rec::getXL(box), rec::getYH(box) - 1));
 
-    while(currentFind->getUpperLeft().y() > boost::polygon::yl(box)){
+    while(currentFind->getYHigh() > rec::getYL(box)){
         // check if the tile is solid
         if(currentFind->getType() != tileType::BLANK){
             // This is an edge of a solid tile
-            target = currentFind;
+            someTile = currentFind;
             return true;
-        }else if(currentFind->getUpperRight().x() < boost::polygon::xh(box)){
+        }else if(currentFind->getXHigh() < rec::getXH(box)){
             // See if the right edge within AOI, right must be a tile
-            target = (currentFind->tr);
+            someTile = currentFind;
             return true;
         }
 
         // Move down to the next tile touching the left edge of AOI
-        if(currentFind->getLowerLeft().y() < 1) break;
+        if(currentFind->getYLow() < 1) break;
 
-        currentFind = findPoint(Cord(boost::polygon::xl(box), currentFind->getLowerLeft().y() - 1));
+        currentFind = findPoint(Cord(rec::getXL(box), currentFind->getYLow() - 1));
     }
 
     return false;
-
 }
 
 void CornerStitching::enumerateDirectedArea(Rectangle box, std::vector <Tile *> &allTiles) const{

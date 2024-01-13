@@ -52,8 +52,8 @@ public:
 
     // Determine if there is any nonblank tiles in the box area
     bool searchArea(Rectangle box) const;
-    // Determine if there is any nonblank tiles in the box area, return any tile in the region if found, nullptr otherwise 
-    bool searchArea(Rectangle box, Tile *target) const;
+    // Determine if there is any nonblank tiles in the box area, return any tile in the region if found (via pointer)
+    bool searchArea(Rectangle box, Tile *someTile) const;
 
     // Enumerates all nonblank tiles in a given box area, each tile is visited only after all the tiles above and to its left does
     void enumerateDirectedArea(Rectangle box, std::vector <Tile *> &allTiles) const;
