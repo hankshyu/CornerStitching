@@ -58,10 +58,15 @@ public:
     // Enumerates all nonblank tiles in a given box area, each tile is visited only after all the tiles above and to its left does
     void enumerateDirectedArea(Rectangle box, std::vector <Tile *> &allTiles) const;
 
-    void insertTile(Tile &tile);
+    // Input a tile "prototype" to insert into the corner stitching system, returns the actual pointer to the tile in the system
+    Tile *insertTile(const Tile &tile);
+
+    // Removes the tile within system
     void removeTile(Tile *tile);
 
     // Output format for presenting software
-    void visualiseArtpiece(const std::string ouputFileName) const;
+    void visualiseTileDistribution(const std::string ouputFileName) const;
+    // Check globally if any two tiles is mergable, returns true if no fails found
+    bool checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const;
 };
 #endif // __CORNERSTITCHING_H__

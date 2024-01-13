@@ -336,9 +336,12 @@ void CornerStitching::enumerateDirectedArea(Rectangle box, std::vector <Tile *> 
         leftTouchTile = findPoint(Cord(rec::getXL(box), leftTouchTile->getYLow() - 1 ));
     }
 }
+Tile *CornerStitching::insertTile(const Tile &tile){
+    
+}
 
 
-void CornerStitching::visualiseArtpiece(const std::string outputFileName) const{
+void CornerStitching::visualiseTileDistribution(const std::string outputFileName) const{
     std::ofstream ofs;
     ofs.open(outputFileName);
     if(!ofs.is_open()) throw(CSException("CORNERSTITCHING_05"));
@@ -359,8 +362,7 @@ void CornerStitching::visualiseArtpiece(const std::string outputFileName) const{
         if(rtTile == nullptr){
             ofs << "nullptr" << std::endl; 
         }else{
-            unsigned long long rtHash = 2*rtTile->getLowerLeft().x() + 3*rtTile->getLowerLeft().y() + 5*rtTile->getWidth() + 7*rtTile->getHeight();
-            ofs << rtHash << std::endl;
+            ofs << *rtTile << std::endl;
         }
 
         Tile *trTile = tile->tr;
@@ -368,8 +370,7 @@ void CornerStitching::visualiseArtpiece(const std::string outputFileName) const{
         if(trTile == nullptr){
             ofs << "nullptr" << std::endl; 
         }else{
-            unsigned long long trHash = 2*trTile->getLowerLeft().x() + 3*trTile->getLowerLeft().y() + 5*trTile->getWidth() + 7*trTile->getHeight();
-            ofs << trHash << std::endl;
+            ofs << *trTile << std::endl;
         }
 
         Tile *blTile = tile->bl;
@@ -377,8 +378,7 @@ void CornerStitching::visualiseArtpiece(const std::string outputFileName) const{
         if(blTile == nullptr){
             ofs << "nullptr" << std::endl; 
         }else{
-            unsigned long long blHash = 2*blTile->getLowerLeft().x() + 3*blTile->getLowerLeft().y() + 5*blTile->getWidth() + 7*blTile->getHeight();
-            ofs << blTile << std::endl;
+            ofs << *blTile << std::endl;
         }
 
         Tile *lbTile = tile->lb;
@@ -386,9 +386,73 @@ void CornerStitching::visualiseArtpiece(const std::string outputFileName) const{
         if(lbTile == nullptr){
             ofs << "nullptr" << std::endl; 
         }else{
-            unsigned long long lbHash = 2*lbTile->getLowerLeft().x() + 3*lbTile->getLowerLeft().y() + 5*lbTile->getWidth() + 7*lbTile->getHeight();
-            ofs << lbTile << std::endl;
+            ofs << *lbTile << std::endl;
         }
     }
     ofs.close();
 }
+bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const{
+    std::unordered_set<Tile *> allTilesSet;
+    collectAllTiles(allTilesSet);
+
+    std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
+    
+    // this is for checking the copying works
+    std::cout << "allTilesArr: " << std::endl;
+    for(Tile *t : allTilesArr){
+        std::cout << *t << std::endl;
+    }
+    bool errorFree = true;
+
+    Tile *tile1, *tile2;
+    for(int i = 0; i < allTilesArr.size(); ++i){
+        for(int j = (i+1); j < allTilesArr.size(); ++j){
+            tile1 = allTilesArr[i];
+            tile2 = allTilesArr[j];
+            assert(tile1 != nullptr);
+            assert(tile2 != nullptr);
+            
+            if((tile1->getYLow() == tile2->getYLow()) && (tile1->getHeight() == tile2->getHeight())){
+                // horizontal merge potential
+                assert(tile1->getXLow() != tile2->getXLow());
+
+                Tile *leftTile, *rightTile;
+                if(tile1->getXLow() < tile2->getXLow()){
+                    leftTile = tile1;
+                    rightTile = tile2;
+                }else{
+                    leftTile = tile2;
+                    rightTile = tile1;
+                }
+
+                if(leftTile->getXHigh() == rightTile->getXLow()){
+                    failTiles.push_back(std::pair<Tile *, Tile *>(tile1, tile2));
+                    errorFree = false;
+                }
+
+            }else if((tile1->getXLow() == tile2->getXLow()) && (tile1->getWidth() == tile2->getWidth())){
+                // vertical merge potential
+                assert(tile1->getYLow() != tile2->getYLow());
+
+                Tile *upTile, *downTile;
+                if(tile1->getYLow() < tile2->getYLow()){
+                    upTile = tile1;
+                    downTile = tile2;
+                }else{
+                    upTile = tile2;
+                    downTile = tile1;
+                }
+
+                if(downTile->getYHigh() == upTile->getYLow()){
+                    failTiles.push_back(std::pair<Tile *, Tile *>(tile1, tile2));
+                    errorFree = false;
+                }
+
+            }
+        }
+    }
+
+    return errorFree;
+
+}
+
