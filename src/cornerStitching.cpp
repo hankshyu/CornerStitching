@@ -55,7 +55,6 @@ void CornerStitching::collectAllTilesDFS(Tile *currentSearch, std::unordered_set
     }
 }
 
-// this function is not yet rewritten done
 void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const{
 
     // R1) Enumerate the tile
@@ -89,6 +88,77 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
         if(R4 || R5) enumerateDirectedAreaRProcedure(box, allTiles, t);
     }
 
+}
+
+void CornerStitching::cutBlankTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight){
+
+    // check if victim tile is blank type
+    if(origTop->getType() != tileType::BLANK){
+        throw CSException("CORNERSTITCHING_08");
+    }
+
+    // check if the cut is valid due to the height of origTop and expect newDownHeight
+    if(origTop->getHeight() <= newDownHeight){
+        throw CSException("CORNERSTITCHING_09");
+    }
+
+    newDown = new Tile(tileType::BLANK, origTop->getLowerLeft(),origTop->getWidth(), newDownHeight);
+
+    newDown->rt = origTop;
+    newDown->lb = origTop->lb;
+    newDown->bl = origTop->bl;
+
+    // maniputlate surronding tiles of origTop and newDown
+
+    // change lower-neighbors' rt pointer to newDown
+    std::vector <Tile *> origDownNeighbors;
+    findDownNeighbors(origTop, origDownNeighbors);
+    for(Tile *t : origDownNeighbors){
+        if(t->rt == origTop) t->rt = newDown;
+    }
+
+    // 1. find the correct tr for newDown
+    // 2. change right neighbors to point their bl to the correct tile (whether to switch to newDown or keep origTop)
+    std::vector <Tile *> origRightNeighbors;
+    findRightNeighbors(origTop, origRightNeighbors);
+    
+    bool rightModified = false;
+    for(int i = 0; i < origRightNeighbors.size(); ++i){
+        if(origRightNeighbors[i]->getYLow() < newDown->getYHigh()){
+            if(!rightModified){
+                rightModified = true;
+                newDown->tr = origRightNeighbors[i];
+            }
+            // 08/06/2023 bug fix: change "tile" -> "newDown", add break statement to terminate unecessary serarch early
+            if(origRightNeighbors[i]->getYLow() >= newDown->getYLow()){
+                origRightNeighbors[i]->bl = newDown;
+            }else{
+                break;
+            }
+        }
+    }
+
+    // 1. find the new correct bl for origTop
+    // 2. change left neighbors to point their tr to the correct tile (whether to switch to newDown or keep origTop)
+    std::vector <Tile *> origLeftNeighbors;
+    findLeftNeighbors(origTop, origLeftNeighbors);
+
+    bool leftModified = false;
+    for(int i = 0; i < origLeftNeighbors.size(); ++i){
+        if(origLeftNeighbors[i]->getYHigh() > newDown->getYHigh()){
+            if(!leftModified){
+                leftModified = true;
+                origTop->bl = origLeftNeighbors[i];
+                break;
+            }
+        }else{
+            origLeftNeighbors[i]->tr = newDown;
+        }
+    }
+
+    origTop->setLowerLeft(newDown->getUpperLeft());
+    origTop->setHeight(origTop->getHeight() - newDownHeight);
+    origTop->lb = newDown;
 }
 
 CornerStitching::CornerStitching(len_t chipWidth, len_t chipHeight)
@@ -336,10 +406,57 @@ void CornerStitching::enumerateDirectedArea(Rectangle box, std::vector <Tile *> 
         leftTouchTile = findPoint(Cord(rec::getXL(box), leftTouchTile->getYLow() - 1 ));
     }
 }
-Tile *CornerStitching::insertTile(const Tile &tile){
-    
-}
 
+Tile *CornerStitching::insertTile(const Tile &tile){
+    // check if the input prototype is within the canvas
+    if(!checkRectangleInCanvas(tile.getRectangle())){
+        throw CSException("CORNERSTITCHING_06");
+    }
+
+    // check if the tile inserting position already exist anotehr tile
+    if(searchArea(tile.getRectangle())){
+        throw CSException("CORNERSTITCHING_07");
+    }
+
+    /*  STEP 1)
+        Find the space tile containing the top edge of the area to be occupied by the new tile
+        (due to the strip property, a single space tile must contain the entire edge).
+        Then split the top space tile along a horizontal line into a piece entirely above the new tile 
+        and a piece overlapping the new tile. Update corne stitches in the tiles adjoining the new tile
+    */
+
+    bool tileTouchesSky = (tile.getYHigh() == mCanvasSizeBlankTile->getYHigh());
+    bool cleanTopCut = true;
+    Tile *origTop;
+    if(!tileTouchesSky){
+        origTop = findPoint(tile.getUpperLeft());
+        cleanTopCut = (origTop->getYLow() == tile.getYHigh());
+    }
+
+    if((!tileTouchesSky) && (!cleanTopCut)){
+        Tile *newDown;
+        cutBlankTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYHigh());
+    }
+
+    /*  STEP 2)
+        Find the space tile containing the bottom edge of the area to be occupied by the new tile, 
+        split it in similar fation in STEP 1, and update stitches around it.
+    */
+
+    bool tileTouchesGround = (tile.getYLow() == mCanvasSizeBlankTile->getYLow());
+    bool cleanBottomCut = true;
+    Tile *origBottom;
+    if(!tileTouchesGround){
+        Cord targetTileLL = tile.getLowerLeft();
+        origBottom = findPoint(Cord(targetTileLL.x(), (targetTileLL.y() - 1)));
+        cleanBottomCut = (origBottom->getYHigh() == tile.getYLow());
+    }
+
+    if((!tileTouchesGround) && (!cleanBottomCut)){
+        Tile *newDown;
+        cutBlankTileHorizontally(origBottom, newDown, tile.getYLow() - origBottom->getYLow());
+    }
+}
 
 void CornerStitching::visualiseTileDistribution(const std::string outputFileName) const{
     std::ofstream ofs;
@@ -391,6 +508,7 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
     }
     ofs.close();
 }
+
 bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const{
     std::unordered_set<Tile *> allTilesSet;
     collectAllTiles(allTilesSet);

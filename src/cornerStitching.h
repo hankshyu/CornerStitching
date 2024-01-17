@@ -26,6 +26,11 @@ private:
     // Helper function of enumerateDirectArea
     void enumerateDirectedAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const;
 
+    // Pass in a victim blank tile through origTop, it will split the victim into two pieces:
+    // 1. origTop represents the top portion of the split, with height (origTop.height - newDownHeight)
+    // 2. newDown represents the lower portion of the split, with height newDownHeight
+    void cutBlankTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight);
+
 public:
     CornerStitching() = delete;
     CornerStitching(len_t chipWidth, len_t chipHeight);
