@@ -90,12 +90,7 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
 
 }
 
-void CornerStitching::cutBlankTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight){
-
-    // check if victim tile is blank type
-    if(origTop->getType() != tileType::BLANK){
-        throw CSException("CORNERSTITCHING_08");
-    }
+void CornerStitching::cutTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight){
 
     // check if the cut is valid due to the height of origTop and expect newDownHeight
     if(origTop->getHeight() <= newDownHeight){
@@ -435,7 +430,7 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
     if((!tileTouchesSky) && (!cleanTopCut)){
         Tile *newDown;
-        cutBlankTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYHigh());
+        cutTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYHigh());
     }
 
     /*  STEP 2)
@@ -454,8 +449,176 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
     if((!tileTouchesGround) && (!cleanBottomCut)){
         Tile *newDown;
-        cutBlankTileHorizontally(origBottom, newDown, tile.getYLow() - origBottom->getYLow());
+        cutTileHorizontally(origBottom, newDown, tile.getYLow() - origBottom->getYLow());
     }
+
+    /*  STEP 3)
+        Work down along the left side ofthe area of the new tile. Each tile along this edge must be a space tile that
+        spans the entire width of the new solid tile. Split the tile into a piece entirely to the left of the new tile, 
+        one entirely within the new tile, and one to the right. The splitting may make it possible to merge the left and 
+        right remainders vertically with the tiles just above them: merge whenever possible. Finally, merge the centre
+        space tile with the solid tile that is forming. Each split or merge requires stitches to be updated and adjoining tiles.
+    */
+
+    Tile *splitTile = findPoint(Cord(tile.getXLow(), (tile.getYHigh() - 1)));
+    len_t findTileY = splitTile->getYLow();
+    Tile *oldsplitTile;
+
+    // Merge assisting indexes
+    len_t leftMergeWidth = 0, rightMergeWidth = 0;
+    bool topMostMerge = true;
+
+    while(true){
+
+        // calculate the borders of left blank tile and right blank tile
+        len_t blankLeftBorder = splitTile->getXLow();
+        len_t tileLeftBorder = tile.getXLow();
+        len_t tileRightBorder = tile.getXHigh();
+        len_t blankRightBorder = splitTile->getXHigh();
+
+        // The middle tile that's completely within the new tile.
+        Tile *newMid = new Tile(tileType::BLANK, Cord(tileLeftBorder, splitTile->getYLow()), tile.getWidth(), splitTile->getHeight());
+
+        // initialize bl, tr pointer in case the left and right tile do not exist
+        newMid->bl = splitTile->bl;
+        newMid->tr = splitTile->tr;
+
+        std::vector<Tile *> topNeighbors;
+        findTopNeighbors(splitTile, topNeighbors);
+        std::vector<Tile *>bottomNeighbors;
+        findDownNeighbors(splitTile, bottomNeighbors);
+        std::vector<Tile *>leftNeighbors;
+        findLeftNeighbors(splitTile, leftNeighbors);
+        std::vector<Tile *>rightNeighbors;
+        findRightNeighbors(splitTile, rightNeighbors);
+
+        // split the left piece if necessary, maintain pointers all around
+        bool leftSplitNecessary = (blankLeftBorder != tileLeftBorder);
+
+        if(leftSplitNecessary){
+            Tile *newLeft = new Tile(tileType::BLANK, splitTile->getLowerLeft(), (tileLeftBorder - blankLeftBorder) ,splitTile->getHeight());
+
+            newLeft->tr = newMid;
+            newLeft->bl = splitTile->bl;
+
+            newMid->bl = newLeft;
+
+            // fix pointers about the top neighbors of new created left tile
+            bool rtModified = false;
+            for(int i = 0; i < topNeighbors.size(); ++i){
+                if(topNeighbors[i]->getXLow() < tileLeftBorder){
+                    if(!rtModified){
+                        rtModified = true;
+                        newLeft->rt = topNeighbors[i];
+                    }
+                    if(topNeighbors[i]->getXLow() >= blankLeftBorder){
+                        topNeighbors[i]->lb = newLeft;
+                    }else{
+                        break;
+                    }
+                }
+            }
+            
+            // fix pointers about the bottom neighbors of new created left tile
+            bool lbModified = false;
+            for(int i = 0; i < bottomNeighbors.size(); ++i){
+                if(bottomNeighbors[i]->getXLow() < tileLeftBorder){
+                    if(!lbModified){
+                        lbModified = true;
+                        newLeft->lb = bottomNeighbors[i];
+                    }
+                    if(bottomNeighbors[i]->getXHigh() <= tileLeftBorder){
+                        bottomNeighbors[i]->rt = newLeft;
+                    }
+                }else{
+                    break;
+                }
+            }
+
+            // change tr pointers of left neighbors to the new created left tile
+            for(int i = 0; i < leftNeighbors.size(); ++i){
+                if(leftNeighbors[i]->tr == splitTile){
+                    leftNeighbors[i]->tr = newLeft;
+                }
+            }
+
+        }else{
+            // change the tr pointers of the left neighbors to newMid
+            for(int i = 0; i < leftNeighbors.size(); ++i){
+                if(leftNeighbors[i]->tr == splitTile){
+                    leftNeighbors[i]->tr = newMid;
+                }
+            }
+        }
+
+
+        // split the right piece if necessary, maintain pointers all around
+        bool rightSplitNecessary = (tileRightBorder != blankRightBorder);
+        if(rightSplitNecessary){
+            Tile *newRight = new Tile(tileType::BLANK, newMid->getLowerRight(), (blankRightBorder- tileRightBorder) ,newMid->getHeight());
+
+            newRight->tr = splitTile->tr;
+            newRight->bl = newMid;
+
+            newMid->tr = newRight;
+
+            // fix pointers about the top neighbors of new created right tile
+            bool rtModified = false;
+            for(int i = 0; i < topNeighbors.size(); ++i){
+                if(topNeighbors[i]->getXHigh() > tileRightBorder){
+                    if(!rtModified){
+                        rtModified = true;
+                        newRight->rt = topNeighbors[i];
+                    }
+                    if(topNeighbors[i]->getLowerLeft().x >= tileRightBorder){
+                        topNeighbors[i]->lb = newRight;
+                    }
+                }else{
+                    break;
+                }
+            }
+
+            // fix pointers about the bottom neighbors of new created right tile
+
+            bool lbModified = false;
+            for(int i = 0 ; i < bottomNeighbors.size(); ++i){
+                if(bottomNeighbors[i]->getLowerRight().x > tileRightBorder){
+                    if(!lbModified){
+                        lbModified = true;
+                        newRight->lb = bottomNeighbors[i];
+                    }
+                    if(bottomNeighbors[i]->getLowerRight().x <= blankRightBorder){
+                        bottomNeighbors[i]->rt = newRight;
+                    }else{
+                        break;
+                    }
+                }
+            }
+
+            // also change bl pointers of right neighbors to the newly created left tile
+            for(int i = 0; i < rightNeighbors.size(); ++i){
+                if(rightNeighbors[i]->bl == splitTile){
+                    rightNeighbors[i]->bl = newRight;
+                }
+            }
+            
+        }else{
+            // change bl pointers of right neighbors back to newMid
+            for(int i = 0; i < rightNeighbors.size(); ++i){
+                if(rightNeighbors[i]->bl == splitTile){
+                    rightNeighbors[i]->bl = newMid;
+                }
+            }
+        }
+
+
+
+
+   }
+
+
+
+
 }
 
 void CornerStitching::visualiseTileDistribution(const std::string outputFileName) const{
