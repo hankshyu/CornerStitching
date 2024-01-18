@@ -905,7 +905,7 @@ void LFLegaliser::insertTile(Tile &tile){
     // locate the topmost blank-tile, split in 3 pieces, left, mid and right
 
     Tile *splitTile = findPoint(Cord(tile.getUpperLeft() - Cord(0, 1)));
-    len_t findTileY = splitTile->getLowerLeft().y;
+    len_t splitTileYLow = splitTile->getLowerLeft().y;
     Tile *oldsplitTile;
 
     // Merge helping indexes
@@ -1241,7 +1241,7 @@ void LFLegaliser::insertTile(Tile &tile){
         }
 
         oldsplitTile = splitTile;
-        if(findTileY == tile.getLowerLeft().y){
+        if(splitTileYLow == tile.getLowerLeft().y){
             // Merging the bottom most split blank tile and the blank tile below if necessary
 
             // Detect & Merging left bottom & the blank below
@@ -1388,8 +1388,8 @@ void LFLegaliser::insertTile(Tile &tile){
 
             break;
         }else{
-            splitTile = findPoint(Cord(tile.getLowerLeft().x, findTileY) - Cord(0,1));
-            findTileY= splitTile->getLowerLeft().y;
+            splitTile = findPoint(Cord(tile.getLowerLeft().x, splitTileYLow) - Cord(0,1));
+            splitTileYLow= splitTile->getLowerLeft().y;
             delete(oldsplitTile);
         }
 

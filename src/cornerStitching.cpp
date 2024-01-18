@@ -156,6 +156,52 @@ void CornerStitching::cutTileHorizontally(Tile *origTop, Tile *newDown, len_t ne
     origTop->lb = newDown;
 }
 
+void CornerStitching::mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown){
+
+    // test if merge up is actually above mergeDown
+    if(mergeUp->getYLow() > mergeDown->getYLow()){
+        throw CSException("CORNERSTITCHING_10");
+    }
+
+    // check if two tiles are mergable
+    bool sameWidth = (mergeUp->getWidth() == mergeDown->getWidth());
+    bool xAligned = (mergeUp->getXLow() == mergeDown->getXLow());
+    if(!(sameWidth && xAligned)){
+        throw CSException("CORNERSTITCHING_11");
+    }
+
+    std::vector<Tile *> mergedownLeftNeighbors;
+    findLeftNeighbors(mergeDown, mergedownLeftNeighbors);
+    for(int i = 0; i < mergedownLeftNeighbors.size(); ++i){
+        if(mergedownLeftNeighbors[i]->tr == mergeDown){
+            mergedownLeftNeighbors[i]->tr = mergeUp;
+        }
+    }
+
+    std::vector<Tile *> mergedownDownNeighbors;
+    findDownNeighbors(mergeDown, mergedownDownNeighbors);
+    for(int i = 0; i < mergedownDownNeighbors.size(); ++i){
+        if(mergedownDownNeighbors[i]->rt == mergeDown){
+            mergedownDownNeighbors[i]->rt = mergeUp;
+        }
+    }
+    std::vector<Tile *> mergedownRightNeighbors;
+    findRightNeighbors(mergeDown, mergedownRightNeighbors);
+    for(int i = 0; i < mergedownRightNeighbors.size(); ++i){
+        if(mergedownRightNeighbors[i]->bl == mergeDown){
+            mergedownRightNeighbors[i]->bl = mergeUp;
+        }
+    }
+    
+    mergeUp->bl = mergeDown->bl;
+    mergeUp->lb = mergeDown->lb;
+    
+    mergeUp->setLowerLeft(mergeDown->getLowerLeft());
+    mergeUp->setHeight(mergeUp->getHeight() + mergeDown->getHeight());
+    
+    delete(mergeDown);
+}
+
 CornerStitching::CornerStitching(len_t chipWidth, len_t chipHeight)
     : mCanvasWidth(chipWidth), mCanvasHeight(chipHeight) 
     {
@@ -461,8 +507,8 @@ Tile *CornerStitching::insertTile(const Tile &tile){
     */
 
     Tile *splitTile = findPoint(Cord(tile.getXLow(), (tile.getYHigh() - 1)));
-    len_t findTileY = splitTile->getYLow();
-    Tile *oldsplitTile;
+    len_t splitTileYLow = splitTile->getYLow();
+    Tile *oldSplitTile;
 
     // Merge assisting indexes
     len_t leftMergeWidth = 0, rightMergeWidth = 0;
@@ -555,7 +601,7 @@ Tile *CornerStitching::insertTile(const Tile &tile){
         // split the right piece if necessary, maintain pointers all around
         bool rightSplitNecessary = (tileRightBorder != blankRightBorder);
         if(rightSplitNecessary){
-            Tile *newRight = new Tile(tileType::BLANK, newMid->getLowerRight(), (blankRightBorder- tileRightBorder) ,newMid->getHeight());
+            Tile *newRight = new Tile(tileType::BLANK, newMid->getLowerRight(), (blankRightBorder - tileRightBorder), newMid->getHeight());
 
             newRight->tr = splitTile->tr;
             newRight->bl = newMid;
@@ -570,7 +616,7 @@ Tile *CornerStitching::insertTile(const Tile &tile){
                         rtModified = true;
                         newRight->rt = topNeighbors[i];
                     }
-                    if(topNeighbors[i]->getLowerLeft().x >= tileRightBorder){
+                    if(topNeighbors[i]->getXLow() >= tileRightBorder){
                         topNeighbors[i]->lb = newRight;
                     }
                 }else{
@@ -579,15 +625,14 @@ Tile *CornerStitching::insertTile(const Tile &tile){
             }
 
             // fix pointers about the bottom neighbors of new created right tile
-
             bool lbModified = false;
             for(int i = 0 ; i < bottomNeighbors.size(); ++i){
-                if(bottomNeighbors[i]->getLowerRight().x > tileRightBorder){
+                if(bottomNeighbors[i]->getXHigh() > tileRightBorder){
                     if(!lbModified){
                         lbModified = true;
                         newRight->lb = bottomNeighbors[i];
                     }
-                    if(bottomNeighbors[i]->getLowerRight().x <= blankRightBorder){
+                    if(bottomNeighbors[i]->getXHigh() <= blankRightBorder){
                         bottomNeighbors[i]->rt = newRight;
                     }else{
                         break;
@@ -611,13 +656,157 @@ Tile *CornerStitching::insertTile(const Tile &tile){
             }
         }
 
+        // link rt & lb pointers for newMid and modify the surrounding neighbor pointers 
+        bool rtModified = false;
+        for(int i = 0; i < topNeighbors.size(); ++i){
+            if(topNeighbors[i]->getXLow() < tileRightBorder){
+                if(!rtModified){
+                    rtModified = true;
+                    newMid->rt = topNeighbors[i];
+                }
+                if(topNeighbors[i]->getXLow() >= tileLeftBorder){
+                    topNeighbors[i]->lb = newMid;
+                }else{
+                    break;
+                }
+            }
+        }
 
+        bool lbModified = false;
+        for(int i = 0; i < bottomNeighbors.size(); ++i){
+            if(bottomNeighbors[i]->getXHigh() > tileLeftBorder){
+                if(!lbModified){
+                    lbModified = true;
+                    newMid->lb = bottomNeighbors[i];
+                }
+                if(bottomNeighbors[i]->getXHigh() <= tileRightBorder){
+                    bottomNeighbors[i]->rt = newMid;
+                }else{
+                    break;
+                }
+            }
+        }
 
+        // Start Mergin Process, the tiles are split accordingly. We may merge all blank tiles possible, midTiles would be merged lastly 
 
+        // Merge the left tile if necessary
+        bool initTopLeftMerge = false;
+        if(topMostMerge){
+            Tile *initTopLeftUp, *initTopLeftDown;
+            if(leftSplitNecessary){
+                initTopLeftDown = newMid->bl;
+                if(initTopLeftDown->rt != nullptr){
+                    initTopLeftUp= initTopLeftDown->rt;
+                    bool sameWidth = (initTopLeftUp->getWidth() == initTopLeftDown->getWidth());
+                    bool xAligned = (initTopLeftUp->getXLow() == initTopLeftDown->getXLow());
+                    if((initTopLeftUp->getType() == tileType::BLANK) &&  sameWidth && xAligned){
+                        initTopLeftMerge = true;
+                    }
+                }
+            }
+        }
+
+        bool leftNeedsMerge = ((leftMergeWidth > 0) && (leftMergeWidth == (tileLeftBorder - blankLeftBorder))) || initTopLeftMerge;
+        if(leftNeedsMerge){
+            Tile *mergeUp = newMid->bl->rt;
+            Tile *mergeDown = newMid->bl;
+            mergeTileHorizontally(mergeUp, mergeDown);
+
+        }
+        // update merge width for below merging blocks
+        leftMergeWidth = tileLeftBorder - blankLeftBorder;
+
+        // Merge the right tiles if necessary
+        bool initTopRightMerge = false;
+        if(topMostMerge){
+            Tile *initTopRightUp, *initTopRightDown;
+            if(rightSplitNecessary){
+                initTopRightDown = newMid->tr;
+                if(initTopRightDown->rt != nullptr){
+                    initTopRightUp = initTopRightDown->rt;
+                    bool sameWidth = (initTopRightUp->getWidth() == initTopRightDown->getWidth());
+                    bool xAligned = (initTopRightUp->getXLow() == initTopRightDown->getXLow());
+                    if((initTopRightUp->getType() == tileType::BLANK) && (sameWidth) && (xAligned)){
+                        initTopRightMerge = true;
+                    }
+                }
+            }
+        }
+        
+        bool rightNeedsMerge = ((rightMergeWidth > 0) && (rightMergeWidth == (blankRightBorder - tileRightBorder))) || initTopRightMerge;        
+        if(rightNeedsMerge){
+            Tile *mergeUp = newMid->tr->rt;
+            Tile *mergeDown = newMid->tr;
+            mergeTileHorizontally(mergeUp, mergeDown);
+        }
+        // update right merge width for latter blocks
+        rightMergeWidth = blankRightBorder - tileRightBorder;
+
+        // Merge the middle tiles, it MUST be merga without the first time
+
+        if(!topMostMerge){
+            Tile *mergeUp = newMid->rt;
+            Tile *mergeDown = newMid;
+            mergeTileHorizontally(mergeUp, mergeDown);
+
+            // relink the newMid to the merged tile 
+            newMid = mergeUp;
+        }
+
+        oldSplitTile = splitTile;
+
+        // if the merging process hits the last merge, process some potential mergings tiles below the working tiles
+        if(splitTileYLow == tile.getYLow()){
+
+            // detect & merge left bottom and the tiles below
+            bool lastDownLeftMerge = false;
+            Tile *lastBotLeftUp, *lastBotLeftDown;
+            if(leftSplitNecessary){
+                lastBotLeftUp = newMid->bl;
+                if(lastBotLeftUp->lb != nullptr){
+                    lastBotLeftDown = lastBotLeftUp->lb;
+                    bool sameWidth = (lastBotLeftUp->getWidth() == lastBotLeftDown->getWidth());
+                    bool xAligned = (lastBotLeftUp->getXLow() == lastBotLeftDown->getXLow());
+                    if(lastBotLeftDown->getType() == tileType::BLANK && sameWidth && xAligned){
+                        lastDownLeftMerge = true;
+                    }
+                }
+            }
+            if(lastDownLeftMerge){
+                mergeTileHorizontally(lastBotLeftUp, lastBotLeftDown);
+            }
+
+            // detect & merge right bottom and the tiles below
+            bool lastDownRightmerge = false;
+            Tile *lastBotRightUp, *lastBotRightDown;
+            if(rightSplitNecessary){
+                lastBotRightUp = newMid->tr;
+                if(lastBotRightUp->lb != nullptr){
+                    lastBotRightDown = lastBotRightUp->lb;
+                    bool sameWidth = (lastBotRightUp->getWidth() == lastBotRightDown->getWidth());
+                    bool xAligned = (lastBotRightUp->getXLow() == lastBotRightDown->getXLow());
+                    if(lastBotRightDown->getType() == tileType::BLANK && sameWidth && xAligned){
+                        lastDownRightmerge = true;
+                    }
+
+                }
+            }
+            if(lastDownRightmerge){
+                mergeTileHorizontally(lastBotRightUp, lastBotRightDown);
+            }
+
+            // last step is to substitute newMid to the input tile
+            delete(oldSplitTile);
+            return newMid;
+        }
+
+        // the merging process has not yet hit the bottom tile, working downwards to next splitTile
+        delete(oldSplitTile);
+        topMostMerge = false;
+        splitTile = findPoint(Cord(tile.getXLow(), splitTileYLow - 1));
+        splitTileYLow = splitTile->getYLow();
+        
    }
-
-
-
 
 }
 

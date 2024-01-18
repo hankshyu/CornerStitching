@@ -31,6 +31,9 @@ private:
     // 2. newDown represents the lower portion of the split, with height newDownHeight
     void cutTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight);
 
+    // Merges two horizontally attatched tiles. The function merges "mergeDown" into "mergeUp" and deletes it
+    void mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown);
+
 public:
     CornerStitching() = delete;
     CornerStitching(len_t chipWidth, len_t chipHeight);
