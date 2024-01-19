@@ -26,6 +26,7 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_09", "cutTileHorizontally(): there is no enough height for newDownHeight to cut from origTop (victim tile)"},
     {"CORNERSTITCHING_10", "mergeTileHorizontally(): input mergeUp is not above input mergeDown"},
     {"CORNERSTITCHING_11", "mergeTileHorizontally(): the two tiles are not mergable"},
+    {"CORNERSTITCHING_12", "insertTile(): input tile's type shall not be tileType::BLANK, blank tile is prohibited from insertion"},
 
 };
 

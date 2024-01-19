@@ -34,10 +34,10 @@ $(OBJPATH)/%.o: $(SRCPATH)/%.cpp $(SRCPATH)/%.h
 csrun_debug: $(SRCPATH)/units.h $(SRCPATH)/colours.h $(DBG_OBJS)
 	$(CXX) $(DEBUGFLAGS) -I $(BOOSTPATH) $(LINKFLAGS) $^ -o $(BINPATH)/$@
 
-main_db.o: $(SRCPATH)/main.cpp 
+$(OBJPATH)/main_dbg.o: $(SRCPATH)/main.cpp 
 	$(CXX) $(DEBUGFLAGS) -I $(BOOSTPATH) $(CFLAGS) -DCOMPILETIME="\"`date`\"" $^ -o $@
 
-%_db.o: $(SRCPATH)/%.cpp $(SRCPATH)/%.h
+$(OBJPATH)/%_dbg.o: $(SRCPATH)/%.cpp $(SRCPATH)/%.h
 	$(CXX) $(DEBUGFLAGS) -I $(BOOSTPATH) $(CFLAGS) $< -o $@
 
 .PHONY: clean

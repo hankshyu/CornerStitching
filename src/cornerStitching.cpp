@@ -7,15 +7,7 @@ bool CornerStitching::checkPointInCanvas(const Cord &point) const{
 }
 
 bool CornerStitching::checkRectangleInCanvas(const Rectangle &rect) const{
-
-    bool realLLIn = rec::isContained(mCanvasSizeBlankTile->getRectangle(), rec::getLL(rect));
-
-    len_t containedURX = rec::getXH(rect) - 1;
-    len_t containedURY = rec::getYH(rect) - 1;
-    Cord containedUR (containedURX, containedURY);
-    bool realURIn = rec::isContained(mCanvasSizeBlankTile->getRectangle(), containedUR);
-    
-    return realLLIn && realURIn;
+    return rec::isContained(mCanvasSizeBlankTile->getRectangle(), rect);
 }
 
 void CornerStitching::collectAllTiles(std::unordered_set<Tile *> &allTiles) const{
@@ -34,22 +26,22 @@ void CornerStitching::collectAllTilesDFS(Tile *currentSearch, std::unordered_set
     allTiles.insert(currentSearch);
     
     if(currentSearch->rt != nullptr){
-        if(allTiles.find(currentSearch) != allTiles.end()){
+        if(allTiles.find(currentSearch->rt) == allTiles.end()){
             collectAllTilesDFS(currentSearch->rt, allTiles);
         }
     }
     if(currentSearch->tr != nullptr){
-        if(allTiles.find(currentSearch) != allTiles.end()){
+        if(allTiles.find(currentSearch->tr) == allTiles.end()){
             collectAllTilesDFS(currentSearch->tr, allTiles);
         }
     }
     if(currentSearch->bl != nullptr){
-        if(allTiles.find(currentSearch) != allTiles.end()){
+        if(allTiles.find(currentSearch->bl) == allTiles.end()){
             collectAllTilesDFS(currentSearch->bl, allTiles);
         }
     }
     if(currentSearch->lb != nullptr){
-        if(allTiles.find(currentSearch) != allTiles.end()){
+        if(allTiles.find(currentSearch->lb) == allTiles.end()){
             collectAllTilesDFS(currentSearch->lb, allTiles);
         }
     }
@@ -271,7 +263,7 @@ len_t CornerStitching::getCanvasHeight() const{
 Tile *CornerStitching::findPoint(const Cord &key) const{
 
     // throw exception if point finding (key) out of canvas range
-    if(checkPointInCanvas(key)){
+    if(!checkPointInCanvas(key)){
         throw CSException("CORNERSTITCHING_01");
     }
 
@@ -458,6 +450,67 @@ Tile *CornerStitching::insertTile(const Tile &tile){
     if(searchArea(tile.getRectangle())){
         throw CSException("CORNERSTITCHING_07");
     }
+    // insert tile type shall not be BLANK
+    if(tile.getType() == tileType::BLANK){
+        throw CSException("CORNERSTITCHING_12");
+    }
+
+    // Special case when inserting the first tile in the system
+    if(mAllNonBlankTilesMap.empty()){
+        Tile *tdown, *tup, *tleft, *tright;
+
+        bool hasDownTile = (tile.getYLow() != mCanvasSizeBlankTile->getYLow());
+        bool hasUpTile = (tile.getYHigh() != mCanvasSizeBlankTile->getYHigh());
+        bool hasLeftTile = (tile.getXLow() != mCanvasSizeBlankTile->getXLow());
+        bool hasRightTile = (tile.getXHigh() != mCanvasSizeBlankTile->getXHigh());
+
+        Tile *newTile = new Tile(tile);
+
+        if(hasDownTile){
+            tdown = new Tile(tileType::BLANK, Cord(0, 0), this->mCanvasWidth, newTile->getYLow());
+            newTile->lb = tdown;
+        }
+
+        if(hasUpTile){
+            tup = new Tile(tileType::BLANK, Cord(0, newTile->getYHigh()), 
+                                this->mCanvasWidth, (this->mCanvasHeight - newTile->getYHigh()));
+            newTile->rt = tup;
+        }
+
+        if(hasLeftTile){
+            tleft = new Tile(tileType::BLANK, Cord(0, newTile->getYLow()),
+                                newTile->getXLow(), newTile->getHeight());
+            newTile->bl = tleft;
+            tleft->tr = newTile;
+
+            
+            if(hasDownTile) tleft->lb = tdown;
+            if(hasUpTile) tleft->rt = tup;
+            
+            if(hasUpTile) tup->lb = tleft;
+        }else{
+            if(hasUpTile) tup->lb = newTile;
+        }
+
+        if(hasRightTile){
+            tright = new Tile(tileType::BLANK, newTile->getLowerRight(), 
+                                (mCanvasWidth - newTile->getXHigh()), newTile->getHeight());
+            newTile->tr = tright;
+            tright->bl = newTile;
+
+            if(hasDownTile) tright->lb = tdown;
+            if(hasUpTile) tright->rt = tup;
+
+            if(hasDownTile) tdown->rt = tright;
+        }else{
+            if(hasDownTile) tdown->rt = newTile;
+        }
+
+        // push index into the map and exit
+        mAllNonBlankTilesMap[newTile->getLowerLeft()] = newTile;
+        return newTile;
+    }
+
 
     /*  STEP 1)
         Find the space tile containing the top edge of the area to be occupied by the new tile
@@ -797,6 +850,8 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
             // last step is to substitute newMid to the input tile
             delete(oldSplitTile);
+            newMid->setType(tile.getType());
+            mAllNonBlankTilesMap[newMid->getLowerLeft()] = newMid;
             return newMid;
         }
 
@@ -812,7 +867,7 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
 void CornerStitching::visualiseTileDistribution(const std::string outputFileName) const{
     std::ofstream ofs;
-    ofs.open(outputFileName);
+    ofs.open(outputFileName, std::fstream::out);
     if(!ofs.is_open()) throw(CSException("CORNERSTITCHING_05"));
 
     std::unordered_set<Tile *> allTiles;
@@ -823,8 +878,7 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
     // Then start to write info for each file
     for(Tile *tile : allTiles){
         unsigned long long tileHash;
-        tileHash = 2*tile->getLowerLeft().x() + 3*tile->getLowerLeft().y() + 5*tile->getWidth() + 7*tile->getHeight();
-        ofs << tileHash << " " << *tile << std::endl;
+        ofs << *tile << std::endl;
 
         Tile *rtTile = tile->rt;
         ofs << "rt: ";
@@ -881,6 +935,7 @@ bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>>
             tile2 = allTilesArr[j];
             assert(tile1 != nullptr);
             assert(tile2 != nullptr);
+            if((tile1->getType() != tileType::BLANK) || (tile2->getType() != tileType::BLANK)) continue;
             
             if((tile1->getYLow() == tile2->getYLow()) && (tile1->getHeight() == tile2->getHeight())){
                 // horizontal merge potential
