@@ -1,4 +1,6 @@
-boost_1_83_0/
+.vscode/
+boost_1_84_0/
+boost_1_84_0.tar
 inputs/Global_Floorplanning/
 outputs/*
 bin/csrun

@@ -6,7 +6,7 @@ DEBUGFLAGS = -g
 SRCPATH = ./src
 BINPATH = ./bin
 OBJPATH = ./obj
-BOOSTPATH = ./boost_1_83_0/ # ! Remember to specify the path
+BOOSTPATH = ./boost_1_84_0/ # ! Remember to specify the path
 
 all: csrun
 debug: csrun_debug

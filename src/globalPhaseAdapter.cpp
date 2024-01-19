@@ -7,6 +7,9 @@
 
 globalPhaseAdapter::globalPhaseAdapter(std::string fileName){
     this->ifs.open(fileName);
+    if(!this->ifs.is_open()){
+        throw CSException("GLOBALPHASEADAPTER_02");
+    }
 }
 
 globalPhaseAdapter::~globalPhaseAdapter(){
@@ -47,7 +50,7 @@ void globalPhaseAdapter::readGlobalResult() {
             nT->type = tesseraType::HARD;
             this->fixedTesserae.push_back(nT);
         }else{
-            throw CSException("GLOBALPHASEADAPTER_01");
+            throw CSException("GLOBALPHASEADAPTER_02");
 }
 
     }
