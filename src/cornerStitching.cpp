@@ -875,6 +875,8 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
 
     // write out the total tile numbers
     ofs << allTiles.size() << std::endl;
+    // write the chip contour 
+    ofs << mCanvasWidth << " " << mCanvasHeight << std::endl;
     // Then start to write info for each file
     for(Tile *tile : allTiles){
         unsigned long long tileHash;
