@@ -151,7 +151,7 @@ void CornerStitching::cutTileHorizontally(Tile *origTop, Tile *newDown, len_t ne
 void CornerStitching::mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown){
 
     // test if merge up is actually above mergeDown
-    if(mergeUp->getYLow() > mergeDown->getYLow()){
+    if(mergeUp->getYLow() <= mergeDown->getYLow()){
         throw CSException("CORNERSTITCHING_10");
     }
 
@@ -440,7 +440,7 @@ void CornerStitching::enumerateDirectedArea(Rectangle box, std::vector <Tile *> 
     }
 }
 
-Tile *CornerStitching::insertTile(const Tile &tile){
+Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
     // check if the input prototype is within the canvas
     if(!checkRectangleInCanvas(tile.getRectangle())){
         throw CSException("CORNERSTITCHING_06");
@@ -529,7 +529,7 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
     if((!tileTouchesSky) && (!cleanTopCut)){
         Tile *newDown;
-        cutTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYHigh());
+        cutTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYLow());
     }
 
     /*  STEP 2)
@@ -833,7 +833,8 @@ Tile *CornerStitching::insertTile(const Tile &tile){
             bool lastDownRightmerge = false;
             Tile *lastBotRightUp, *lastBotRightDown;
             if(rightSplitNecessary){
-                lastBotRightUp = newMid->tr;
+                // 08/06/2024 bug fix: lastBotRightUp finds incorrect tile, lastBotRightUp = newMid->tr does not point to the correct tile 
+                lastBotRightUp = findPoint(newMid->getLowerRight());
                 if(lastBotRightUp->lb != nullptr){
                     lastBotRightDown = lastBotRightUp->lb;
                     bool sameWidth = (lastBotRightUp->getWidth() == lastBotRightDown->getWidth());
@@ -938,44 +939,21 @@ bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>>
             assert(tile1 != nullptr);
             assert(tile2 != nullptr);
             if((tile1->getType() != tileType::BLANK) || (tile2->getType() != tileType::BLANK)) continue;
-            
-            if((tile1->getYLow() == tile2->getYLow()) && (tile1->getHeight() == tile2->getHeight())){
-                // horizontal merge potential
-                assert(tile1->getXLow() != tile2->getXLow());
 
-                Tile *leftTile, *rightTile;
-                if(tile1->getXLow() < tile2->getXLow()){
-                    leftTile = tile1;
-                    rightTile = tile2;
-                }else{
-                    leftTile = tile2;
-                    rightTile = tile1;
-                }
-
-                if(leftTile->getXHigh() == rightTile->getXLow()){
-                    failTiles.push_back(std::pair<Tile *, Tile *>(tile1, tile2));
-                    errorFree = false;
-                }
-
-            }else if((tile1->getXLow() == tile2->getXLow()) && (tile1->getWidth() == tile2->getWidth())){
-                // vertical merge potential
-                assert(tile1->getYLow() != tile2->getYLow());
-
-                Tile *upTile, *downTile;
-                if(tile1->getYLow() < tile2->getYLow()){
-                    upTile = tile1;
-                    downTile = tile2;
-                }else{
-                    upTile = tile2;
-                    downTile = tile1;
-                }
-
-                if(downTile->getYHigh() == upTile->getYLow()){
-                    failTiles.push_back(std::pair<Tile *, Tile *>(tile1, tile2));
-                    errorFree = false;
-                }
-
+            if((tile1->getLowerLeft() == tile2->getUpperLeft()) && (tile1->getLowerRight() == tile2->getUpperRight())){
+                std::cout << "[Init1]" << *tile1 << " " << *tile2 << std::endl;
+                errorFree = false;
+            }else if((tile1->getUpperLeft() == tile2->getLowerLeft()) && (tile1->getUpperRight() == tile2->getLowerRight())){
+                std::cout << "[Init2]" << *tile2 << " " << *tile1 << std::endl;
+                errorFree = false;
+            }else if((tile1->getLowerLeft() == tile2->getLowerRight()) && (tile1->getUpperLeft() == tile2->getUpperRight())){
+                std::cout << "[Init3]" << *tile1 << " " << *tile2 << std::endl;
+                errorFree = false;
+            }else if((tile1->getLowerRight() == tile2->getLowerLeft()) && (tile1->getUpperRight() == tile2->getUpperLeft())){
+                std::cout << "[Init4]" << *tile1 << " " << *tile2 << std::endl;
+                errorFree = false;
             }
+
         }
     }
 
@@ -983,3 +961,24 @@ bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>>
 
 }
 
+bool CornerStitching::checkCombinableBlanks() const{
+    std::unordered_set<Tile *> allTilesSet;
+    collectAllTiles(allTilesSet);
+
+    std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
+
+    for(Tile *t : allTilesArr){
+        if(t->rt != nullptr){
+            bool bothBlank = (t->getType() == tileType::BLANK) && (t->rt->getType() == tileType::BLANK);
+            bool xAligned = (t->getXLow() == t->rt->getXLow());
+            bool widthSame = (t->getWidth() == t->rt->getWidth());
+
+            if(bothBlank && xAligned && widthSame){
+                std::cout << "[Neo]" << *t << " " << *(t->rt) << std::endl;
+                return false;
+            }
+
+        }
+    }
+    return true;
+}

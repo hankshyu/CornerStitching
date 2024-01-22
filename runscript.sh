@@ -1,0 +1,2 @@
+python3 utils/renderTiles.py outputs/case06/case06-output-23.txt -o outputs/case06/case06-output-23.png -i   
+python3 utils/renderTiles.py outputs/case06/case06-output-22.txt -o outputs/case06/case06-output-22.png -i   

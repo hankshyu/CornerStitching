@@ -67,7 +67,7 @@ public:
     void enumerateDirectedArea(Rectangle box, std::vector <Tile *> &allTiles) const;
 
     // Input a tile "prototype" to insert into the corner stitching system, returns the actual pointer to the tile in the system
-    Tile *insertTile(const Tile &tile);
+    Tile *insertTile(const Tile &tile, int debugPort);
 
     // Removes the tile within system
     void removeTile(Tile *tile);
@@ -76,5 +76,6 @@ public:
     void visualiseTileDistribution(const std::string ouputFileName) const;
     // Check globally if any two tiles is mergable, returns true if no fails found
     bool checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const;
+    bool checkCombinableBlanks() const;
 };
 #endif // __CORNERSTITCHING_H__

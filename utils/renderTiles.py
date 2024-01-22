@@ -395,6 +395,7 @@ if __name__ == '__main__':
     # Parse input arguments
     parser = ArgumentParser()
     parser.add_argument('-i', '--interactive', action='store_true', help='interactive mode', dest='interactiveFlag')
+    parser.add_argument('-a', '--arrow', action='store_true', help='show arrow mode', dest='arrowFlag')
     parser.add_argument('inFile', help='visualization input file')
     parser.add_argument('-o', '--output', help='visualization output file', dest='outFile')
     args = parser.parse_args()
@@ -408,8 +409,10 @@ if __name__ == '__main__':
 
     if args.outFile == None:
         print("Rendering Results not saved")
+    elif args.arrowFlag == True:
+        print("Rendering Result with arrows ", GREEN, "ON", COLORRST, " saved to: ", args.outFile)
     else:
-        print("Rendering Result saved to: ", args.outFile)
+        print("Rendering Result with arrows ", RED, "OFF", COLORRST, " saved to: ", args.outFile)
     
     file_read_case = open(args.inFile, 'r')
     fin_case = file_read_case.read().split("\n")
@@ -461,10 +464,16 @@ if __name__ == '__main__':
         
         ax.add_patch(tl.dShape[1])
 
-        Twidth = 0.7*tl.width
-        Theight = 0.3*tl.height
-        if(Twidth > 3*Theight):
-            Twidth = 3*Theight
+        if tl.width > tl.height:
+            Twidth = 0.7*tl.width
+            Theight = 0.3*tl.height
+            if(Twidth > 3*Theight):
+                Twidth = 3*Theight
+        else:
+            Twidth = 0.95 * tl.width
+            Theight = 0.3*tl.height
+            if(Theight > Twidth):
+                Theight = Twidth
         representLenghIdx = min(Twidth, Theight)
         tl.dName[1], _ = text_with_autofit(ax, tl.LL.__str__(), (int(tl.xl + 0.5*tl.width), int(tl.yl + 0.5*tl.height)), Twidth, Theight, show_rect = False)
         # sm.dVector[1] = plt.arrow(sm.Centre[0], sm.Centre[1], sm.Vector[0], sm.Vector[1], width = 10.0, head_width = 150.0, color = 'g')
@@ -500,7 +509,30 @@ if __name__ == '__main__':
 
     # For using '-o' flag to save output file
     if args.outFile != None :
-        plt.savefig(args.outFile, dpi=1200)
+        if args.arrowFlag == True:
+            plt.savefig(args.outFile, dpi = 1200)
+        else:
+            global_myChip.avrt = not global_myChip.avrt
+            for tl in global_myChip.tileArr:
+                tl.drt[0] = global_myChip.avrt and tl.drt[0] 
+                tl.drt[1].set_visible(tl.drt[0])
+
+            global_myChip.avtr = not global_myChip.avtr
+            for tl in global_myChip.tileArr:
+                tl.dtr[0] = global_myChip.avtr and tl.dtr[0] 
+                tl.dtr[1].set_visible(tl.dtr[0])
+            
+            global_myChip.avbl = not global_myChip.avbl
+            for tl in global_myChip.tileArr:
+                tl.dbl[0] = global_myChip.avbl and tl.dbl[0] 
+                tl.dbl[1].set_visible(tl.dbl[0])
+
+            global_myChip.avlb = not global_myChip.avlb
+            for tl in global_myChip.tileArr:
+                tl.dlb[0] = global_myChip.avlb and tl.dlb[0] 
+                tl.dlb[1].set_visible(tl.dlb[0])
+            plt.draw()
+            plt.savefig(args.outFile, dpi = 1200)
 
     # Create checkboxes to select/unselect certain Tile attributes
     rax = fig.add_axes([0.6, 0.05, 0.15, 0.15])
