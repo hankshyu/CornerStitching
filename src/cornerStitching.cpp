@@ -72,7 +72,7 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
         bool R4 = (t->getYLow() >= targetTile->getYLow());
 
         // R5) If the bottom edge ofthe search area cuts both the target tile and its neighbor
-        len_t bottomEdge = targetTile->getYLow();
+        len_t bottomEdge = rec::getYL(box);
         bool cutTargetTile = (targetTile->getYLow() <= bottomEdge) && (targetTile->getYHigh() > bottomEdge);
         bool cutNeighbor = (t->getYLow() <= bottomEdge) && (t->getYHigh() > bottomEdge);
         bool R5 = cutTargetTile && cutNeighbor;
@@ -918,20 +918,18 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
     ofs.close();
 }
 
-bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const{
+bool CornerStitching::debugBlankMerged(Tile *tile1, Tile *tile2) const{
     std::unordered_set<Tile *> allTilesSet;
     collectAllTiles(allTilesSet);
 
     std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
     
     // this is for checking the copying works
-    std::cout << "allTilesArr: " << std::endl;
-    for(Tile *t : allTilesArr){
-        std::cout << *t << std::endl;
-    }
-    bool errorFree = true;
+    // std::cout << "allTilesArr: " << std::endl;
+    // for(Tile *t : allTilesArr){
+    //     std::cout << *t << std::endl;
+    // }
 
-    Tile *tile1, *tile2;
     for(int i = 0; i < allTilesArr.size(); ++i){
         for(int j = (i+1); j < allTilesArr.size(); ++j){
             tile1 = allTilesArr[i];
@@ -941,44 +939,16 @@ bool CornerStitching::checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>>
             if((tile1->getType() != tileType::BLANK) || (tile2->getType() != tileType::BLANK)) continue;
 
             if((tile1->getLowerLeft() == tile2->getUpperLeft()) && (tile1->getLowerRight() == tile2->getUpperRight())){
-                std::cout << "[Init1]" << *tile1 << " " << *tile2 << std::endl;
-                errorFree = false;
+                return false;
             }else if((tile1->getUpperLeft() == tile2->getLowerLeft()) && (tile1->getUpperRight() == tile2->getLowerRight())){
-                std::cout << "[Init2]" << *tile2 << " " << *tile1 << std::endl;
-                errorFree = false;
+                return false;
             }else if((tile1->getLowerLeft() == tile2->getLowerRight()) && (tile1->getUpperLeft() == tile2->getUpperRight())){
-                std::cout << "[Init3]" << *tile1 << " " << *tile2 << std::endl;
-                errorFree = false;
+                return false;
             }else if((tile1->getLowerRight() == tile2->getLowerLeft()) && (tile1->getUpperRight() == tile2->getUpperLeft())){
-                std::cout << "[Init4]" << *tile1 << " " << *tile2 << std::endl;
-                errorFree = false;
-            }
-
-        }
-    }
-
-    return errorFree;
-
-}
-
-bool CornerStitching::checkCombinableBlanks() const{
-    std::unordered_set<Tile *> allTilesSet;
-    collectAllTiles(allTilesSet);
-
-    std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
-
-    for(Tile *t : allTilesArr){
-        if(t->rt != nullptr){
-            bool bothBlank = (t->getType() == tileType::BLANK) && (t->rt->getType() == tileType::BLANK);
-            bool xAligned = (t->getXLow() == t->rt->getXLow());
-            bool widthSame = (t->getWidth() == t->rt->getWidth());
-
-            if(bothBlank && xAligned && widthSame){
-                std::cout << "[Neo]" << *t << " " << *(t->rt) << std::endl;
                 return false;
             }
-
         }
     }
+
     return true;
 }

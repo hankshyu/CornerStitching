@@ -74,8 +74,10 @@ public:
 
     // Output format for presenting software
     void visualiseTileDistribution(const std::string ouputFileName) const;
-    // Check globally if any two tiles is mergable, returns true if no fails found
-    bool checkMergingSuccess(std::vector<std::pair<Tile *, Tile *>> &failTiles) const;
-    bool checkCombinableBlanks() const;
+    // Check globally if any two tiles is mergable, returns true if no fails found, else return false and
+    // two mergable tiles is returned through tile1 and tile2
+    bool debugBlankMerged(Tile *tile1, Tile *tile2) const;
+
+    
 };
 #endif // __CORNERSTITCHING_H__
