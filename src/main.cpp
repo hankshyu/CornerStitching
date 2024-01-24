@@ -67,16 +67,21 @@ int main(int argc, char const *argv[]) {
 	// }
 
 	try{
-		Tile tileArr [7];
-		tileArr[0] = Tile(tileType::BLOCK, Cord(0, 3), 3, 1);
-		tileArr[1] = Tile(tileType::BLOCK, Cord(3, 1), 4, 2);
-		tileArr[2] = Tile(tileType::BLOCK, Cord(3, 3), 2, 2);
-		tileArr[3] = Tile(tileType::BLOCK, Cord(5, 5), 1, 2);
-		tileArr[4] = Tile(tileType::BLOCK, Cord(6, 6), 1, 1);
-		tileArr[5] = Tile(tileType::BLOCK, Cord(6, 4), 1, 1);
-		tileArr[6] = Tile(tileType::BLOCK, Cord(2, 5), 1, 1);
-		CornerStitching cs(7, 7);
-		for(int i = 0; i < 7; i++){
+		Tile tileArr [12];
+		tileArr[0] = Tile(tileType::BLOCK, Rectangle(7, 15, 15, 21));
+		tileArr[1] = Tile(tileType::OVERLAP, Rectangle(15, 17, 21, 22));
+		tileArr[2] = Tile(tileType::OVERLAP, Rectangle(5, 9, 13, 15));
+		tileArr[3] = Tile(tileType::OVERLAP, Rectangle(13, 11, 15, 15));
+		tileArr[4] = Tile(tileType::OVERLAP, Rectangle(15, 11, 21, 17));
+		tileArr[5] = Tile(tileType::OVERLAP, Rectangle(21, 13, 27, 20));
+		tileArr[6] = Tile(tileType::OVERLAP, Rectangle(13, 9, 21, 11));
+		tileArr[7] = Tile(tileType::OVERLAP, Rectangle(7, 4, 17, 9));
+		tileArr[8] = Tile(tileType::OVERLAP, Rectangle(17, 4, 21, 9));
+		tileArr[9] = Tile(tileType::OVERLAP, Rectangle(21, 4, 27, 13));
+		tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
+		tileArr[11] = Tile(tileType::OVERLAP, Rectangle(7, 2, 12, 4));
+		CornerStitching cs(30, 30);
+		for(int i = 0; i < 12; i++){
 			cs.insertTile(tileArr[i], 0);
 		}
 		Tile *tile1, *tile2;
@@ -89,7 +94,7 @@ int main(int argc, char const *argv[]) {
 		cs.visualiseTileDistribution("./outputs/case08/case08-output-0.txt");
 
 		Rectangle recArr[10];
-		recArr[0] = Rectangle(2, 2, 6, 6);
+		recArr[0] = Rectangle(7, 4, 27, 19);
 		recArr[1] = Rectangle(2, 3, 6, 6);
 		recArr[2] = Rectangle(2, 3, 5, 6);
 		recArr[3] = Rectangle(4, 4, 7, 6);
