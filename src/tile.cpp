@@ -23,7 +23,7 @@ Tile::Tile(const Tile &other)
     : mType(other.getType()), mRectangle(other.getRectangle()), rt(other.rt), tr(other.tr), bl(other.bl), lb(other.lb) {
 }
 
-Tile &Tile::operator=(const Tile &other) {
+Tile &Tile::operator = (const Tile &other) {
     if (this == &other) return (*this);
 
     this->mType = other.getType();
@@ -37,7 +37,7 @@ Tile &Tile::operator=(const Tile &other) {
     return (*this);
 }
 
-bool Tile::operator==(const Tile &comp) const {
+bool Tile::operator == (const Tile &comp) const {
     return (mType == comp.getType()) && (mRectangle == comp.getRectangle()) &&
            ((rt == comp.rt) && (tr == comp.tr) && (bl == comp.bl) && (lb == comp.lb));
 }

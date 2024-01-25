@@ -39,6 +39,8 @@ public:
     CornerStitching(len_t chipWidth, len_t chipHeight);
     CornerStitching(const CornerStitching &other);
     ~CornerStitching();
+ 
+    bool operator == (const CornerStitching &comp) const;
 
     len_t getCanvasWidth() const;
     len_t getCanvasHeight() const;

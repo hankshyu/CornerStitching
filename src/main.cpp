@@ -72,14 +72,14 @@ int main(int argc, char const *argv[]) {
 		tileArr[1] = Tile(tileType::OVERLAP, Rectangle(15, 17, 21, 22));
 		tileArr[2] = Tile(tileType::OVERLAP, Rectangle(5, 9, 13, 15));
 		tileArr[3] = Tile(tileType::OVERLAP, Rectangle(13, 11, 15, 15));
-		tileArr[4] = Tile(tileType::OVERLAP, Rectangle(15, 11, 21, 17));
+		tileArr[4] = Tile(tileType::BLOCK, Rectangle(15, 11, 21, 17));
 		tileArr[5] = Tile(tileType::OVERLAP, Rectangle(21, 13, 27, 20));
 		tileArr[6] = Tile(tileType::OVERLAP, Rectangle(13, 9, 21, 11));
-		tileArr[7] = Tile(tileType::OVERLAP, Rectangle(7, 4, 17, 9));
+		tileArr[7] = Tile(tileType::BLOCK, Rectangle(7, 4, 17, 9));
 		tileArr[8] = Tile(tileType::OVERLAP, Rectangle(17, 4, 21, 9));
 		tileArr[9] = Tile(tileType::OVERLAP, Rectangle(21, 4, 27, 13));
 		tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
-		tileArr[11] = Tile(tileType::OVERLAP, Rectangle(7, 2, 12, 4));
+		tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
 		CornerStitching cs(30, 30);
 		for(int i = 0; i < 12; i++){
 			cs.insertTile(tileArr[i], 0);
@@ -91,27 +91,16 @@ int main(int argc, char const *argv[]) {
 		}else{
 			std::cout << " Merging fail!" << std::endl;
 		}
-		cs.visualiseTileDistribution("./outputs/case08/case08-output-0.txt");
 
-		Rectangle recArr[10];
-		recArr[0] = Rectangle(7, 4, 27, 19);
-		recArr[1] = Rectangle(2, 3, 6, 6);
-		recArr[2] = Rectangle(2, 3, 5, 6);
-		recArr[3] = Rectangle(4, 4, 7, 6);
-
-
-		for(int i = 0; i < 4; ++i){
-			std::vector<Tile *> allTiles;
-			cs.enumerateDirectedArea(recArr[i], allTiles);
-			if(allTiles.empty()){
-				std::cout << "allTiles are empty" << std::endl;
-			}else{
-				std::cout << "There are " << allTiles.size() << "blocks in " << recArr[i] << std::endl;
-				for(int j = 0; j < allTiles.size(); ++j){
-					std::cout << j << ": " << *allTiles[j] << std::endl;
-				}
-			}
+		CornerStitching cs2(30, 30);
+		for(int i = 11; i >= 0; --i){
+			cs2.insertTile(tileArr[i], 0);
 		}
+		bool eq = (cs == cs2);
+		std::cout << "Two equal? " << eq << std::endl;
+
+
+
 
 
 	}catch(CSException e){

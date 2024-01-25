@@ -252,6 +252,137 @@ CornerStitching::~CornerStitching(){
 
 }
 
+bool CornerStitching::operator == (const CornerStitching &other) const{
+
+    // compare the canvas info
+    if((mCanvasWidth != other.mCanvasWidth) || (mCanvasHeight != other.mCanvasHeight)) return false;
+    // Collect all tiles in ours and others
+    std::unordered_set<Tile *> oursAllTiles;
+    this->collectAllTiles(oursAllTiles);
+
+    std::unordered_set<Tile *> theirsAllTiles;
+    other.collectAllTiles(theirsAllTiles);
+
+    if(oursAllTiles.size() != theirsAllTiles.size()) return false;
+
+    // Categorize collected tiles using their tileType
+    std::vector<Tile *>ourBlockArr;
+    std::vector<Tile *>ourBlankArr;
+    std::vector<Tile *>ourOverlapArr;
+    for(Tile *t : oursAllTiles){
+        tileType tType = t->getType();
+        if(tType == tileType::BLOCK) ourBlockArr.push_back(t);
+        else if(tType == tileType::BLANK) ourBlankArr.push_back(t);
+        else if(tType == tileType::OVERLAP) ourOverlapArr.push_back(t);
+    }
+
+    std::unordered_map <Cord, Tile *> theirBlockMap;
+    std::unordered_map <Cord, Tile *> theirBlankMap;
+    std::unordered_map <Cord, Tile *> theirOverlapMap;
+    for(Tile *t : theirsAllTiles){
+        tileType tType = t->getType();
+        if(tType == tileType::BLOCK) theirBlockMap[t->getLowerLeft()] = t;
+        else if(tType == tileType::BLANK) theirBlankMap[t->getLowerLeft()] = t;
+        else if(tType == tileType::OVERLAP) theirOverlapMap[t->getLowerLeft()] = t;
+    }
+
+    if(ourBlockArr.size() != theirBlockMap.size()) return false;
+    if(ourBlankArr.size() != theirBlankMap.size()) return false;
+    if(ourOverlapArr.size() != theirOverlapMap.size()) return false;
+
+    // Create a hash to map each our tiles to theris
+    std::unordered_map <Tile *, Tile *> tileMap;
+
+    // Map tileType::BLOCK tiles from ours to theirs
+    for(Tile *t : ourBlockArr){
+        std::unordered_map <Cord, Tile *>::iterator it = theirBlockMap.find(t->getLowerLeft());
+        // if not found than there is no matching tile in ours and thiers
+        if(it == theirBlockMap.end()) return false;
+
+        // check if two rectangles are equal
+        if(t->getRectangle() != (it->second->getRectangle())) return false;
+
+        // add to link
+        tileMap[t] = it->second;
+
+        theirBlockMap.erase(it);
+    }
+    //there exist excessive elements, indicating that at least two ours tile map to the same thiers tile
+    if(!theirBlockMap.empty()) return false;
+
+
+    // Map tileType::BLANK tiles from ours to theirs
+    for(Tile *t : ourBlankArr){
+        std::unordered_map <Cord, Tile *>::iterator it = theirBlankMap.find(t->getLowerLeft());
+        // if not found than there is no matching tile in ours and thiers
+        if(it == theirBlankMap.end()) return false;
+
+        // check if two rectangles are equal
+        if(t->getRectangle() != (it->second->getRectangle())) return false;
+
+        // add to link
+        tileMap[t] = it->second;
+
+        theirBlankMap.erase(it);
+    }
+    if(!theirBlankMap.empty()) return false;
+
+    // Map tileType::OVERLAP tiles from ours to theirs
+    for(Tile *t : ourOverlapArr){
+        std::unordered_map <Cord, Tile *>::iterator it = theirOverlapMap.find(t->getLowerLeft());
+        // if not found than there is no matching tile in ours and thiers
+        if(it == theirOverlapMap.end()) return false;
+
+        // check if two rectangles are equal
+        if(t->getRectangle() != (it->second->getRectangle())) return false;
+
+        // add to link
+        tileMap[t] = it->second;
+
+        theirOverlapMap.erase(it);
+    }
+    if(!theirOverlapMap.empty()) return false;
+
+    // Check the links are consistent
+    for(Tile *t : oursAllTiles){
+       Tile *theirTile = tileMap[t]; 
+
+       // check rt links is correct
+       if(t->rt == nullptr){
+            if(theirTile->rt != nullptr) return false;
+       }else{
+            if(tileMap[t->rt] != theirTile->rt) return false;
+       }
+
+       // check if tr link is correct
+       if(t->tr == nullptr){
+            if(theirTile->tr != nullptr) return false;
+       }else{
+            if(tileMap[t->tr] != theirTile->tr) return false;
+       }
+
+       // check if bl link is correct
+       if(t->bl == nullptr){
+            if(theirTile->bl != nullptr) return false;
+       }else{
+            if(tileMap[t->bl] != theirTile->bl) return false;
+       }
+
+        // check if lb link is correct
+        if(t->lb == nullptr){
+            if(theirTile->lb != nullptr) return false;
+        }else{
+            if(tileMap[t->lb] != theirTile->lb) return false;
+        }
+
+    }
+    
+    // all checkings done, two cornerStitching is equal
+    return true;
+
+    
+}
+
 len_t CornerStitching::getCanvasWidth() const{
     return this->mCanvasWidth;
 }
