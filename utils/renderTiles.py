@@ -481,31 +481,31 @@ if __name__ == '__main__':
         rtRoot = Cord(int(0.25*tl.xl + 0.75*tl.xh), int(0.125*tl.yl + 0.875*tl.yh))
         if tl.rt == False:
             # tl.drt[1] = plt.arrow(rtRoot.x, rtRoot.y, 0, (tl.yh - rtRoot.y), width=0.7, head_width = 10.0, color="r", linestyle="-")
-            tl.drt[1] = plt.scatter(rtRoot.x, rtRoot.y, s = representLenghIdx*0.1, c ='g', marker = 'x', clip_on=False)
+            tl.drt[1] = plt.scatter(rtRoot.x, rtRoot.y, s = representLenghIdx*1.5, c ='g', marker = 'x', clip_on=False)
         else:
             rtTile = myChip.tileDict[tl.rt]
-            tl.drt[1] = plt.arrow(rtRoot.x, rtRoot.y, (rtTile.centre.x - rtRoot.x), (rtTile.centre.y - rtRoot.y), width=0.7, head_width = 10.0, color="g", linestyle="-")
+            tl.drt[1] = plt.arrow(rtRoot.x, rtRoot.y, (rtTile.centre.x - rtRoot.x), (rtTile.centre.y - rtRoot.y), width=representLenghIdx*0.1, head_width = representLenghIdx*0.4, color="g", linestyle="-")
              
         trRoot = Cord(int(0.125*tl.xl + 0.875*tl.xh), int(0.25*tl.yl + 0.75*tl.yh))
         if tl.tr == False:
-            tl.dtr[1] = plt.scatter(trRoot.x, trRoot.y, s = representLenghIdx*0.1, c ='b', marker = 'x', clip_on=False)
+            tl.dtr[1] = plt.scatter(trRoot.x, trRoot.y, s = representLenghIdx*1.5, c ='b', marker = 'x', clip_on=False)
         else:
             trTile = myChip.tileDict[tl.tr]
-            tl.dtr[1] = plt.arrow(trRoot.x, trRoot.y, (trTile.centre.x - trRoot.x), (trTile.centre.y - trRoot.y), width=0.7, head_width = 10.0, color="b", linestyle="-")
+            tl.dtr[1] = plt.arrow(trRoot.x, trRoot.y, (trTile.centre.x - trRoot.x), (trTile.centre.y - trRoot.y), width=representLenghIdx*0.1, head_width = representLenghIdx*0.4, color="b", linestyle="-")
     
         blRoot = Cord(int(0.125*tl.xh + 0.875*tl.xl), int(0.25*tl.yh + 0.75*tl.yl))
         if tl.bl == False:
-            tl.dbl[1] = plt.scatter(blRoot.x, blRoot.y, s = representLenghIdx*0.1, c ='deepskyblue', marker = 'x', clip_on=False)
+            tl.dbl[1] = plt.scatter(blRoot.x, blRoot.y, s = representLenghIdx*1.5, c ='deepskyblue', marker = 'x', clip_on=False)
         else:
             blTile = myChip.tileDict[tl.bl]
-            tl.dbl[1] = plt.arrow(blRoot.x, blRoot.y, (blTile.centre.x - blRoot.x), (blTile.centre.y - blRoot.y), width=0.7, head_width = 10.0, color="deepskyblue", linestyle="-")
+            tl.dbl[1] = plt.arrow(blRoot.x, blRoot.y, (blTile.centre.x - blRoot.x), (blTile.centre.y - blRoot.y), width=representLenghIdx*0.1, head_width =representLenghIdx*0.4, color="deepskyblue", linestyle="-")
 
         lbRoot = Cord(int(0.25*tl.xh + 0.75*tl.xl), int(0.125*tl.yh + 0.875*tl.yl))
         if tl.lb == False:
-            tl.dlb[1] = plt.scatter(lbRoot.x, lbRoot.y, s = representLenghIdx*0.1, c ='slategray', marker = 'x', clip_on=False)
+            tl.dlb[1] = plt.scatter(lbRoot.x, lbRoot.y, s = representLenghIdx*1.5, c ='slategray', marker = 'x', clip_on=False)
         else:
             lbTile = myChip.tileDict[tl.lb]
-            tl.dlb[1] = plt.arrow(lbRoot.x, lbRoot.y, (lbTile.centre.x - lbRoot.x), (lbTile.centre.y - lbRoot.y), width=0.7, head_width = 10.0, color="slategray", linestyle="-")
+            tl.dlb[1] = plt.arrow(lbRoot.x, lbRoot.y, (lbTile.centre.x - lbRoot.x), (lbTile.centre.y - lbRoot.y), width=representLenghIdx*0.1, head_width=representLenghIdx*0.4, color="slategray", linestyle="-")
 
     # For using '-o' flag to save output file
     if args.outFile != None :

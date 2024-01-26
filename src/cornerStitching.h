@@ -28,11 +28,16 @@ private:
 
     // Pass in a victim tile through origTop, it will split the victim into two pieces:
     // 1. origTop represents the top portion of the split, with height (origTop.height - newDownHeight)
-    // 2. newDown represents the lower portion of the split, with height newDownHeight
-    void cutTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight);
+    // 2. newDown represents the lower portion of the split, with height newDownHeight, is the return value
+    Tile *cutTileHorizontally(Tile *origTop, len_t newDownHeight);
 
-    // Merges two horizontally attatched tiles. The function merges "mergeDown" into "mergeUp" and deletes it
-    void mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown);
+    // Merges two tiles (up, down) along a horizontal cut line:
+    // mergeDown is merged into mergeUp, mergeDown is deleted and the new merged tile is the return value
+    Tile *mergeTilesHorizontally(Tile *mergeUp, Tile *mergeDown);
+
+    // Merges two tiles (left, right) along a vertical cut line:
+    // mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
+    Tile *mergeTilesVertically(Tile *mergeLeft, Tile *mergeRight);
 
 public:
     CornerStitching() = delete;
@@ -69,10 +74,10 @@ public:
     void enumerateDirectedArea(Rectangle box, std::vector <Tile *> &allTiles) const;
 
     // Input a tile "prototype" to insert into the corner stitching system, returns the actual pointer to the tile in the system
-    Tile *insertTile(const Tile &tile, int debugPort);
+    Tile *insertTile(const Tile &tile);
 
-    // Removes the tile within system
-    void removeTile(Tile *tile);
+    // Removes the tile within system, retunrs false if Tile not within cornerStitching System. true if succes
+    bool removeTile(Tile *tile);
 
     // Output format for presenting software
     void visualiseTileDistribution(const std::string ouputFileName) const;

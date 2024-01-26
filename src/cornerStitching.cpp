@@ -82,14 +82,14 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
 
 }
 
-void CornerStitching::cutTileHorizontally(Tile *origTop, Tile *newDown, len_t newDownHeight){
+Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 
     // check if the cut is valid due to the height of origTop and expect newDownHeight
     if(origTop->getHeight() <= newDownHeight){
         throw CSException("CORNERSTITCHING_09");
     }
 
-    newDown = new Tile(tileType::BLANK, origTop->getLowerLeft(),origTop->getWidth(), newDownHeight);
+    Tile *newDown = new Tile(tileType::BLANK, origTop->getLowerLeft(),origTop->getWidth(), newDownHeight);
 
     newDown->rt = origTop;
     newDown->lb = origTop->lb;
@@ -146,9 +146,11 @@ void CornerStitching::cutTileHorizontally(Tile *origTop, Tile *newDown, len_t ne
     origTop->setLowerLeft(newDown->getUpperLeft());
     origTop->setHeight(origTop->getHeight() - newDownHeight);
     origTop->lb = newDown;
+
+    return newDown;
 }
 
-void CornerStitching::mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown){
+Tile *CornerStitching::mergeTilesHorizontally(Tile *mergeUp, Tile *mergeDown){
 
     // test if merge up is actually above mergeDown
     if(mergeUp->getYLow() <= mergeDown->getYLow()){
@@ -192,6 +194,7 @@ void CornerStitching::mergeTileHorizontally(Tile *mergeUp, Tile *mergeDown){
     mergeUp->setHeight(mergeUp->getHeight() + mergeDown->getHeight());
     
     delete(mergeDown);
+    return mergeUp;
 }
 
 CornerStitching::CornerStitching(len_t chipWidth, len_t chipHeight)
@@ -571,7 +574,7 @@ void CornerStitching::enumerateDirectedArea(Rectangle box, std::vector <Tile *> 
     }
 }
 
-Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
+Tile *CornerStitching::insertTile(const Tile &tile){
     // check if the input prototype is within the canvas
     if(!checkRectangleInCanvas(tile.getRectangle())){
         throw CSException("CORNERSTITCHING_06");
@@ -659,8 +662,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
     }
 
     if((!tileTouchesSky) && (!cleanTopCut)){
-        Tile *newDown;
-        cutTileHorizontally(origTop, newDown, tile.getYHigh() - origTop->getYLow());
+        cutTileHorizontally(origTop, tile.getYHigh() - origTop->getYLow());
     }
 
     /*  STEP 2)
@@ -678,8 +680,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
     }
 
     if((!tileTouchesGround) && (!cleanBottomCut)){
-        Tile *newDown;
-        cutTileHorizontally(origBottom, newDown, tile.getYLow() - origBottom->getYLow());
+        cutTileHorizontally(origBottom, tile.getYLow() - origBottom->getYLow());
     }
 
     /*  STEP 3)
@@ -894,7 +895,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
         if(leftNeedsMerge){
             Tile *mergeUp = newMid->bl->rt;
             Tile *mergeDown = newMid->bl;
-            mergeTileHorizontally(mergeUp, mergeDown);
+            mergeTilesHorizontally(mergeUp, mergeDown);
 
         }
         // update merge width for below merging blocks
@@ -921,7 +922,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
         if(rightNeedsMerge){
             Tile *mergeUp = newMid->tr->rt;
             Tile *mergeDown = newMid->tr;
-            mergeTileHorizontally(mergeUp, mergeDown);
+            mergeTilesHorizontally(mergeUp, mergeDown);
         }
         // update right merge width for latter blocks
         rightMergeWidth = blankRightBorder - tileRightBorder;
@@ -931,7 +932,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
         if(!topMostMerge){
             Tile *mergeUp = newMid->rt;
             Tile *mergeDown = newMid;
-            mergeTileHorizontally(mergeUp, mergeDown);
+            mergeTilesHorizontally(mergeUp, mergeDown);
 
             // relink the newMid to the merged tile 
             newMid = mergeUp;
@@ -957,7 +958,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
                 }
             }
             if(lastDownLeftMerge){
-                mergeTileHorizontally(lastBotLeftUp, lastBotLeftDown);
+                mergeTilesHorizontally(lastBotLeftUp, lastBotLeftDown);
             }
 
             // detect & merge right bottom and the tiles below
@@ -977,7 +978,7 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
                 }
             }
             if(lastDownRightmerge){
-                mergeTileHorizontally(lastBotRightUp, lastBotRightDown);
+                mergeTilesHorizontally(lastBotRightUp, lastBotRightDown);
             }
 
             // last step is to substitute newMid to the input tile
@@ -994,6 +995,90 @@ Tile *CornerStitching::insertTile(const Tile &tile, int debugPort){
         splitTileYLow = splitTile->getYLow();
         
    }
+
+}
+
+bool CornerStitching::removeTile(Tile *tile){
+    // look up if the tile exist in the cornerStitching system
+    assert(tile != nullptr);
+    Cord tileLL = tile->getLowerLeft();
+    std::unordered_map<Cord, Tile*>::iterator it = mAllNonBlankTilesMap.find(tileLL);
+    // there is no such index
+    if(it == mAllNonBlankTilesMap.end()) return false;
+    // the index does not point to the tile to delete
+    if(mAllNonBlankTilesMap[tileLL] != tile) return false;
+
+    // special case when there is only one noeBlank tile left in the cornerStitching system
+    if(mAllNonBlankTilesMap.size() == 1){
+        if(tile->rt != nullptr) delete(tile->rt);
+        if(tile->tr != nullptr) delete(tile->tr);
+        if(tile->bl != nullptr) delete(tile->bl);
+        if(tile->lb != nullptr) delete(tile->lb);
+
+        mAllNonBlankTilesMap.clear();
+        delete(tile);
+        return true;
+    }
+
+    
+    /*  STEP 1)
+        Change the type of the dead tile to tileType::BLANK
+    */
+    tile->setType(tileType::BLANK);
+
+
+    /*  STEP 2)
+        Use the neighbor-finding algorithm to search from top to bottom through all the tiles
+        that adjoin the right edge of the dead tile
+    */
+    std::vector<Tile *>rightNeighbors;
+    findRightNeighbors(tile, rightNeighbors);
+
+    std::vector<Tile *>leftneighbors;
+    findLeftNeighbors(tile, leftneighbors);
+
+    /*  STEP 3)
+        For each space tile fond in STEP 2), split either the neighbor or the dead tile, or both, so that the 
+        two tiles have the same ertical span, then merge the tiles together horizontally
+    */
+   for(int i = 0; i < rightNeighbors.size(); ++i){
+        Tile *rNeighbor = rightNeighbors[i];
+        if(i == 0){
+            if(rNeighbor->getYHigh() > tile->getYHigh()){
+                Tile *newRNeighbor = cutTileHorizontally(rNeighbor, tile->getYHigh() - rNeighbor->getYLow());
+                rNeighbor = newRNeighbor;
+            }
+        }
+
+        if(i == (rightNeighbors.size() - 1)){
+            if(rNeighbor->getYLow() < tile->getYLow()){
+                cutTileHorizontally(rNeighbor, tile->getYLow() - rNeighbor->getYLow());
+            }
+        }
+
+        // now all the tiles are YLow >= tile.YLow && YHigh <= tile.YHigh
+
+        Tile *mergeLeft, *mergeRight;
+        if(rNeighbor->getYLow() > tile->getYLow()){
+            // necessary to split
+            mergeRight = rNeighbor;
+            Tile *afterCutTile = cutTileHorizontally(tile, rNeighbor->getYLow() - tile->getYLow());
+            mergeLeft = tile;
+            tile = afterCutTile;
+        }else{
+            // the two tiles are already aligned, happens at the last(lower right corner) neighbor tile
+            mergeLeft = tile;
+            mergeRight = rNeighbor;
+        }
+
+        assert(mergeLeft->getType() == tileType::BLANK);
+   }
+
+   return true;
+
+
+    
+
 
 }
 

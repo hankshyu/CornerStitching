@@ -67,41 +67,42 @@ int main(int argc, char const *argv[]) {
 	// }
 
 	try{
-		Tile tileArr [12];
-		tileArr[0] = Tile(tileType::BLOCK, Rectangle(7, 15, 15, 21));
-		tileArr[1] = Tile(tileType::OVERLAP, Rectangle(15, 17, 21, 22));
-		tileArr[2] = Tile(tileType::OVERLAP, Rectangle(5, 9, 13, 15));
-		tileArr[3] = Tile(tileType::OVERLAP, Rectangle(13, 11, 15, 15));
-		tileArr[4] = Tile(tileType::BLOCK, Rectangle(15, 11, 21, 17));
-		tileArr[5] = Tile(tileType::OVERLAP, Rectangle(21, 13, 27, 20));
-		tileArr[6] = Tile(tileType::OVERLAP, Rectangle(13, 9, 21, 11));
-		tileArr[7] = Tile(tileType::BLOCK, Rectangle(7, 4, 17, 9));
-		tileArr[8] = Tile(tileType::OVERLAP, Rectangle(17, 4, 21, 9));
-		tileArr[9] = Tile(tileType::OVERLAP, Rectangle(21, 4, 27, 13));
-		tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
-		tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
-		CornerStitching cs(30, 30);
-		for(int i = 0; i < 12; i++){
-			cs.insertTile(tileArr[i], 0);
-		}
+		// Tile tileArr [12];
+		// tileArr[0] = Tile(tileType::BLOCK, Rectangle(7, 15, 15, 21));
+		// tileArr[1] = Tile(tileType::OVERLAP, Rectangle(15, 17, 21, 22));
+		// tileArr[2] = Tile(tileType::OVERLAP, Rectangle(5, 9, 13, 15));
+		// tileArr[3] = Tile(tileType::OVERLAP, Rectangle(13, 11, 15, 15));
+		// tileArr[4] = Tile(tileType::BLOCK, Rectangle(15, 11, 21, 17));
+		// tileArr[5] = Tile(tileType::OVERLAP, Rectangle(21, 13, 27, 20));
+		// tileArr[6] = Tile(tileType::OVERLAP, Rectangle(13, 9, 21, 11));
+		// tileArr[7] = Tile(tileType::BLOCK, Rectangle(7, 4, 17, 9));
+		// tileArr[8] = Tile(tileType::OVERLAP, Rectangle(17, 4, 21, 9));
+		// tileArr[9] = Tile(tileType::OVERLAP, Rectangle(21, 4, 27, 13));
+		// tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
+		// tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
+
+		// CornerStitching cs(100, 65);
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
+		// Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
+
+		CornerStitching cs(100, 100);
+		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 10), 10, 15));
+		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 20));
+		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 45), 10, 25));
+
+		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 10), 20, 20));
+		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 30), 20, 25));
+		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 55), 20, 15));
+
 		Tile *tile1, *tile2;
 		bool mergeSuccess = cs.debugBlankMerged(tile1, tile2);
-		if(mergeSuccess){
-			std::cout << "Merging successful!" << std::endl;
-		}else{
-			std::cout << " Merging fail!" << std::endl;
-		}
+		std::cout << ((mergeSuccess)? "Merging successful" : "Merging fail!") << std::endl;
 
-		CornerStitching cs2(30, 30);
-		for(int i = 11; i >= 0; --i){
-			cs2.insertTile(tileArr[i], 0);
-		}
-		bool eq = (cs == cs2);
-		std::cout << "Two equal? " << eq << std::endl;
-
-
-
-
+		cs.visualiseTileDistribution("./outputs/case09/case09-0.txt");
+		cs.removeTile(todelete);
+		cs.visualiseTileDistribution("./outputs/case09/case09-1.txt");
 
 	}catch(CSException e){
 		std::cout << e.what() << std::endl;
