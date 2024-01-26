@@ -81,20 +81,20 @@ int main(int argc, char const *argv[]) {
 		// tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
 		// tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
 
-		// CornerStitching cs(100, 65);
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
-		// Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
+		CornerStitching cs(100, 65);
+		cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
+		cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
+		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
+		cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
 
-		CornerStitching cs(100, 100);
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 10), 10, 15));
-		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 20));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 45), 10, 25));
+		// CornerStitching cs(100, 100);
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 10), 10, 15));
+		// Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 20));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 45), 10, 25));
 
-		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 10), 20, 20));
-		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 30), 20, 25));
-		cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 55), 20, 15));
+		// cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 10), 20, 20));
+		// cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 30), 20, 25));
+		// cs.insertTile(Tile(tileType::OVERLAP, Cord(55, 55), 20, 15));
 
 		Tile *tile1, *tile2;
 		bool mergeSuccess = cs.debugBlankMerged(tile1, tile2);

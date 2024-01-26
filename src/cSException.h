@@ -24,9 +24,11 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_07", "insertTile(): input tile's position already exist another tile on canvas"},
     {"CORNERSTITCHING_08", "cutTileHorizontally(): victim tile (origTop) is not tileType::BLANK"},
     {"CORNERSTITCHING_09", "cutTileHorizontally(): there is no enough height for newDownHeight to cut from origTop (victim tile)"},
-    {"CORNERSTITCHING_10", "mergeTileHorizontally(): input mergeUp is not above input mergeDown"},
-    {"CORNERSTITCHING_11", "mergeTileHorizontally(): the two tiles are not mergable"},
+    {"CORNERSTITCHING_10", "mergeTilesHorizontally(): input mergeUp is not above input mergeDown"},
+    {"CORNERSTITCHING_11", "mergeTilesHorizontally(): two input tiles (mergeUp and mergeDown) are not mergable"},
     {"CORNERSTITCHING_12", "insertTile(): input tile's type shall not be tileType::BLANK, blank tile is prohibited from insertion"},
+    {"CORNERSTITCHING_13", "mergeTilesVertically(): input mergeLeft is not at the left of input mergeRight"},
+    {"CORNERSTITCHING_14", "mergeTilesVertically(): two input tiles (mergeLeft and mergeRight) are not mergable"},
 
 };
 

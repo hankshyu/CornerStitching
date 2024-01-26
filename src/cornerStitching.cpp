@@ -157,10 +157,11 @@ Tile *CornerStitching::mergeTilesHorizontally(Tile *mergeUp, Tile *mergeDown){
         throw CSException("CORNERSTITCHING_10");
     }
 
-    // check if two tiles are mergable
+    // check if two input tiles (mergeUp and mergeDown) are actually mergable
     bool sameWidth = (mergeUp->getWidth() == mergeDown->getWidth());
     bool xAligned = (mergeUp->getXLow() == mergeDown->getXLow());
-    if(!(sameWidth && xAligned)){
+    bool tilesAttatched = (mergeDown->getYHigh() == mergeUp->getYLow());
+    if(!(sameWidth && xAligned && tilesAttatched)){
         throw CSException("CORNERSTITCHING_11");
     }
 
@@ -195,6 +196,55 @@ Tile *CornerStitching::mergeTilesHorizontally(Tile *mergeUp, Tile *mergeDown){
     
     delete(mergeDown);
     return mergeUp;
+}
+
+Tile *CornerStitching::mergeTilesVertically(Tile *mergeLeft, Tile *mergeRight){
+    
+    // Test if merge left is actually on the left on mergeRight
+    if(mergeLeft->getXLow() >= mergeRight->getXLow()){
+        throw CSException("CORNERSTITCHING_13");
+    }
+
+    // check if two input tiles (mergeLeft and mergeRight) are actually mergable
+    bool sameHeight = (mergeLeft->getHeight() == mergeRight->getHeight());
+    bool yAligned = (mergeLeft->getYLow() == mergeRight->getYLow());
+    bool tilesAttatched = (mergeLeft->getXHigh() == mergeRight->getXLow());
+    if(!(sameHeight && yAligned && tilesAttatched)){
+        throw CSException("CORNERSTITCHING_14");
+    }
+
+    std::vector<Tile *> mergeRightTopNeighbors;
+    findTopNeighbors(mergeRight, mergeRightTopNeighbors);
+    for(int i = 0; i < mergeRightTopNeighbors.size(); ++i){
+        if(mergeRightTopNeighbors[i]->lb == mergeRight){
+            mergeRightTopNeighbors[i]->lb = mergeLeft;
+        }
+    }
+
+    std::vector<Tile *> mergeRightRightNeighbors;
+    findRightNeighbors(mergeRight, mergeRightRightNeighbors);
+    for(int i = 0; i < mergeRightRightNeighbors.size(); ++i){
+        if(mergeRightRightNeighbors[i]->bl == mergeRight){
+            mergeRightRightNeighbors[i]->bl = mergeLeft;
+        }
+    }
+
+    std::vector<Tile *> mergeRightDownNeighbors;
+    findDownNeighbors(mergeRight, mergeRightDownNeighbors);
+    for(int i = 0; i < mergeRightDownNeighbors.size(); ++i){
+        if(mergeRightDownNeighbors[i]->rt == mergeRight){
+            mergeRightDownNeighbors[i]->rt = mergeLeft;
+        }
+    }
+
+    mergeLeft->rt = mergeRight->rt;
+    mergeLeft->tr = mergeRight->tr;
+
+    mergeLeft->setWidth(mergeLeft->getWidth() + mergeRight->getWidth());
+
+    delete(mergeRight);
+    return mergeLeft;
+
 }
 
 CornerStitching::CornerStitching(len_t chipWidth, len_t chipHeight)
@@ -1072,6 +1122,7 @@ bool CornerStitching::removeTile(Tile *tile){
         }
 
         assert(mergeLeft->getType() == tileType::BLANK);
+        mergeTilesVertically(mergeLeft, mergeRight);
    }
 
    return true;
