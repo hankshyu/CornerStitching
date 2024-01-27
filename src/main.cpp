@@ -84,6 +84,7 @@ int main(int argc, char const *argv[]) {
 		CornerStitching cs(100, 65);
 		cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
 		cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
 		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
 		cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
 
@@ -100,9 +101,9 @@ int main(int argc, char const *argv[]) {
 		bool mergeSuccess = cs.debugBlankMerged(tile1, tile2);
 		std::cout << ((mergeSuccess)? "Merging successful" : "Merging fail!") << std::endl;
 
-		cs.visualiseTileDistribution("./outputs/case09/case09-0.txt");
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-1.txt");
 		cs.removeTile(todelete);
-		cs.visualiseTileDistribution("./outputs/case09/case09-1.txt");
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
 
 	}catch(CSException e){
 		std::cout << e.what() << std::endl;

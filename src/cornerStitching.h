@@ -31,13 +31,11 @@ private:
     // 2. newDown represents the lower portion of the split, with height newDownHeight, is the return value
     Tile *cutTileHorizontally(Tile *origTop, len_t newDownHeight);
 
-    // Merges two tiles (up, down) along a horizontal cut line:
-    // mergeDown is merged into mergeUp, mergeDown is deleted and the new merged tile is the return value
-    Tile *mergeTilesHorizontally(Tile *mergeUp, Tile *mergeDown);
+    // Merges two tiles (up, down), mergeDown is merged into mergeUp, mergeDown is deleted and the new merged tile is the return value
+    Tile *mergeTilesVertically(Tile *mergeUp, Tile *mergeDown);
 
-    // Merges two tiles (left, right) along a vertical cut line:
-    // mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
-    Tile *mergeTilesVertically(Tile *mergeLeft, Tile *mergeRight);
+    // Merges two tiles (left, right), mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
+    Tile *mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight);
 
 public:
     CornerStitching() = delete;
