@@ -446,11 +446,14 @@ if __name__ == '__main__':
     # Plot the tiles
     for tIdx, tl in enumerate(myChip.tileArr):
         if tl.blockType == "BLANK":
-            adaptAlpha = 0.20
+            adaptAlpha = 0.15
+            representColour = 'black'
         elif tl.blockType == "BLOCK":
             adaptAlpha = 0.60
+            representColour = 'blue'
         else:
             adaptAlpha = 0.95
+            representColour = 'green'
         
         ClickElements.append(tl)
 
@@ -475,7 +478,8 @@ if __name__ == '__main__':
             if(Theight > Twidth):
                 Theight = Twidth
         representLenghIdx = min(Twidth, Theight)
-        tl.dName[1], _ = text_with_autofit(ax, tl.LL.__str__(), (int(tl.xl + 0.5*tl.width), int(tl.yl + 0.5*tl.height)), Twidth, Theight, show_rect = False)
+        
+        tl.dName[1], _ = text_with_autofit(ax, tl.LL.__str__(), (int(tl.xl + 0.5*tl.width), int(tl.yl + 0.5*tl.height)), Twidth, Theight, show_rect = False, color=representColour)
         # sm.dVector[1] = plt.arrow(sm.Centre[0], sm.Centre[1], sm.Vector[0], sm.Vector[1], width = 10.0, head_width = 150.0, color = 'g')
 
         rtRoot = Cord(int(0.25*tl.xl + 0.75*tl.xh), int(0.125*tl.yl + 0.875*tl.yh))

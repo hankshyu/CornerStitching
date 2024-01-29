@@ -30,6 +30,7 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_13", "mergeTilesVertically(): input mergeLeft is not at the left of input mergeRight"},
     {"CORNERSTITCHING_14", "mergeTilesVertically(): two input tiles (mergeLeft and mergeRight) are not mergable"},
 
+    {"CORNERSTITCHING_15", "removeTile(): input tile is not in the cornerStitching system"},
 };
 
 class CSException : public std::exception{

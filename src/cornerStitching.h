@@ -75,14 +75,19 @@ public:
     Tile *insertTile(const Tile &tile);
 
     // Removes the tile within system, retunrs false if Tile not within cornerStitching System. true if succes
-    bool removeTile(Tile *tile);
+    void removeTile(Tile *tile);
 
     // Output format for presenting software
     void visualiseTileDistribution(const std::string ouputFileName) const;
-    // Check globally if any two tiles is mergable, returns true if no fails found, else return false and
-    // two mergable tiles is returned through tile1 and tile2
-    bool debugBlankMerged(Tile *tile1, Tile *tile2) const;
-
     
+    // Check globally if any two tiles is mergable, returns true if no fails found, else return false and
+    // two unmergable tiles is returned through tile1 and tile2
+    bool debugBlankMerged(Tile *&tile1, Tile *&tile2) const;
+
+    // Check globally if two pointer-linked tiles share the same edge
+    // two detatched tiles is returned through tile1 and tile2
+    bool debugPointerAttatched(Tile *&tile1, Tile *&tile2) const;
+
+    void conductSelfTest()const;
 };
 #endif // __CORNERSTITCHING_H__

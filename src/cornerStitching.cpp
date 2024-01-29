@@ -1048,15 +1048,19 @@ Tile *CornerStitching::insertTile(const Tile &tile){
 
 }
 
-bool CornerStitching::removeTile(Tile *tile){
+void CornerStitching::removeTile(Tile *tile){
 	// look up if the tile exist in the cornerStitching system
 	assert(tile != nullptr);
 	Cord tileLL = tile->getLowerLeft();
 	std::unordered_map<Cord, Tile*>::iterator it = mAllNonBlankTilesMap.find(tileLL);
 	// there is no such index
-	if(it == mAllNonBlankTilesMap.end()) return false;
+	if(it == mAllNonBlankTilesMap.end()){
+		throw (CSException("CORNERSTITCHING_15"));
+	}
 	// the index does not point to the tile to delete
-	if(mAllNonBlankTilesMap[tileLL] != tile) return false;
+	if(mAllNonBlankTilesMap[tileLL] != tile){
+		throw (CSException("CORNERSTITCHING_15"));
+	}	
 
 	// special case when there is only one noeBlank tile left in the cornerStitching system
 	if(mAllNonBlankTilesMap.size() == 1){
@@ -1067,7 +1071,7 @@ bool CornerStitching::removeTile(Tile *tile){
 
 		mAllNonBlankTilesMap.clear();
 		delete(tile);
-		return true;
+		return;
 	}
 
 	// store the geometric properties for later use
@@ -1097,14 +1101,14 @@ bool CornerStitching::removeTile(Tile *tile){
 	for(int i = 0; i < rightNeighbors.size(); ++i){
 		Tile *rNeighbor = rightNeighbors[i];
 		if(i == 0){
-			if(rNeighbor->getYHigh() > tile->getYHigh()){
+			if((rNeighbor->getYHigh() > tile->getYHigh()) && (rNeighbor->getType() == tileType::BLANK)){
 				Tile *newRNeighbor = cutTileHorizontally(rNeighbor, tile->getYHigh() - rNeighbor->getYLow());
 				rNeighbor = newRNeighbor;
 			}
 		}
 
 		if(i == (rightNeighbors.size() - 1)){
-			if(rNeighbor->getYLow() < tile->getYLow()){
+			if((rNeighbor->getYLow() < tile->getYLow()) && (rNeighbor->getType() == tileType::BLANK)){
 				cutTileHorizontally(rNeighbor, tile->getYLow() - rNeighbor->getYLow());
 			}
 		}
@@ -1124,8 +1128,9 @@ bool CornerStitching::removeTile(Tile *tile){
 			mergeRight = rNeighbor;
 		}
 
-		assert(mergeLeft->getType() == tileType::BLANK);
-		mergeTilesHorizontally(mergeLeft, mergeRight);
+		if(mergeRight->getType() == tileType::BLANK){
+			mergeTilesHorizontally(mergeLeft, mergeRight);
+		}
 	}
 
 	/*  STEP 4)
@@ -1140,14 +1145,19 @@ bool CornerStitching::removeTile(Tile *tile){
 		It is also necessary to do vertical merging in STEP 5). After each horizontal merge in STEP 5), check to see if 
 		the result tile can be merged with the tiles just above and below it, and merge if possible.
 	*/
+
 	bool foundFirstRightDeadTile = false;
 	for(int leftTileIdx = 0; leftTileIdx < leftNeighbors.size(); ++leftTileIdx){
 		Tile *lNeighbor = leftNeighbors[leftTileIdx];
 		std::vector<Tile *>rOrigDeadTiles;
 		findRightNeighbors(lNeighbor, rOrigDeadTiles);
 
-		for(int rTileIdx = rOrigDeadTiles.size(); rTileIdx >= 0; --rTileIdx){
-			Tile *rDeadTile = rOrigDeadTiles[rTileIdx];
+		int rTileIdx = (rOrigDeadTiles.size() - 1);
+		bool fetchNextRDeadTile = true;
+		Tile *cacheNextRDeadTile;
+		while(rTileIdx >= 0){
+			Tile *rDeadTile = (fetchNextRDeadTile)? rOrigDeadTiles[rTileIdx] : cacheNextRDeadTile;
+			fetchNextRDeadTile = true;
 
 			if(!foundFirstRightDeadTile){
 				if(rDeadTile->getYLow() < rec::getYL(origDeadTile)) continue;
@@ -1158,37 +1168,59 @@ bool CornerStitching::removeTile(Tile *tile){
 				Tile *newDownlNeighborTile;
 				if(lNeighborYLow < rDeadTileYLow){
 					newDownlNeighborTile = cutTileHorizontally(lNeighbor, rDeadTileYLow - lNeighborYLow);
-
-					//check if merging with left is possible
-					Tile *rightCand = newDownlNeighborTile->tr;
-					bool sameHeight = (newDownlNeighborTile->getHeight() == rightCand->getHeight());
-					bool yAligned = (newDownlNeighborTile->getYLow() == rightCand->getYLow());
-					if(sameHeight && yAligned){
-						newDownlNeighborTile = mergeTilesHorizontally(newDownlNeighborTile, rightCand);
-					}
-
-					//check if newDownNeighborTile can be merged with down tile
-					Tile *downCand = newDownlNeighborTile->lb;
-					bool sameWidth = (newDownlNeighborTile->getWidth() == downCand->getWidth());
-					bool xAligned = (newDownlNeighborTile->getXLow() == downCand->getXLow());
-					if(sameWidth && xAligned){
-						mergeTilesVertically(newDownlNeighborTile, downCand);
-					}
 				}
 			}
+
 			// now all rDeadTile shall have YLow aligned with rDeadTile
+			len_t lNeighborYHigh = lNeighbor->getYHigh();
+			len_t rDeadTileYHigh = rDeadTile->getYHigh();
+			if(lNeighborYHigh > rDeadTileYHigh){
+				// a potentail cut for lNeighbor
+				if(lNeighbor->getType() == tileType::BLANK){
+					Tile *newDownlNeighborTile = cutTileHorizontally(lNeighbor, (rDeadTileYHigh - lNeighbor->getYLow()));
+					rDeadTile = mergeTilesHorizontally(newDownlNeighborTile, rDeadTile);
+				}
+			}else if(lNeighborYHigh < rDeadTileYHigh){
+				// cut rDeadTile if possible
+				// next round don't fetch another rDeadTile, use upper cut
+				Tile *newDownRDeadTile = cutTileHorizontally(rDeadTile, (lNeighborYHigh - rDeadTile->getYLow()));
+				fetchNextRDeadTile = false;
+				// offset the increment of rtileIdx
+				rTileIdx++;
+				cacheNextRDeadTile = rDeadTile;
+				rDeadTile = newDownRDeadTile;
+				if(lNeighbor->getType() == tileType::BLANK){
+					rDeadTile = mergeTilesHorizontally()
+
+				}
+			}
+
+			// check if merging shall take place, always check if merging with the bottom tile is possible,
+			// if the tile hits the ceiling, also attempt to merge with the top tile
+
+			if(rDeadTile->lb != nullptr){
+				
+				Tile *downMergeCand = rDeadTile->lb;
+				if(downMergeCand->getType() == tileType::BLANK){
+					bool xAligned = (downMergeCand->getXLow() == rDeadTile->getXLow());
+					bool sameWidth = (downMergeCand->getWidth() == rDeadTile->getWidth());
+					if(xAligned && sameWidth){
+						mergeTilesVertically(rDeadTile, downMergeCand);
+					}
+				}
+				
+			}	
+
+			if(rDeadTile->getYHigh() >= )
+
+			
+			
 
 
+			rTileIdx--;
 		}
-
-		if(leftTileIdx == 0){
-
-		}
-	
 
 	}
-
-	return true;
 
 }
 
@@ -1244,7 +1276,7 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
 	ofs.close();
 }
 
-bool CornerStitching::debugBlankMerged(Tile *tile1, Tile *tile2) const{
+bool CornerStitching::debugBlankMerged(Tile *&tile1, Tile *&tile2) const{
 	std::unordered_set<Tile *> allTilesSet;
 	collectAllTiles(allTilesSet);
 
@@ -1278,3 +1310,66 @@ bool CornerStitching::debugBlankMerged(Tile *tile1, Tile *tile2) const{
 
 	return true;
 }
+
+bool CornerStitching::debugPointerAttatched(Tile *&tile1, Tile *&tile2) const{
+	std::unordered_set<Tile *> allTilesSet;
+	collectAllTiles(allTilesSet);
+
+	std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
+	for(int i = 0; i < allTilesArr.size(); ++i){
+		Tile *tile = allTilesArr[i];
+		Tile *tileRT = tile->rt;
+		Tile *tileTR = tile->tr;
+		Tile *tileBL = tile->bl;
+		Tile *tileLB = tile->lb;
+
+		if(tileRT != nullptr){
+			if(tileRT->getYLow() != tile->getYHigh()){
+				tile1 = tile;
+				tile2 = tileRT;
+				return false;
+			}
+		}
+
+		if(tileTR != nullptr){
+			if(tileTR->getXLow() != tile->getXHigh()){
+				tile1 = tile;
+				tile2 = tileTR;
+				return false;
+			}
+		}
+
+		if(tileBL != nullptr){
+			if(tileBL->getXHigh() != tile->getXLow()){
+				tile1 = tile;
+				tile2 = tileBL;
+				return false;
+			}
+		}
+
+		if(tileLB != nullptr){
+			if(tileLB->getYHigh() != tile->getYLow()){
+				tile1 = tile;
+				tile2 = tileLB;
+				return false;
+			}
+		}
+
+	}
+	return true;
+
+}
+
+void CornerStitching::conductSelfTest() const{
+	Tile *tile1, *tile2;
+	bool blankMergeTest = debugBlankMerged(tile1, tile2);
+	if(!blankMergeTest){
+		std::cout << "Fail blank merge Test " << *tile1 << " " << *tile2 << std::endl;
+	}
+
+	bool pointerAttatched = debugPointerAttatched(tile1, tile2);
+	if(!pointerAttatched){
+		std::cout << "Fail pointer attatch Test " << *tile1 << " " << *tile2 << std::endl;
+	}
+}
+
