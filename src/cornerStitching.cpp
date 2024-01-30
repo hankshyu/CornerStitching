@@ -1059,9 +1059,9 @@ void CornerStitching::removeTile(Tile *tile){
 	// look up if the tile exist in the cornerStitching system
 	assert(tile != nullptr);
 	Cord tileLL = tile->getLowerLeft();
-	std::unordered_map<Cord, Tile*>::iterator it = mAllNonBlankTilesMap.find(tileLL);
+	std::unordered_map<Cord, Tile*>::iterator deadTileIt = mAllNonBlankTilesMap.find(tileLL);
 	// there is no such index
-	if(it == mAllNonBlankTilesMap.end()){
+	if(deadTileIt == mAllNonBlankTilesMap.end()){
 		throw (CSException("CORNERSTITCHING_15"));
 	}
 	// the index does not point to the tile to delete
@@ -1086,9 +1086,10 @@ void CornerStitching::removeTile(Tile *tile){
 	
 	/*  STEP 1)
 		Change the type of the dead tile to tileType::BLANK
+		and remove the tile from mAllNonBlankTilesMap
 	*/
 	tile->setType(tileType::BLANK);
-
+	mAllNonBlankTilesMap.erase(deadTileIt);
 
 	/*  STEP 2)
 		Use the neighbor-finding algorithm to search from top to bottom through all the tiles

@@ -81,27 +81,40 @@ int main(int argc, char const *argv[]) {
 		// tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
 		// tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
 
-		CornerStitching cs(100, 65);
-		cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
-		cs.conductSelfTest();
-		cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
-		cs.conductSelfTest();
+		Tile tileArr[8];
+		tileArr[0] = Tile(tileType::BLOCK, Cord(0, 5), 10, 10);
+		tileArr[1] = Tile(tileType::BLOCK, Cord(10, 0), 10, 5);
+		tileArr[2] = Tile(tileType::BLOCK, Cord(20, 5), 10, 5);
+		tileArr[3] = Tile(tileType::BLOCK, Cord(10, 15), 10, 10);
+		tileArr[4] = Tile(tileType::BLOCK, Cord(20, 30), 10, 5);
+		tileArr[5] = Tile(tileType::BLOCK, Cord(10, 25), 10, 10);
+		tileArr[6] = Tile(tileType::BLOCK, Cord(10, 11), 10, 1);
+		tileArr[7] = Tile(tileType::BLOCK, Cord(10, 13), 10, 2);
+
+		CornerStitching cs(30, 35);
+		Tile *allP[8];
+		for(int i = 0; i < 8; i++){
+			allP[i] = cs.insertTile(tileArr[i]);
+			cs.conductSelfTest();
+		}
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
-		CornerStitching csCopy(cs);
-
-		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
+		cs.removeTile(allP[6]);
 		cs.conductSelfTest();
-
-		cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
-		csCopy.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
-
+		cs.removeTile(allP[1]);
+		cs.conductSelfTest();
+		cs.removeTile(allP[5]);
 		cs.conductSelfTest();
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-1.txt");
-		cs.removeTile(todelete);
-		cs.conductSelfTest();
-		cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
 
-		if(csCopy == cs) printf("After verification the two are equal\n");
+		CornerStitching cs1(30, 35);
+		for(int i = 0; i < 8; i++){
+			if(i == 1 || i ==5 || i ==6) continue;
+			allP[i] = cs1.insertTile(tileArr[i]);
+			cs.conductSelfTest();
+		}
+		cs1.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+		
+		if(cs1 == cs) printf("After verification the two are equal\n");
 		else printf("No!! The two corner stitching system are not equal!\n");
 
 
