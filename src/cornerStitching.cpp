@@ -272,10 +272,10 @@ CornerStitching::CornerStitching(const CornerStitching &other){
 	}
 
 	// maintain the pointers of the new Tiles, while simultanuously maintain mAllNonBlankTilesMap
-	for(auto pairs : oldNewPairs){
+	for(std::unordered_map <Tile *, Tile *>::iterator it = oldNewPairs.begin(); it != oldNewPairs.end(); ++it){
 
-		Tile *father = pairs.first;
-		Tile *son = pairs.second;
+		Tile *father = it->first;
+		Tile *son = it->second;
 
 		// insert to mAllNonBlankTilesMap if tile is not BLANK
 		if(son->getType() != tileType::BLANK){
@@ -283,10 +283,17 @@ CornerStitching::CornerStitching(const CornerStitching &other){
 		}
 
 		// maintain the links using the map data-structure
-		son->rt = oldNewPairs[father->rt];
-		son->tr = oldNewPairs[father->tr];
-		son->bl = oldNewPairs[father->bl];
-		son->lb = oldNewPairs[father->lb];
+		if(father->rt == nullptr) son->rt = nullptr;
+		else son->rt = oldNewPairs[father->rt];
+		
+		if(father->tr == nullptr) son->tr = nullptr;
+		else son->tr = oldNewPairs[father->tr];
+
+		if(father->bl == nullptr) son->bl = nullptr;
+		else son->bl = oldNewPairs[father->bl];
+
+		if(father->lb == nullptr) son->lb = nullptr;
+		else son->lb = oldNewPairs[father->lb];
 	}
 
 }
@@ -1190,6 +1197,10 @@ void CornerStitching::removeTile(Tile *tile){
 					if(lNeighbor->getType() == tileType::BLANK){
 						rDeadTile = mergeTilesHorizontally(lNeighbor, rDeadTile);
 					}
+				}
+			}else{ // lNeighborYHigh == rDeadTileYHigh
+				if((lNeighbor->getType() == tileType::BLANK) && (rDeadTile->getType() == tileType::BLANK)){
+					rDeadTile = mergeTilesHorizontally(lNeighbor, rDeadTile);
 				}
 			}
 

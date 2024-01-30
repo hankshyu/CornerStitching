@@ -87,14 +87,22 @@ int main(int argc, char const *argv[]) {
 		cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
 		cs.conductSelfTest();
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
+		CornerStitching csCopy(cs);
+
 		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
 		cs.conductSelfTest();
+
 		cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
+		csCopy.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
+
 		cs.conductSelfTest();
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-1.txt");
 		cs.removeTile(todelete);
 		cs.conductSelfTest();
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+
+		if(csCopy == cs) printf("After verification the two are equal\n");
+		else printf("No!! The two corner stitching system are not equal!\n");
 
 
 		// CornerStitching cs(30, 35);
