@@ -1132,6 +1132,7 @@ void CornerStitching::removeTile(Tile *tile){
 			mergeTilesHorizontally(mergeLeft, mergeRight);
 		}
 	}
+	visualiseTileDistribution("./outputs/case09/case09-output-5.txt");
 
 	/*  STEP 4)
 		Scan upwards along the left edge of the original dead tile to find all the space tiles that are left 
@@ -1145,6 +1146,7 @@ void CornerStitching::removeTile(Tile *tile){
 		It is also necessary to do vertical merging in STEP 5). After each horizontal merge in STEP 5), check to see if 
 		the result tile can be merged with the tiles just above and below it, and merge if possible.
 	*/
+	int debugFileIdx = 6;
 
 	bool foundFirstRightDeadTile = false;
 	for(int leftTileIdx = 0; leftTileIdx < leftNeighbors.size(); ++leftTileIdx){
@@ -1152,12 +1154,10 @@ void CornerStitching::removeTile(Tile *tile){
 		std::vector<Tile *>rOrigDeadTiles;
 		findRightNeighbors(lNeighbor, rOrigDeadTiles);
 
-		int rTileIdx = (rOrigDeadTiles.size() - 1);
-		bool fetchNextRDeadTile = true;
-		Tile *cacheNextRDeadTile;
-		while(rTileIdx >= 0){
-			Tile *rDeadTile = (fetchNextRDeadTile)? rOrigDeadTiles[rTileIdx] : cacheNextRDeadTile;
-			fetchNextRDeadTile = true;
+		len_t origDeadTileYH = rec::getYH(origDeadTile);
+		for(int rTileIdx = (rOrigDeadTiles.size() - 1); rTileIdx >= 0; --rTileIdx){
+			Tile *rDeadTile = rOrigDeadTiles[rTileIdx];
+			if(rDeadTile->getYLow() >= origDeadTileYH) break;
 
 			if(!foundFirstRightDeadTile){
 				if(rDeadTile->getYLow() < rec::getYL(origDeadTile)) continue;
@@ -1165,9 +1165,8 @@ void CornerStitching::removeTile(Tile *tile){
 				// check if necessary to split the lNeighbor
 				len_t lNeighborYLow = lNeighbor->getYLow();
 				len_t rDeadTileYLow = rDeadTile->getYLow();
-				Tile *newDownlNeighborTile;
 				if(lNeighborYLow < rDeadTileYLow){
-					newDownlNeighborTile = cutTileHorizontally(lNeighbor, rDeadTileYLow - lNeighborYLow);
+					cutTileHorizontally(lNeighbor, rDeadTileYLow - lNeighborYLow);
 				}
 			}
 
@@ -1178,46 +1177,54 @@ void CornerStitching::removeTile(Tile *tile){
 				// a potentail cut for lNeighbor
 				if(lNeighbor->getType() == tileType::BLANK){
 					Tile *newDownlNeighborTile = cutTileHorizontally(lNeighbor, (rDeadTileYHigh - lNeighbor->getYLow()));
-					rDeadTile = mergeTilesHorizontally(newDownlNeighborTile, rDeadTile);
+					if(rDeadTile->getType() == tileType::BLANK){
+						rDeadTile = mergeTilesHorizontally(newDownlNeighborTile, rDeadTile);
+					}
 				}
 			}else if(lNeighborYHigh < rDeadTileYHigh){
-				// cut rDeadTile if possible
+				// cut rDeadTile if possible if it's tileType::BLANK
 				// next round don't fetch another rDeadTile, use upper cut
-				Tile *newDownRDeadTile = cutTileHorizontally(rDeadTile, (lNeighborYHigh - rDeadTile->getYLow()));
-				fetchNextRDeadTile = false;
-				// offset the increment of rtileIdx
-				rTileIdx++;
-				cacheNextRDeadTile = rDeadTile;
-				rDeadTile = newDownRDeadTile;
-				if(lNeighbor->getType() == tileType::BLANK){
-					rDeadTile = mergeTilesHorizontally()
-
+				if(rDeadTile->getType() == tileType::BLANK){
+					rDeadTile = cutTileHorizontally(rDeadTile, (lNeighborYHigh - rDeadTile->getYLow()));
+					// offset the increment of rtileIdx
+					if(lNeighbor->getType() == tileType::BLANK){
+						rDeadTile = mergeTilesHorizontally(lNeighbor, rDeadTile);
+					}
 				}
 			}
 
 			// check if merging shall take place, always check if merging with the bottom tile is possible,
 			// if the tile hits the ceiling, also attempt to merge with the top tile
-
 			if(rDeadTile->lb != nullptr){
-				
 				Tile *downMergeCand = rDeadTile->lb;
-				if(downMergeCand->getType() == tileType::BLANK){
-					bool xAligned = (downMergeCand->getXLow() == rDeadTile->getXLow());
-					bool sameWidth = (downMergeCand->getWidth() == rDeadTile->getWidth());
-					if(xAligned && sameWidth){
-						mergeTilesVertically(rDeadTile, downMergeCand);
+				if(downMergeCand != nullptr){
+					if(downMergeCand->getType() == tileType::BLANK){
+						bool xAligned = (downMergeCand->getXLow() == rDeadTile->getXLow());
+						bool sameWidth = (downMergeCand->getWidth() == rDeadTile->getWidth());
+						if(xAligned && sameWidth){
+							mergeTilesVertically(rDeadTile, downMergeCand);
+						}
 					}
 				}
-				
 			}	
 
-			if(rDeadTile->getYHigh() >= )
-
-			
-			
-
-
-			rTileIdx--;
+			// this is tile that hits the ceiling,  attempt to merge with the tile above 
+			if(rDeadTile->getYHigh() >= origDeadTileYH){
+				Tile *UpMergeCand = rDeadTile->rt;
+				if(UpMergeCand != nullptr){
+					if(UpMergeCand->getType() == tileType::BLANK){
+						bool xAligned = (UpMergeCand->getXLow() == rDeadTile->getXLow());
+						bool sameWidth = (UpMergeCand->getWidth() == rDeadTile->getWidth());
+						if(xAligned & sameWidth){
+							rDeadTile = mergeTilesVertically(UpMergeCand, rDeadTile);
+						}
+					}
+				}
+			}
+			std::string outFileName = "./outputs/case09/case09-output-" + std::to_string(debugFileIdx) + ".txt";
+			debugFileIdx++;
+			visualiseTileDistribution(outFileName);
+			if(rDeadTile->getYHigh() >= origDeadTileYH) break;
 		}
 
 	}

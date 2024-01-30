@@ -81,32 +81,36 @@ int main(int argc, char const *argv[]) {
 		// tileArr[10] = Tile(tileType::OVERLAP, Rectangle(27, 13, 29, 19));
 		// tileArr[11] = Tile(tileType::BLOCK, Rectangle(7, 2, 12, 4));
 
-		// CornerStitching cs(100, 65);
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
-		// cs.conductSelfTest();
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
-		// cs.conductSelfTest();
-		// cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
-		// Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
-		// cs.conductSelfTest();
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
-		// cs.conductSelfTest();
-
-
-		CornerStitching cs(30, 35);
-		cs.insertTile(Tile(tileType::BLOCK, Cord(0, 5), 10, 10));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 0), 10, 5));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(20, 5), 10, 5));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 15), 10, 10));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(20, 30), 10, 5));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 10));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 11), 10, 1));
-		cs.insertTile(Tile(tileType::BLOCK, Cord(10, 13), 10, 2));
-
-		cs.visualiseTileDistribution("./outputs/case09/case09-output-4.txt");
-		// cs.removeTile(todelete);
+		CornerStitching cs(100, 65);
+		cs.insertTile(Tile(tileType::BLOCK, Cord(15, 5), 75, 10));
 		cs.conductSelfTest();
-		// cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+		cs.insertTile(Tile(tileType::BLOCK, Cord(7, 38), 25, 14));
+		cs.conductSelfTest();
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
+		Tile *todelete = cs.insertTile(Tile(tileType::BLOCK, Cord(40, 23), 20, 37));
+		cs.conductSelfTest();
+		cs.insertTile(Tile(tileType::BLOCK, Cord(66, 25), 29, 20));
+		cs.conductSelfTest();
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-1.txt");
+		cs.removeTile(todelete);
+		cs.conductSelfTest();
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+
+
+		// CornerStitching cs(30, 35);
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(0, 5), 10, 10));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 0), 10, 5));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(20, 5), 10, 5));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 15), 10, 10));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(20, 30), 10, 5));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 10));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 11), 10, 1));
+		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 13), 10, 2));
+
+		// cs.visualiseTileDistribution("./outputs/case09/case09-output-4.txt");
+		// // cs.removeTile(todelete);
+		// cs.conductSelfTest();
+		// // cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
 
 	}catch(CSException e){
 		std::cout << e.what() << std::endl;
