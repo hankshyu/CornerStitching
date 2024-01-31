@@ -88,6 +88,6 @@ public:
     // two detatched tiles is returned through tile1 and tile2
     bool debugPointerAttatched(Tile *&tile1, Tile *&tile2) const;
 
-    void conductSelfTest()const;
+    bool conductSelfTest()const;
 };
 #endif // __CORNERSTITCHING_H__

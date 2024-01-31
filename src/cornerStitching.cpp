@@ -1101,6 +1101,9 @@ void CornerStitching::removeTile(Tile *tile){
 	std::vector<Tile *>leftNeighbors;
 	findLeftNeighbors(tile, leftNeighbors);
 
+	// this is for backup when leftNeighbors are empty, tiles are in descent in YLow
+	std::vector<Tile *>deadTileRemains;
+
 	/*  STEP 3)
 		For each space tile fond in STEP 2), split either the neighbor or the dead tile, or both, so that the 
 		two tiles have the same ertical span, then merge the tiles together horizontally. Carry on until the bottom
@@ -1139,8 +1142,13 @@ void CornerStitching::removeTile(Tile *tile){
 		if(mergeRight->getType() == tileType::BLANK){
 			mergeTilesHorizontally(mergeLeft, mergeRight);
 		}
+		deadTileRemains.push_back(mergeLeft);
 	}
-	visualiseTileDistribution("./outputs/case09/case09-output-5.txt");
+	std::cout << "This is deadTileRemians" << std::endl;
+	for(Tile *t : deadTileRemains){
+		std::cout << *t << std::endl;
+	}
+	visualiseTileDistribution("./outputs/case09/case09-output-debug-0.txt");
 
 	/*  STEP 4)
 		Scan upwards along the left edge of the original dead tile to find all the space tiles that are left 
@@ -1154,7 +1162,7 @@ void CornerStitching::removeTile(Tile *tile){
 		It is also necessary to do vertical merging in STEP 5). After each horizontal merge in STEP 5), check to see if 
 		the result tile can be merged with the tiles just above and below it, and merge if possible.
 	*/
-	int debugFileIdx = 6;
+	int debugFileIdx = 1;
 
 	bool foundFirstRightDeadTile = false;
 	for(int leftTileIdx = 0; leftTileIdx < leftNeighbors.size(); ++leftTileIdx){
@@ -1174,7 +1182,9 @@ void CornerStitching::removeTile(Tile *tile){
 				len_t lNeighborYLow = lNeighbor->getYLow();
 				len_t rDeadTileYLow = rDeadTile->getYLow();
 				if(lNeighborYLow < rDeadTileYLow){
-					cutTileHorizontally(lNeighbor, rDeadTileYLow - lNeighborYLow);
+					if(lNeighbor->getType() == tileType::BLANK){
+						cutTileHorizontally(lNeighbor, rDeadTileYLow - lNeighborYLow);
+					}
 				}
 			}
 
@@ -1233,12 +1243,41 @@ void CornerStitching::removeTile(Tile *tile){
 					}
 				}
 			}
-			std::string outFileName = "./outputs/case09/case09-output-" + std::to_string(debugFileIdx) + ".txt";
+			std::string outFileName = "./outputs/case09/case09-output-debug-" + std::to_string(debugFileIdx) + ".txt";
 			debugFileIdx++;
 			visualiseTileDistribution(outFileName);
 			if(rDeadTile->getYHigh() >= origDeadTileYH) break;
 		}
 
+	}
+
+	// Case if lNeighbor is empty (The removed tile is aligned with the left border of the chip contour)
+	if(leftNeighbors.empty()){
+		for(int i = deadTileRemains.size() - 1; i >= 0; --i){
+			// attempt to merge the tile with the lower tile
+			Tile *deadTileDebris = deadTileRemains[i];
+			Tile *deadTileDebrirsLB = deadTileDebris->lb;
+			if(deadTileDebrirsLB != nullptr){
+				if(deadTileDebrirsLB->getType() == tileType::BLANK){
+					bool xAligned = (deadTileDebrirsLB->getXLow() == deadTileDebris->getXLow());
+					bool sameWidth = (deadTileDebrirsLB->getWidth() == deadTileDebris->getWidth());
+					if(xAligned && sameWidth) mergeTilesVertically(deadTileDebris, deadTileDebrirsLB);
+				}
+			}
+
+			if(i == 0){
+				// the tile that hits the roof, attemp to merge with the upper tile too
+				Tile *deadTileDebrisRT = deadTileDebris->rt;
+				if(deadTileDebrisRT != nullptr){
+					if(deadTileDebrisRT->getType() == tileType::BLANK){
+						bool xAligned = (deadTileDebrisRT->getXLow() == deadTileDebris->getXLow());
+						bool sameWidth = (deadTileDebrisRT->getWidth() == deadTileDebris->getWidth());
+						if(xAligned && sameWidth) mergeTilesVertically(deadTileDebrisRT, deadTileDebris);
+					}
+				}
+			}
+
+		}
 	}
 
 }
@@ -1379,7 +1418,7 @@ bool CornerStitching::debugPointerAttatched(Tile *&tile1, Tile *&tile2) const{
 
 }
 
-void CornerStitching::conductSelfTest() const{
+bool CornerStitching::conductSelfTest() const{
 	Tile *tile1, *tile2;
 	bool blankMergeTest = debugBlankMerged(tile1, tile2);
 	if(!blankMergeTest){
@@ -1390,5 +1429,6 @@ void CornerStitching::conductSelfTest() const{
 	if(!pointerAttatched){
 		std::cout << "Fail pointer attatch Test " << *tile1 << " " << *tile2 << std::endl;
 	}
+	return (blankMergeTest && pointerAttatched);
 }
 

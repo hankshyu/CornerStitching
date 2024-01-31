@@ -83,12 +83,12 @@ int main(int argc, char const *argv[]) {
 
 		Tile tileArr[8];
 		tileArr[0] = Tile(tileType::BLOCK, Cord(0, 5), 10, 10);
-		tileArr[1] = Tile(tileType::BLOCK, Cord(10, 0), 10, 5);
+		tileArr[1] = Tile(tileType::OVERLAP, Cord(10, 0), 10, 5);
 		tileArr[2] = Tile(tileType::BLOCK, Cord(20, 5), 10, 5);
-		tileArr[3] = Tile(tileType::BLOCK, Cord(10, 15), 10, 10);
+		tileArr[3] = Tile(tileType::OVERLAP, Cord(10, 15), 10, 10);
 		tileArr[4] = Tile(tileType::BLOCK, Cord(20, 30), 10, 5);
 		tileArr[5] = Tile(tileType::BLOCK, Cord(10, 25), 10, 10);
-		tileArr[6] = Tile(tileType::BLOCK, Cord(10, 11), 10, 1);
+		tileArr[6] = Tile(tileType::OVERLAP, Cord(10, 11), 10, 1);
 		tileArr[7] = Tile(tileType::BLOCK, Cord(10, 13), 10, 2);
 
 		CornerStitching cs(30, 35);
@@ -98,40 +98,42 @@ int main(int argc, char const *argv[]) {
 			cs.conductSelfTest();
 		}
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
-		cs.removeTile(allP[6]);
-		cs.conductSelfTest();
-		cs.removeTile(allP[1]);
-		cs.conductSelfTest();
-		cs.removeTile(allP[5]);
-		cs.conductSelfTest();
+
+		// std::unordered_set<int> deleteIdx = {2, 7, 4, 0};
+		std::unordered_set<int> deleteIdx = {0};
+		// for(int idx : deleteIdx){
+		// 	std::cout << "cs removing ... " << idx << std::endl;
+		// 	cs.removeTile(allP[idx]);
+		// 	cs.conductSelfTest();
+		// }
+
+		cs.removeTile(allP[0]);
+		std::cout << "remove one: " << cs.conductSelfTest() << std::endl;
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-1.txt");
+
+		// cs.removeTile(allP[4]);
+		// std::cout << "remove two: " << cs.conductSelfTest() << std::endl;
+		// cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+
+		// cs.removeTile(allP[7]);
+		// std::cout << "remove three: " << cs.conductSelfTest() << std::endl;
+		// cs.visualiseTileDistribution("./outputs/case09/case09-output-3.txt");
+
+		// cs.removeTile(allP[2]);
+		// std::cout << "remove four: " << cs.conductSelfTest() << std::endl;
+		// cs.visualiseTileDistribution("./outputs/case09/case09-output-4.txt");
 
 		CornerStitching cs1(30, 35);
 		for(int i = 0; i < 8; i++){
-			if(i == 1 || i ==5 || i ==6) continue;
-			allP[i] = cs1.insertTile(tileArr[i]);
-			cs.conductSelfTest();
+			if(deleteIdx.find(i) != deleteIdx.end()) continue;
+			std::cout << "cs1 inserting ... " << i << std::endl;
+			cs1.insertTile(tileArr[i]);
+			cs1.conductSelfTest();
 		}
-		cs1.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
+		cs1.visualiseTileDistribution("./outputs/case09/case09-output-9.txt");
 		
 		if(cs1 == cs) printf("After verification the two are equal\n");
 		else printf("No!! The two corner stitching system are not equal!\n");
-
-
-		// CornerStitching cs(30, 35);
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(0, 5), 10, 10));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 0), 10, 5));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(20, 5), 10, 5));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 15), 10, 10));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(20, 30), 10, 5));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 25), 10, 10));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 11), 10, 1));
-		// cs.insertTile(Tile(tileType::BLOCK, Cord(10, 13), 10, 2));
-
-		// cs.visualiseTileDistribution("./outputs/case09/case09-output-4.txt");
-		// // cs.removeTile(todelete);
-		// cs.conductSelfTest();
-		// // cs.visualiseTileDistribution("./outputs/case09/case09-output-2.txt");
 
 	}catch(CSException e){
 		std::cout << e.what() << std::endl;
