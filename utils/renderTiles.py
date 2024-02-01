@@ -453,7 +453,7 @@ if __name__ == '__main__':
             representColour = 'blue'
         else:
             adaptAlpha = 0.95
-            representColour = 'magenta'
+            representColour = 'red'
         
         ClickElements.append(tl)
 

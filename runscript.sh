@@ -1,4 +1,4 @@
-for IDX in {0..1} 9;
+for IDX in {0..1};
 do
 python3 utils/renderTiles.py outputs/case09/case09-output-$IDX.txt -o outputs/case09/case09-output-$IDX.png   
 done

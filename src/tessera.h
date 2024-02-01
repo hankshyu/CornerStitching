@@ -2,29 +2,53 @@
 #define __TESSERA_H__
 
 #include <string.h>
-#include <vector>
+#include <unordered_set>
 #include "rectangle.h"
 #include "tile.h"
 #include "cord.h"
 enum class tesseraType{
-    EMPTY ,SOFT, HARD, OVERLAP
+    SOFT, HARD, PREPLACED
 };
 class Tessera{
+private:
+    std::string mTessName;
+    tesseraType mTessType;
+    area_t mTessLegalArea;
+
+    Rectangle mTessGlobalPhasePlacement;
+
 public: 
-    std::string name;
-    tesseraType type;
-    Rectangle origBox;
 
-    std::vector <Tile *> TileArr;
-    std::vector <Tile *> OverlapArr; 
+    std::unordered_set <Tile *> blockTiles;
+    std::unordered_set <Tile *> overlapTiles;
 
-    Cord mBBLowerLeft;
-    Cord mBBUpperRight;
+    Tessera();
+    Tessera(tesseraType type, std::string name, area_t minArea, Rectangle initPlacement);
+    Tessera(const Tessera &other);
 
-    int insertTiles(Tile *tile);
-    void calBoundingBox();
+    Tessera &operator = (const Tessera &other);
+    bool operator == (const Tessera &other) const;
+    friend std::ostream &operator << (std::ostream &os, const Tessera &t);
+
+    std::string getName() const;
+    tesseraType getType() const;
+    area_t getLegalArea() const;
+    Rectangle getGlobalPhasePlacement() const;
+
+    Rectangle calculateBoundingBox() const;
+    area_t calculateCurrentArea() const;
+
+    bool isLegalNoHole();
+    bool isLegalNoEnclave();
+    bool isLegalEnoughArea();
+    bool isLegalAspectRatio();
+    bool isLegalUtilization();
+    bool isLegal();
+
     void splitRectliearDueToOverlap();
 };
+
+std::ostream &operator << (std::ostream &os, const Tessera &t);
 
 
 #endif // __TESSERA_H__

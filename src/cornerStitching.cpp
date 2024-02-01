@@ -1144,10 +1144,6 @@ void CornerStitching::removeTile(Tile *tile){
 		}
 		deadTileRemains.push_back(mergeLeft);
 	}
-	std::cout << "This is deadTileRemians" << std::endl;
-	for(Tile *t : deadTileRemains){
-		std::cout << *t << std::endl;
-	}
 	visualiseTileDistribution("./outputs/case09/case09-output-debug-0.txt");
 
 	/*  STEP 4)
@@ -1253,6 +1249,9 @@ void CornerStitching::removeTile(Tile *tile){
 
 	// Case if lNeighbor is empty (The removed tile is aligned with the left border of the chip contour)
 	if(leftNeighbors.empty()){
+		// if deadTileRemains is empty, both left and right of the tile touches the chip contour
+		// push in the tile to check if merging is possible
+		if(deadTileRemains.empty()) deadTileRemains.push_back(tile);
 		for(int i = deadTileRemains.size() - 1; i >= 0; --i){
 			// attempt to merge the tile with the lower tile
 			Tile *deadTileDebris = deadTileRemains[i];
