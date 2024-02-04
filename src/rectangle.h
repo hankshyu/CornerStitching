@@ -20,6 +20,14 @@ namespace rec{
         return boost::polygon::delta(boost::polygon::vertical(rec));
     }
 
+    inline area_t getArea(Rectangle rec){
+        return boost::polygon::area(rec);
+    }
+
+    inline double calculateAspectRatio(Rectangle rec){
+        return boost::polygon::delta(boost::polygon::horizontal(rec)) /
+                boost::polygon::delta(boost::polygon::vertical(rec));
+    }
     inline len_t getXL(Rectangle rec){
         return boost::polygon::xl(rec);
     } 

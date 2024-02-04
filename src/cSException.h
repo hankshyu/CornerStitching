@@ -29,8 +29,9 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_12", "insertTile(): input tile's type shall not be tileType::BLANK, blank tile is prohibited from insertion"},
     {"CORNERSTITCHING_13", "mergeTilesVertically(): input mergeLeft is not at the left of input mergeRight"},
     {"CORNERSTITCHING_14", "mergeTilesVertically(): two input tiles (mergeLeft and mergeRight) are not mergable"},
-
     {"CORNERSTITCHING_15", "removeTile(): input tile is not in the cornerStitching system"},
+
+    {"RECTILINEAR_01", "calculateBoundingBox(): there exist no tile in rectilinear"},
 };
 
 class CSException : public std::exception{

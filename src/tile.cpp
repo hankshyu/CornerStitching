@@ -49,36 +49,40 @@ Rectangle Tile::getRectangle() const {
     return this->mRectangle;
 }
 
-len_t Tile::getWidth() const{
+len_t Tile::getWidth() const {
     return rec::getWidth(this->mRectangle);
 }
-len_t Tile::getHeight() const{
+len_t Tile::getHeight() const {
     return rec::getHeight(this->mRectangle);
 };
 
-len_t Tile::getXLow() const{
+area_t Tile::getArea() const {
+    return rec::getArea(this->mRectangle);
+}
+
+len_t Tile::getXLow() const {
     return rec::getXL(this->mRectangle);
 };
-len_t Tile::getXHigh() const{
+len_t Tile::getXHigh() const {
     return rec::getXH(this->mRectangle);
 };
-len_t Tile::getYLow() const{
+len_t Tile::getYLow() const {
     return rec::getYL(this->mRectangle);
 };
-len_t Tile::getYHigh() const{
+len_t Tile::getYHigh() const {
     return rec::getYH(this->mRectangle);
 };
 
-Cord Tile::getLowerLeft() const{
+Cord Tile::getLowerLeft() const {
     return rec::getLL(this->mRectangle);
 };
-Cord Tile::getLowerRight() const{
+Cord Tile::getLowerRight() const {
     return rec::getLR(this->mRectangle);
 };
-Cord Tile::getUpperLeft() const{
+Cord Tile::getUpperLeft() const {
     return rec::getUL(this->mRectangle);
 };
-Cord Tile::getUpperRight() const{
+Cord Tile::getUpperRight() const {
     return rec::getUR(this->mRectangle);
 };
 
@@ -100,12 +104,9 @@ void Tile::setLowerLeft(Cord lowerLeft) {
 };
 
 double Tile::calAspectRatio() const {
-    return double(getWidth()) / double(getHeight());
+    return rec::calculateAspectRatio(this->mRectangle);
 };
 
-area_t Tile::calArea() const {
-    return getWidth() * getHeight();
-};
 
 // bool Tile::checkXCordInTile(const Cord &point) const{
 //     Rectangle thisRec = this->getRectangle();

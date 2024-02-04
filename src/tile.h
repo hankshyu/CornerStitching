@@ -45,6 +45,7 @@ public:
 
     len_t getWidth() const;
     len_t getHeight() const;
+    area_t getArea() const;
 
     len_t getXLow() const;
     len_t getXHigh() const;
@@ -62,7 +63,6 @@ public:
     void setLowerLeft(Cord lowerLeft);
 
     double calAspectRatio() const;
-    area_t calArea() const;
     
     // checks if a point is contained inside the tile
     // bool checkXCordInTile(const Cord &point) const;
