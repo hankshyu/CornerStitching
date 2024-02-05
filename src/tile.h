@@ -27,8 +27,8 @@ public:
 
     Tile *rt, *tr, *bl, *lb;
 
-    // std::vector <int> OverlapFixedTesseraeIdx;
-    // std::vector <int> OverlapSoftTesseraeIdx;
+    std::vector <int> OverlapFixedTesseraeIdx;
+    std::vector <int> OverlapSoftTesseraeIdx;
     
     Tile();
     Tile(tileType t, Rectangle rect);

@@ -107,8 +107,12 @@ Rectangle Rectilinear::calculateBoundingBox() const {
     }
 
     len_t BBXL, BBYL, BBXH, BBYH;
-    BBXL = BBYL = LEN_T_MIN;
-    BBXH = BBYH = LEN_T_MAX;
+    Tile *randomTile = (blockTiles.empty())? (*(overlapTiles.begin())) : (*(blockTiles.begin()));
+
+    BBXL = (randomTile)->getXLow();
+    BBYL = (randomTile)->getYLow();
+    BBXH = (randomTile)->getXHigh();
+    BBYH = (randomTile)->getYHigh();
 
     for(Tile *t : blockTiles){
         len_t xl = t->getXLow();
@@ -116,10 +120,10 @@ Rectangle Rectilinear::calculateBoundingBox() const {
         len_t xh = t->getXHigh();
         len_t yh = t->getYHigh();
         
-        if(xl > BBXL) BBXL = xl;
-        if(yl > BBYL) BBYL = yl;
-        if(xh < BBXH) BBXH = xh;
-        if(yh < BBYH) BBYH = yh;
+        if(xl < BBXL) BBXL = xl;
+        if(yl < BBYL) BBYL = yl;
+        if(xh > BBXH) BBXH = xh;
+        if(yh > BBYH) BBYH = yh;
     }
     for(Tile *t : overlapTiles){
         len_t xl = t->getXLow();
@@ -127,11 +131,13 @@ Rectangle Rectilinear::calculateBoundingBox() const {
         len_t xh = t->getXHigh();
         len_t yh = t->getYHigh();
         
-        if(xl > BBXL) BBXL = xl;
-        if(yl > BBYL) BBYL = yl;
-        if(xh < BBXH) BBXH = xh;
-        if(yh < BBYH) BBYH = yh;
+        if(xl < BBXL) BBXL = xl;
+        if(yl < BBYL) BBYL = yl;
+        if(xh > BBXH) BBXH = xh;
+        if(yh > BBYH) BBYH = yh;
     }
+
+    return Rectangle(BBXL, BBYL, BBXH, BBYH);
 }
 
 area_t Rectilinear::calculateActualArea() const {
@@ -142,6 +148,7 @@ area_t Rectilinear::calculateActualArea() const {
     for(Tile *t : overlapTiles){
         actualArea += t->getArea();
     }
+    return actualArea;
 }
 
 double Rectilinear::calculateUtilization() const {
@@ -186,7 +193,8 @@ std::ostream &operator << (std::ostream &os, const Rectilinear &r){
         break;
     }
 
-    os << std::endl << "Legal Area = " << r.mLegalArea << "Global Placement = " << r.mGlobalPlacement << std::endl;
+    os << "Global Placement = " << r.mGlobalPlacement << std::endl;
+    os << "Aspect Ratio: " << r.mAspectRatioMin << " ~ " << r.mAspectRatioMax << ", Utilization Min = " << r.mUtilizationMin << std::endl; 
 
     os << "BLOCK Tiles (" << r.blockTiles.size() << ")" << std::endl;
     for(Tile *t : r.blockTiles){
@@ -197,4 +205,5 @@ std::ostream &operator << (std::ostream &os, const Rectilinear &r){
     for(Tile *t : r.overlapTiles){
         os << std::endl << *t; 
     }
+    return os;
 }

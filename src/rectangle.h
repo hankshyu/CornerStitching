@@ -25,8 +25,8 @@ namespace rec{
     }
 
     inline double calculateAspectRatio(Rectangle rec){
-        return boost::polygon::delta(boost::polygon::horizontal(rec)) /
-                boost::polygon::delta(boost::polygon::vertical(rec));
+        return double(boost::polygon::delta(boost::polygon::horizontal(rec))) /
+                double(boost::polygon::delta(boost::polygon::vertical(rec)));
     }
     inline len_t getXL(Rectangle rec){
         return boost::polygon::xl(rec);
