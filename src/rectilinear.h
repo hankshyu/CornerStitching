@@ -19,6 +19,8 @@ private:
     int mId;
     std::string mName;
     rectilinearType mType;
+    Rectangle mGlobalPlacement;
+
     area_t mLegalArea;
 
     double mAspectRatioMin;
@@ -26,16 +28,15 @@ private:
 
     double mUtilizationMin;
 
-    Rectangle mGlobalPlacement;
 
 public: 
 
-    std::unordered_set <Tile *> blockTiles;
-    std::unordered_set <Tile *> overlapTiles;
+    std::unordered_set<Tile *> blockTiles;
+    std::unordered_set<Tile *> overlapTiles;
 
     Rectilinear();
-    Rectilinear(int id, std::string name, rectilinearType type, Rectangle initPlacement,
-                area_t minArea, double aspectRatioMin, double aspectRatioMax, double utilizationMin);
+    Rectilinear(int id, std::string name, rectilinearType type, Rectangle globalPlacement,
+                area_t legalArea, double aspectRatioMin, double aspectRatioMax, double utilizationMin);
     Rectilinear(const Rectilinear &other);
 
     Rectilinear &operator = (const Rectilinear &other);
@@ -45,8 +46,22 @@ public:
     int getId() const;
     std::string getName() const;
     rectilinearType getType() const;
+    Rectangle getGlboalPlacement() const;
     area_t getLegalArea() const;
-    Rectangle getGlobalPhasePlacement() const;
+    double getAspectRatioMin() const;
+    double getAspectRatioMax() const;
+    double getUtilizationMin() const;
+
+
+    void setId(int id);
+    void setName(std::string name);
+    void setType(rectilinearType type);
+    void setGlobalPlacement(const Rectangle &globalPlacement);
+    void setLegalArea(area_t legalArea);
+    void setAspectRatioMin(double aspectRatioMin);
+    void setAspectRatioMax(double aspectRatioMax);
+    void setUtilizationMin(double utilizationMin);
+    
 
     Rectangle calculateBoundingBox() const;
     area_t calculateActualArea() const;

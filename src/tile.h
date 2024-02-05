@@ -27,8 +27,8 @@ public:
 
     Tile *rt, *tr, *bl, *lb;
 
-    std::vector <int> OverlapFixedTesseraeIdx;
-    std::vector <int> OverlapSoftTesseraeIdx;
+    // std::vector <int> OverlapFixedTesseraeIdx;
+    // std::vector <int> OverlapSoftTesseraeIdx;
     
     Tile();
     Tile(tileType t, Rectangle rect);
@@ -68,8 +68,6 @@ public:
     // bool checkXCordInTile(const Cord &point) const;
     // bool checkYCordInTile(const Cord &point) const;
     // bool checkCordInTile(const Cord &point) const;
-
-
 
 };
 
