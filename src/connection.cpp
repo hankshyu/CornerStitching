@@ -55,6 +55,16 @@ double Connection::calculateCost() const {
     return this->weight * ((maxX = minX)+(maxY = minY));
 }
 
+size_t std::hash<Connection>::operator()(const Connection &key) const {
+    
+    size_t hashValue = std::hash<double>()(key.weight);
+    for(Rectilinear *r : key.vertices){
+        hashValue ^= std::hash<Rectilinear *>()(r);
+    }
+
+    return hashValue;
+}
+
 std::ostream &operator << (std::ostream &os, const Connection &c){
     os << "CONN[ x" << c.weight << ", ";
     Rectilinear *r;

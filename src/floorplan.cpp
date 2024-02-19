@@ -23,3 +23,12 @@ void Floorplan::setName(std::string name){
 void Floorplan::setContour(Rectangle contour){
     this->mContour = contour;
 }
+
+double Floorplan::calculateHPWL(){
+    double floorplanHPWL = 0;
+    for(Connection c : this->allConnections){
+        floorplanHPWL += c.calculateCost();
+    }
+    
+    return floorplanHPWL;
+}

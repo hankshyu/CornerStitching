@@ -7,6 +7,7 @@
 #include "tile.h"
 #include "rectilinear.h"
 #include "rectangle.h"
+#include "connection.h"
 
 class Floorplan{
 private:
@@ -18,9 +19,8 @@ public:
     std::unordered_map<Tile *, Rectilinear*> blockTilePayload;
     std::unordered_map<Tile *, std::vector<Rectilinear*>> overlapTilePayload;
 
-    std::unordered_set<Rectilinear*> allRectilinears;
-    std::unordered_set<Tile *> allTiles;
-
+    std::vector<Rectilinear*> allRectilinears;
+    std::vector<Connection> allConnections;
 
     Floorplan();
     Floorplan(std::string name, Rectangle contour);
@@ -30,7 +30,6 @@ public:
 
     void setName(std::string name);
     void setContour(Rectangle contour);
-
 
     double calculateHPWL();
     
