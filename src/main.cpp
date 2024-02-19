@@ -13,10 +13,12 @@
 #include "cornerStitching.h"
 #include "cSException.h"
 #include "rectilinear.h"
+#include "doughnutPolygon.h"
 
 #include <unordered_map>
 #include <unordered_set>
 #include <random>
+
 void genEncoder(int bits, unsigned int num, std::vector<int> &answer){
 	unsigned int filter = 1;
 	for(int i = 0; i < bits ; ++i){
@@ -26,45 +28,28 @@ void genEncoder(int bits, unsigned int num, std::vector<int> &answer){
 }
 int main(int argc, char const *argv[]) {
 
-	try{
-		CornerStitching cs(500, 400);
-		Tile* t1 = cs.insertTile(Tile(tileType::BLOCK, Rectangle(50, 110, 70, 150)));
-		Tile* t2 = cs.insertTile(Tile(tileType::OVERLAP, Rectangle(70, 130, 100, 150)));
-		Tile* t3 = cs.insertTile(Tile(tileType::BLOCK, Rectangle(50, 150, 100, 170)));
-		Tile* t4 = cs.insertTile(Tile(tileType::BLOCK, Rectangle(30, 170, 110, 200)));
+    using namespace boost::polygon::operators;
+    typedef std::vector<DoughnutPolygon> DoughnutPolygonSet;
+    DoughnutPolygonSet ps;
 
-		cs.visualiseTileDistribution("./outputs/case08/case08-output-0.txt");
+	std::vector<Rectangle> rtSet;
+	rtSet.push_back(Rectangle(12, 20, 13, 23));
+	rtSet.push_back(Rectangle(9, 21, 12, 22));
+	rtSet.push_back(Rectangle(9, 23, 17, 27));
+	rtSet.push_back(Rectangle(6, 20, 9, 25));
+	rtSet.push_back(Rectangle(15, 20, 17, 23));
 
-		Rectilinear r1(7, "CPU1", rectilinearType::SOFT, Rectangle(120, 120, 180, 190), 3780, 0.9, 3, 0.8);
-		r1.blockTiles.insert(t1);
-		r1.blockTiles.insert(t3);
-		r1.blockTiles.insert(t4);
-
-		r1.overlapTiles.insert(t2);
-
-		std::cout << r1 << std::endl;
-
-		std::cout << LEN_T_MIN << ", " << LEN_T_MAX << std::endl;
-		std::cout << "bounding box: " << r1.calculateBoundingBox() << std::endl;
-		std::cout << "acutal area: " << r1.calculateActualArea() << std::endl;
-		std::cout << "utilization: " << r1.calculateUtilization() << std::endl;
-		std::cout << "aspect ratio" << rec::calculateAspectRatio(r1.calculateBoundingBox()) << std::endl;
-
-		std::cout << r1.isLegalEnoughArea() << std::endl;
-		std::cout << r1.isLegalAspectRatio() << std::endl;
-		std::cout << r1.isLegalUtilization() << std::endl;
-		
-
-
-
-
-	}catch(CSException e){
-		std::cout << e.what() << std::endl;
-		abort();
+	for(Rectangle r : rtSet){
+		ps += r;
 	}
 
-
-
+	std::cout << "Fragment size: " << ps.size();
+	std::cout << "About holes: ";
+	DoughnutPolygon firstPiece = ps[0];
+	if(firstPiece.begin_holes() == firstPiece.end_holes()) std::cout << "No holes" << std::endl;
+	else std::cout << "Has holes" << std::endl;
+	
+	
 	// try{
 	// 	globalPhaseAdapter gpa("./inputs/case06-output.txt");
 	// 	gpa.readGlobalResult();

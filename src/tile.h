@@ -10,7 +10,7 @@
 namespace gtl = boost::polygon;
 
 enum class tileType{
-    BLOCK, BLANK, OVERLAP
+    BLANK, BLOCK, OVERLAP
 };
 
 class Tile{

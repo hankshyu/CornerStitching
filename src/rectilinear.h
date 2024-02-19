@@ -11,7 +11,7 @@ enum class rectilinearType{
 };
 
 enum class rectilinearIllegalType{
-    LEGAL, AREA, ASPECT_RATIO, UTILIZATION, HOLE, TWO_SHAPE
+    LEGAL, OVERLAP, AREA, ASPECT_RATIO, UTILIZATION, HOLE, TWO_SHAPE, MIN_CLEARANCE
 };
 
 class Rectilinear{
@@ -27,7 +27,6 @@ private:
     double mAspectRatioMax;
 
     double mUtilizationMin;
-
 
 public: 
 
@@ -67,15 +66,19 @@ public:
     area_t calculateActualArea() const;
     double calculateUtilization() const;
 
+    bool isLegalNoOverlap() const;
     bool isLegalEnoughArea() const;
     bool isLegalAspectRatio() const;
     bool isLegalUtilization() const;
     bool isLegalNoHole() const;
     bool isLegalOneShape() const;
+    bool isLegalMinimumClearance() const;
 
-    bool isLegalNoOverlap() const;
 
     bool isLegal(rectilinearIllegalType &illegalCode) const;
+
+    void acquireWinding(std::vector<Cord> &winding) const;
+    void reshapeContainedTiles();
 
 };
 

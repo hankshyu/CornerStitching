@@ -69,10 +69,16 @@ namespace rec{
         return boost::polygon::contains(BigRec, smallRec, true);
     }
 
-    //Returns true if the point is contained inside the rectangle
+    // Returns true if the point is contained inside the rectangle
     inline bool isContained(const Rectangle &rec, Cord point){
         Rectangle actualRectangle =  Rectangle(getXL(rec), getYL(rec), getXH(rec) - 1, getYH(rec) - 1);
         return boost::polygon::contains(actualRectangle, point, true);
+    }
+
+    // Calculates the centre coordinate of the Rectangle, centre coordinate my be float number, stored with double data type
+    inline void calculateCentre(const Rectangle &rec, double &centreX, double &centreY){
+        centreX = double(boost::polygon::xl(rec) + boost::polygon::xh(rec))/2;
+        centreY = double(boost::polygon::yl(rec) + boost::polygon::yh(rec))/2;
     }
 }
 
@@ -84,6 +90,7 @@ namespace std{
     };
 }
 
-std::ostream &operator<<(std::ostream &os, const Rectangle &c);
+std::ostream &operator << (std::ostream &os, const Rectangle &c);
+
 
 #endif  // #define __RECTANGLE_H__

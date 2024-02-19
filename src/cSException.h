@@ -32,6 +32,9 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_15", "removeTile(): input tile is not in the cornerStitching system"},
 
     {"RECTILINEAR_01", "calculateBoundingBox(): there exist no tile in rectilinear"},
+
+    {"CONNECTION_01", "calculateCost(): Connection has < 2 vertices"},
+
 };
 
 class CSException : public std::exception{

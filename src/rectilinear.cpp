@@ -1,6 +1,7 @@
 #include "rectilinear.h"
 #include "cSException.h"
 #include "limits.h"
+#include "doughnutPolygon.h"
 
 Rectilinear::Rectilinear()
     : mId(-1), mName(""), mType(rectilinearType::EMPTY), mGlobalPlacement(Rectangle(0, 0, 0, 0)),
@@ -170,7 +171,89 @@ bool Rectilinear::isLegalUtilization() const {
 }
 
 bool Rectilinear::isLegalNoHole() const {
+    using namespace boost::polygon::operators;
+    std::vector<DoughnutPolygon> curRectSet;
+
+    for(Tile *t : this->blockTiles){
+        curRectSet += t->getRectangle();
+    }
+    for(Tile *t : this->overlapTiles){
+        curRectSet += t->getRectangle();
+    }
+
+    for(int i = 0; i < curRectSet.size(); ++i){
+        DoughnutPolygon curRectSegment = curRectSet[i];
+        if(curRectSegment.begin_holes() != curRectSegment.end_holes()) return false;
+    }
+
     return true;
+}
+
+bool Rectilinear::isLegalOneShape() const {
+    using namespace boost::polygon::operators;
+    std::vector<DoughnutPolygon> curRectSet;
+
+    for(Tile *t : this->blockTiles){
+        curRectSet += t->getRectangle();
+    }
+    for(Tile *t : this->overlapTiles){
+        curRectSet += t->getRectangle();
+    }
+
+    return (curRectSet.size() == 1);
+}
+
+bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
+
+    if(!isLegalNoOverlap()){
+        illegalCode = rectilinearIllegalType::OVERLAP;
+        return false;
+    }
+
+    area_t actualArea = calculateActualArea();
+    if(actualArea < this->mLegalArea){
+        illegalCode = rectilinearIllegalType::AREA;
+        return false;
+    }
+
+    Rectangle boundingBox = calculateBoundingBox();
+    double boundingBoxAspectRatio = rec::calculateAspectRatio(boundingBox);
+    if((boundingBoxAspectRatio < mAspectRatioMin) || (boundingBoxAspectRatio > mAspectRatioMax)){
+        illegalCode = rectilinearIllegalType::ASPECT_RATIO;
+        return false;
+    }
+
+    double minUtilizationArea = double(rec::getArea(boundingBox)) * mUtilizationMin;
+    if(double(actualArea) < minUtilizationArea){
+        illegalCode = rectilinearIllegalType::UTILIZATION;
+        return false;
+    }
+
+    using namespace boost::polygon::operators;
+    std::vector<DoughnutPolygon> curRectSet;
+
+    for(Tile *t : this->blockTiles){
+        curRectSet += t->getRectangle();
+    }
+    for(Tile *t : this->overlapTiles){
+        curRectSet += t->getRectangle();
+    }
+
+    if(curRectSet.size() != 1){
+        illegalCode = rectilinearIllegalType::TWO_SHAPE;
+        return false;
+    }
+
+    DoughnutPolygon curRectSegment = curRectSet[0];
+    if(curRectSegment.begin_holes() != curRectSegment.end_holes()){
+        illegalCode = rectilinearIllegalType::HOLE;
+        return false;
+    }
+
+    // error free
+    illegalCode = rectilinearIllegalType::LEGAL;
+    return true;
+
 }
 
 std::ostream &operator << (std::ostream &os, const Rectilinear &r){
