@@ -60,9 +60,11 @@ int main(int argc, char const *argv[]) {
 		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
 		
 	}catch(CSException c){
+		std::cout << "Exception caught -> ";
 		std::cout << c.what() << std::endl;
 		// abort();
 	}catch(...){
+		std::cout << "Excpetion not caught but aborted!" << std::endl;
 		abort();
 	}
 

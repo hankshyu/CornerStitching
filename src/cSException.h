@@ -9,7 +9,7 @@
 
 /* Look Up Table for all exceptin messages */
 inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
-    {"TILE_01", "operator<<: tileType out of Range"},
+    {"TILE_01", "operator <<: tileType out of Range"},
 
     {"GLOBALPHASEADAPTER_01", "globalPhaseAdapter(): file stream not open"},
     {"GLOBALPHASEADAPTER_02", "realGlobalResult(): Module not marked as SOFT or FIXED"},

@@ -97,9 +97,7 @@ public:
     // acquire the windings of rectiinear, may choose winding direction, points pass through vector "winding"
     void acquireWinding(std::vector<Cord> &winding, windingDirection wd) const;
     
-    
     void reshapeContainedTiles();
-
 };
 
 std::ostream &operator << (std::ostream &os, const Rectilinear &t);

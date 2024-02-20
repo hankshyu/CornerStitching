@@ -304,6 +304,14 @@ void Rectilinear::acquireWinding(std::vector<Cord> &winding, windingDirection wd
     assert(dps::oneShape(curRectSet));
     assert(dps::noHole(curRectSet));
 
+    /* this excpetion would cause strange error! changed to assert*/
+    // if(!(dps::oneShape(curRectSet))){
+    //     throw CSException("RECTILINEAR_03");
+    // }
+    // if(!(dps::noHole(curRectSet))){
+    //     throw CSException("RECTILINEAR_04");
+    // }
+
     DoughnutPolygon rectilinearShape = curRectSet[0];
     boost::polygon::direction_1d direction = boost::polygon::winding(rectilinearShape);
     
