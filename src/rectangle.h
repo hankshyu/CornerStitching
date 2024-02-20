@@ -28,35 +28,35 @@ namespace rec{
         return double(boost::polygon::delta(boost::polygon::horizontal(rec))) /
                 double(boost::polygon::delta(boost::polygon::vertical(rec)));
     }
-    inline len_t getXL(Rectangle rec){
+    inline len_t getXL(const Rectangle &rec){
         return boost::polygon::xl(rec);
     } 
 
-    inline len_t getXH(Rectangle rec){
+    inline len_t getXH(const Rectangle &rec){
         return boost::polygon::xh(rec);
     } 
 
-    inline len_t getYL(Rectangle rec){
+    inline len_t getYL(const Rectangle &rec){
         return boost::polygon::yl(rec);
     } 
 
-    inline len_t getYH(Rectangle rec){
+    inline len_t getYH(const Rectangle &rec){
         return boost::polygon::yh(rec);
     } 
 
-    inline Cord getLL(Rectangle rec){
+    inline Cord getLL(const Rectangle &rec){
         return boost::polygon::ll(rec);
     }
 
-    inline Cord getLR(Rectangle rec){
+    inline Cord getLR(const Rectangle &rec){
         return boost::polygon::lr(rec);
     }
 
-    inline Cord getUL(Rectangle rec){
+    inline Cord getUL(const Rectangle &rec){
         return boost::polygon::ul(rec);
     }
 
-    inline Cord getUR(Rectangle rec){
+    inline Cord getUR(const Rectangle &rec){
         return boost::polygon::ur(rec);
     }
     // Returns true if two objects overlap, parameter considerTouch is true touching at the sides or corners is considered overlap.

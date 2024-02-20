@@ -77,7 +77,7 @@ public:
     // Removes the tile within system, retunrs false if Tile not within cornerStitching System. true if succes
     void removeTile(Tile *tile);
 
-    // Output format for presenting software
+    // Output format for presenting software (renderTiles)
     void visualiseTileDistribution(const std::string ouputFileName) const;
     
     // Check globally if any two tiles is mergable, returns true if no fails found, else return false and

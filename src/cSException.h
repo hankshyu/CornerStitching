@@ -32,8 +32,16 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_15", "removeTile(): input tile is not in the cornerStitching system"},
 
     {"RECTILINEAR_01", "calculateBoundingBox(): there exist no tile in rectilinear"},
+    {"RECTILINEAR_02", "acquireWinding(): there exist no tile in rectilinear"},
+    {"RECTILINEAR_03", "acquireWinding(): the rectilinear is not in one shape"},
+    {"RECTILINEAR_04", "acquireWinding(): there exist hole in the rectilinear structure"},
+    {"RECTILINEAR_05", "operator << (std::ostream &os, const rectilinearType &t): rectilinearType does not exist"},
+    {"RECTILINEAR_06", "operator << (std::ostream &os, const rectilinearIllegalType &t): rectilinearIllegalType does not exist"},
+    {"RECTILINEAR_07", "operator << (std::ostream &os, const windingDirection &t): windingDirection does not exist"},
+
 
     {"CONNECTION_01", "calculateCost(): Connection has < 2 vertices"},
+
 
 };
 

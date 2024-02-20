@@ -14,6 +14,10 @@ enum class rectilinearIllegalType{
     LEGAL, OVERLAP, AREA, ASPECT_RATIO, UTILIZATION, HOLE, TWO_SHAPE, MIN_CLEARANCE
 };
 
+enum class windingDirection{
+    CLOCKWISE, ANTICLOCKWISE
+};
+
 class Rectilinear{
 private:
     int mId;
@@ -66,22 +70,41 @@ public:
     area_t calculateActualArea() const;
     double calculateUtilization() const;
 
-    bool isLegalNoOverlap() const;
+    // check if rectilinear contains enough area (larger than mLegalArea), return false if violated
     bool isLegalEnoughArea() const;
+
+    // check if the aspect ratio of rectilinear is within mAspectRatioMin ~ mAspectRatioMax, return false if violated
     bool isLegalAspectRatio() const;
+
+    // check if the utilization (acutal area within the bounding box) is greater than mUtilizationMin, return false if violated
     bool isLegalUtilization() const;
+
+    // check if any of the tiles overlap each other, return false if violated
+    bool isLegalNoOverlap() const;
+
+    // check if rectilinear contains internal hole (become doughnut shape), return false if violated
     bool isLegalNoHole() const;
+
+    // check if rectilinear is disconnected, return false if violated
     bool isLegalOneShape() const;
+    
+    // TODO: check miminum clearance
     bool isLegalMinimumClearance() const;
 
-
+    // use all legal checking methods, if any violated, return false an error code passed through illegalCode
     bool isLegal(rectilinearIllegalType &illegalCode) const;
 
-    void acquireWinding(std::vector<Cord> &winding) const;
+    // acquire the windings of rectiinear, may choose winding direction, points pass through vector "winding"
+    void acquireWinding(std::vector<Cord> &winding, windingDirection wd) const;
+    
+    
     void reshapeContainedTiles();
 
 };
 
 std::ostream &operator << (std::ostream &os, const Rectilinear &t);
+std::ostream &operator << (std::ostream &os, const rectilinearType &t);
+std::ostream &operator << (std::ostream &os, const rectilinearIllegalType &t);
+std::ostream &operator << (std::ostream &os, const windingDirection &w);
 
 #endif // __RECTILINEAR_H__

@@ -2,6 +2,7 @@
 #include "cSException.h"
 #include "limits.h"
 #include "doughnutPolygon.h"
+#include "doughnutPolygonSet.h"
 
 Rectilinear::Rectilinear()
     : mId(-1), mName(""), mType(rectilinearType::EMPTY), mGlobalPlacement(Rectangle(0, 0, 0, 0)),
@@ -156,6 +157,27 @@ double Rectilinear::calculateUtilization() const {
     return double(calculateActualArea())/double(rec::getArea(calculateBoundingBox()));
 }
 
+bool Rectilinear::isLegalNoOverlap() const {
+    using namespace boost::polygon::operators;
+
+    doughnutPolygonSet dpSet, unionSet;
+
+    for(Tile *t : this->blockTiles){
+        Rectangle rt = t->getRectangle();
+        assign(unionSet, dpSet&rt);
+        if(!unionSet.empty()) return false;
+        dpSet += rt;
+    }
+    for(Tile *t : this->overlapTiles){
+        Rectangle rt = t->getRectangle();
+        assign(unionSet, dpSet&rt);
+        if(!unionSet.empty()) return false;
+        dpSet += rt;
+    }
+
+    return true;
+}
+
 bool Rectilinear::isLegalEnoughArea() const {
     return (calculateActualArea() >= this->mLegalArea);
 }
@@ -172,7 +194,7 @@ bool Rectilinear::isLegalUtilization() const {
 
 bool Rectilinear::isLegalNoHole() const {
     using namespace boost::polygon::operators;
-    std::vector<DoughnutPolygon> curRectSet;
+    doughnutPolygonSet curRectSet;
 
     for(Tile *t : this->blockTiles){
         curRectSet += t->getRectangle();
@@ -181,17 +203,13 @@ bool Rectilinear::isLegalNoHole() const {
         curRectSet += t->getRectangle();
     }
 
-    for(int i = 0; i < curRectSet.size(); ++i){
-        DoughnutPolygon curRectSegment = curRectSet[i];
-        if(curRectSegment.begin_holes() != curRectSegment.end_holes()) return false;
-    }
+    return dps::noHole(curRectSet);
 
-    return true;
 }
 
 bool Rectilinear::isLegalOneShape() const {
     using namespace boost::polygon::operators;
-    std::vector<DoughnutPolygon> curRectSet;
+    doughnutPolygonSet curRectSet;
 
     for(Tile *t : this->blockTiles){
         curRectSet += t->getRectangle();
@@ -200,22 +218,54 @@ bool Rectilinear::isLegalOneShape() const {
         curRectSet += t->getRectangle();
     }
 
-    return (curRectSet.size() == 1);
+    return dps::oneShape(curRectSet);
 }
 
 bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
 
-    if(!isLegalNoOverlap()){
-        illegalCode = rectilinearIllegalType::OVERLAP;
+    // check if any tiles overlap
+    using namespace boost::polygon::operators;
+    doughnutPolygonSet curRectSet, unionSet;
+
+    for(Tile *t : this->blockTiles){
+        Rectangle rt = t->getRectangle();
+        assign(unionSet, curRectSet&rt);
+        if(!unionSet.empty()){
+            illegalCode = rectilinearIllegalType::OVERLAP;
+            return false;
+        }
+        curRectSet += rt;
+    }
+    for(Tile *t : this->overlapTiles){
+        Rectangle rt = t->getRectangle();
+        assign(unionSet, curRectSet&rt);
+        if(!unionSet.empty()){
+            illegalCode = rectilinearIllegalType::OVERLAP;
+            return false;
+        }
+        curRectSet += rt;
+    }
+    
+    // check if rectilinear is in one shape
+    if(!dps::oneShape(curRectSet)){
+        illegalCode = rectilinearIllegalType::TWO_SHAPE;
         return false;
     }
 
+    // check if hole exist in rectilinear
+    if(!dps::noHole(curRectSet)){
+        illegalCode = rectilinearIllegalType::HOLE;
+        return false;
+    }
+
+    // check area
     area_t actualArea = calculateActualArea();
     if(actualArea < this->mLegalArea){
         illegalCode = rectilinearIllegalType::AREA;
         return false;
     }
 
+    // check bounding box aspect ratio
     Rectangle boundingBox = calculateBoundingBox();
     double boundingBoxAspectRatio = rec::calculateAspectRatio(boundingBox);
     if((boundingBoxAspectRatio < mAspectRatioMin) || (boundingBoxAspectRatio > mAspectRatioMax)){
@@ -223,30 +273,10 @@ bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
         return false;
     }
 
+    // check bounding box utilization
     double minUtilizationArea = double(rec::getArea(boundingBox)) * mUtilizationMin;
     if(double(actualArea) < minUtilizationArea){
         illegalCode = rectilinearIllegalType::UTILIZATION;
-        return false;
-    }
-
-    using namespace boost::polygon::operators;
-    std::vector<DoughnutPolygon> curRectSet;
-
-    for(Tile *t : this->blockTiles){
-        curRectSet += t->getRectangle();
-    }
-    for(Tile *t : this->overlapTiles){
-        curRectSet += t->getRectangle();
-    }
-
-    if(curRectSet.size() != 1){
-        illegalCode = rectilinearIllegalType::TWO_SHAPE;
-        return false;
-    }
-
-    DoughnutPolygon curRectSegment = curRectSet[0];
-    if(curRectSegment.begin_holes() != curRectSegment.end_holes()){
-        illegalCode = rectilinearIllegalType::HOLE;
         return false;
     }
 
@@ -256,8 +286,51 @@ bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
 
 }
 
+void Rectilinear::acquireWinding(std::vector<Cord> &winding, windingDirection wd) const {
+    if((blockTiles.empty())&&(overlapTiles.empty())){
+        throw CSException("RECTILINEAR_02");
+    }
+
+    using namespace boost::polygon::operators;
+    doughnutPolygonSet curRectSet;
+
+    for(Tile *t : this->blockTiles){
+        curRectSet += t->getRectangle();
+    }
+    for(Tile *t : this->overlapTiles){
+        curRectSet += t->getRectangle();
+    }
+
+    assert(dps::oneShape(curRectSet));
+    assert(dps::noHole(curRectSet));
+
+    DoughnutPolygon rectilinearShape = curRectSet[0];
+    boost::polygon::direction_1d direction = boost::polygon::winding(rectilinearShape);
+    
+    bool reverse_iterator;
+    if(wd == windingDirection::CLOCKWISE){
+        reverse_iterator = (direction == boost::polygon::direction_1d_enum::CLOCKWISE)? false : true;
+    }else{ // wd == windingDirection::ANTICLOCKWISE
+        reverse_iterator = (direction == boost::polygon::direction_1d_enum::COUNTERCLOCKWISE)? false : true;
+    }
+    
+    if(!reverse_iterator){
+        for(auto it = rectilinearShape.begin(); it != rectilinearShape.end(); ++it){
+            winding.push_back(*it);
+        }
+    }else{
+        std::vector<Cord> buffer;
+        for(auto it = rectilinearShape.begin(); it != rectilinearShape.end(); ++it){
+            buffer.push_back(*it);
+        }
+        for(std::vector<Cord>::reverse_iterator it = buffer.rbegin(); it != buffer.rend(); ++it){
+            winding.push_back(*it);
+        }
+    }
+}
+
 std::ostream &operator << (std::ostream &os, const Rectilinear &r){
-    os << "ID = " << r.mId << " Name = " << r.mName << " Type = ";
+    os << "ID = " << r.mId << " Name = " << r.mName << " Type = " << r.mType;
     switch (r.mType)
     {
     case rectilinearType::EMPTY:
@@ -276,7 +349,7 @@ std::ostream &operator << (std::ostream &os, const Rectilinear &r){
         break;
     }
 
-    os << "Global Placement = " << r.mGlobalPlacement << std::endl;
+    os << " Global Placement = " << r.mGlobalPlacement << std::endl;
     os << "Aspect Ratio: " << r.mAspectRatioMin << " ~ " << r.mAspectRatioMax << ", Utilization Min = " << r.mUtilizationMin << std::endl; 
 
     os << "BLOCK Tiles (" << r.blockTiles.size() << ")" << std::endl;
@@ -289,4 +362,82 @@ std::ostream &operator << (std::ostream &os, const Rectilinear &r){
         os << std::endl << *t; 
     }
     return os;
+}
+
+std::ostream &operator << (std::ostream &os, const rectilinearType &t){
+    switch (t)
+    {
+    case rectilinearType::EMPTY:
+        os << "EMPTY"; 
+        break;
+    case rectilinearType::SOFT:
+        os << "SOFT"; 
+        break;
+    case rectilinearType::HARD:
+        os << "HARD"; 
+        break;
+    case rectilinearType::PREPLACED:
+        os << "PREPLACED"; 
+        break;
+    default:
+        throw CSException("RECTILINEAR_05");
+        break;
+    }
+
+    return os;
+
+}
+
+std::ostream &operator << (std::ostream &os, const rectilinearIllegalType &t){
+    switch (t)
+    {
+    case rectilinearIllegalType::LEGAL:
+        os << "LEGAL";
+        break;
+    case rectilinearIllegalType::OVERLAP:
+        os << "OVERLAP";
+        break;
+    case rectilinearIllegalType::AREA:
+        os << "AREA";
+        break;
+    case rectilinearIllegalType::ASPECT_RATIO:
+        os << "ASPECT_RATIO";
+        break;
+    case rectilinearIllegalType::UTILIZATION:
+        os << "UTILIZATION";
+        break;
+    case rectilinearIllegalType::HOLE:
+        os << "HOLE";
+        break;
+    case rectilinearIllegalType::TWO_SHAPE:
+        os << "TWO_SHAPE";
+        break;
+    case rectilinearIllegalType::MIN_CLEARANCE:
+        os << "MIN_CLEARANCE";
+        break;
+    default:
+        throw CSException("RECTILINEAR_06");
+        break;
+    }
+
+    return os;
+
+}
+
+std::ostream &operator << (std::ostream &os, const windingDirection &w){
+    switch (w)
+    {
+    case windingDirection::CLOCKWISE:
+        os << "CLOCKWISE";
+        break;
+    case windingDirection::ANTICLOCKWISE:
+        os << "ANTICLOCKWISE";
+        break;
+    default:
+        throw CSException("RECTILINEAR_07");
+        break;
+    }
+
+    return os;
+
 }

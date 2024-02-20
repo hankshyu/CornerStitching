@@ -73,4 +73,6 @@ std::ostream &operator << (std::ostream &os, const Connection &c){
         os << c.vertices[i]->getName() << ", ";
     }
     os << c.vertices[c.vertices.size() - 1]->getName() << "]";
+
+    return os;
 }

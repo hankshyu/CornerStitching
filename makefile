@@ -17,7 +17,7 @@ LINKFLAGS = -O3
 _OBJS =	main.o \
 		cord.o line.o rectangle.o tile.o globalPhaseAdapter.o \
 		tessera.o cornerStitching.o cSException.o rectilinear.o \
-		doughnutPolygon.o floorplan.o
+		doughnutPolygon.o floorplan.o connection.o
 
 OBJS = $(patsubst %,$(OBJPATH)/%,$(_OBJS))
 DBG_OBJS = $(patsubst %.o, $(OBJPATH)/%_dbg.o, $(_OBJS))

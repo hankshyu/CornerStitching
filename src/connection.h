@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <rectilinear.h>
+#include "rectilinear.h"
 
 class Connection{
 public:

@@ -28,26 +28,44 @@ void genEncoder(int bits, unsigned int num, std::vector<int> &answer){
 }
 int main(int argc, char const *argv[]) {
 
-    using namespace boost::polygon::operators;
-    typedef std::vector<DoughnutPolygon> DoughnutPolygonSet;
-    DoughnutPolygonSet ps;
+	try{
+		std::vector <Tile *> tiles;
+		CornerStitching cs(100, 100);
+		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(3, 18, 6, 22))));
+		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(6, 20, 11, 23))));
+		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(4, 23, 8, 25))));
+		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(8, 17, 10, 20))));
 
-	std::vector<Rectangle> rtSet;
-	rtSet.push_back(Rectangle(12, 20, 13, 23));
-	rtSet.push_back(Rectangle(9, 21, 12, 22));
-	rtSet.push_back(Rectangle(9, 23, 17, 27));
-	rtSet.push_back(Rectangle(6, 20, 9, 25));
-	rtSet.push_back(Rectangle(15, 20, 17, 23));
+		Rectilinear r1(5, "CPU", rectilinearType::SOFT, Rectangle(13, 15, 22, 35), 20, 0.333, 3, 0.6);
+		for(Tile *t : tiles){
+			r1.blockTiles.insert(t);
+		}
+		Tile *bugt = new Tile(tileType::OVERLAP, Rectangle(2, 22, 4, 24));
+		r1.overlapTiles.insert(bugt);
 
-	for(Rectangle r : rtSet){
-		ps += r;
+		std::cout << "Legal no overlap: " << r1.isLegalNoOverlap() << std::endl;
+		std::cout << "Legal no hole: " << r1.isLegalNoHole() << std::endl;
+		std::cout << "Legal one shape: " << r1.isLegalOneShape() << std::endl;
+
+		rectilinearIllegalType illegalType;	
+		std::cout << r1.isLegal(illegalType) << ", Error Type: " << illegalType << std::endl;
+
+		std::vector<Cord> winding;
+		r1.acquireWinding(winding, windingDirection::CLOCKWISE);
+		std::cout << "Presenting clockwise winding: " << std::endl;
+		for(Cord c : winding){
+			std::cout << c << std::endl;
+		}
+
+		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
+		
+	}catch(CSException c){
+		std::cout << c.what() << std::endl;
+		// abort();
+	}catch(...){
+		abort();
 	}
 
-	std::cout << "Fragment size: " << ps.size();
-	std::cout << "About holes: ";
-	DoughnutPolygon firstPiece = ps[0];
-	if(firstPiece.begin_holes() == firstPiece.end_holes()) std::cout << "No holes" << std::endl;
-	else std::cout << "Has holes" << std::endl;
 	
 	
 	// try{

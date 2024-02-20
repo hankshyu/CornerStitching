@@ -1,6 +1,6 @@
 #ifndef __UNITS_H__
 #define __UNITS_H__
-
+#include <cstdint>
 #include <limits.h>
 
 typedef int32_t len_t;
