@@ -246,15 +246,18 @@ Tile *CornerStitching::mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight)
 	return mergeLeft;
 
 }
+CornerStitching::CornerStitching()
+	: mCanvasWidth(1), mCanvasHeight(1) {
+		mCanvasSizeBlankTile = new Tile(tileType::BLANK, Cord(0, 0), 1, 1);
+}
 
 CornerStitching::CornerStitching(len_t chipWidth, len_t chipHeight)
-	: mCanvasWidth(chipWidth), mCanvasHeight(chipHeight) 
-	{
+	: mCanvasWidth(chipWidth), mCanvasHeight(chipHeight) {
 		if((chipWidth <= 0) || (chipHeight <= 0)){
 			throw CSException("CORNERSTITCHING_04");
 		}
 		mCanvasSizeBlankTile = new Tile(tileType::BLANK, Cord(0, 0), chipWidth, chipHeight);
-	}
+}
 
 CornerStitching::CornerStitching(const CornerStitching &other){
 	this->mCanvasWidth = other.mCanvasWidth;

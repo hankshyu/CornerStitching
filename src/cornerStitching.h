@@ -38,7 +38,7 @@ private:
     Tile *mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight);
 
 public:
-    CornerStitching() = delete;
+    CornerStitching();
     CornerStitching(len_t chipWidth, len_t chipHeight);
     CornerStitching(const CornerStitching &other);
     ~CornerStitching();

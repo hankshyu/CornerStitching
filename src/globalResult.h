@@ -3,15 +3,16 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
-struct globalResultBlock{
+struct GlobalResultBlock{
     std::string name;
     std::string type;
     int llx, lly;
     int width, height;
 };
 
-struct globalResultConnection{
+struct GlobalResultConnection{
     std::vector<std::string> vertices;
     double weight;
 };
@@ -22,8 +23,8 @@ public:
     int connectionCount;
     int chipWidth, chipHeight;
 
-    std::vector<globalResultBlock> blocks;
-    std::vector<globalResultConnection> connections;
+    std::vector<GlobalResultBlock> blocks;
+    std::vector<GlobalResultConnection> connections;
 
     GlobalResult();
     GlobalResult(std::string globalResultFile);
@@ -33,10 +34,8 @@ public:
     bool operator == (const GlobalResult &other) const;
     friend std::ostream &operator << (std::ostream &os, const GlobalResult &gr);
 
-    void readGlobalResult(std::istream &is);
+    void readGlobalResult(std::ifstream &is);
     void readGlobalResult(std::string globalResultFile);
-    void writeGlobalResult(std::ostream &os);
-    void writeGlobalResult(std::string globalResultFile);
 };
 
 std::ostream &operator << (std::ostream &os, const GlobalResult &gr);

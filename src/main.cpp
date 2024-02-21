@@ -14,6 +14,7 @@
 #include "cSException.h"
 #include "rectilinear.h"
 #include "doughnutPolygon.h"
+#include "globalResult.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -29,35 +30,43 @@ void genEncoder(int bits, unsigned int num, std::vector<int> &answer){
 int main(int argc, char const *argv[]) {
 
 	try{
-		std::vector <Tile *> tiles;
-		CornerStitching cs(100, 100);
-		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(3, 18, 6, 22))));
-		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(6, 20, 11, 23))));
-		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(4, 23, 8, 25))));
-		tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(8, 17, 10, 20))));
+		// std::vector <Tile *> tiles;
+		// CornerStitching cs(100, 100);
+		// tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(3, 18, 6, 22))));
+		// tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(6, 20, 11, 23))));
+		// tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(4, 23, 8, 25))));
+		// tiles.push_back(cs.insertTile(Tile(tileType::BLOCK, Rectangle(8, 17, 10, 20))));
 
-		Rectilinear r1(5, "CPU", rectilinearType::SOFT, Rectangle(13, 15, 22, 35), 20, 0.333, 3, 0.6);
-		for(Tile *t : tiles){
-			r1.blockTiles.insert(t);
-		}
-		Tile *bugt = new Tile(tileType::OVERLAP, Rectangle(2, 22, 4, 24));
-		r1.overlapTiles.insert(bugt);
+		// Rectilinear r1(5, "CPU", rectilinearType::SOFT, Rectangle(13, 15, 22, 35), 20, 0.333, 3, 0.6);
+		// for(Tile *t : tiles){
+		// 	r1.blockTiles.insert(t);
+		// }
+		// Tile *bugt = new Tile(tileType::OVERLAP, Rectangle(2, 22, 4, 24));
+		// r1.overlapTiles.insert(bugt);
 
-		std::cout << "Legal no overlap: " << r1.isLegalNoOverlap() << std::endl;
-		std::cout << "Legal no hole: " << r1.isLegalNoHole() << std::endl;
-		std::cout << "Legal one shape: " << r1.isLegalOneShape() << std::endl;
+		// std::cout << "Legal no overlap: " << r1.isLegalNoOverlap() << std::endl;
+		// std::cout << "Legal no hole: " << r1.isLegalNoHole() << std::endl;
+		// std::cout << "Legal one shape: " << r1.isLegalOneShape() << std::endl;
 
-		rectilinearIllegalType illegalType;	
-		std::cout << r1.isLegal(illegalType) << ", Error Type: " << illegalType << std::endl;
+		// rectilinearIllegalType illegalType;	
+		// std::cout << r1.isLegal(illegalType) << ", Error Type: " << illegalType << std::endl;
 
-		std::vector<Cord> winding;
-		r1.acquireWinding(winding, windingDirection::CLOCKWISE);
-		std::cout << "Presenting clockwise winding: " << std::endl;
-		for(Cord c : winding){
-			std::cout << c << std::endl;
-		}
+		// std::vector<Cord> winding;
+		// r1.acquireWinding(winding, windingDirection::CLOCKWISE);
+		// std::cout << "Presenting clockwise winding: " << std::endl;
+		// for(Cord c : winding){
+		// 	std::cout << c << std::endl;
+		// }
 
-		cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
+		// cs.visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
+
+		GlobalResult gr;
+		gr.readGlobalResult("./inputs/case09-output.txt");
+		std::cout << gr << std::endl;
+
+
+
+
 		
 	}catch(CSException c){
 		std::cout << "Exception caught -> ";
