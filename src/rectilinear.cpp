@@ -337,6 +337,11 @@ void Rectilinear::acquireWinding(std::vector<Cord> &winding, windingDirection wd
     }
 }
 
+size_t std::hash<Rectilinear>::operator()(const Rectilinear &key) const {
+    // return (std::hash<int>()((int)key.getType())) ^ (std::hash<Rectangle>()(key.getRectangle()));
+    return (std::hash<int>()(key.getId())) ^ (std::hash<std::string>()(key.getName())) ^ (std::hash<Rectangle>()(key.getGlboalPlacement()));
+}
+
 std::ostream &operator << (std::ostream &os, const Rectilinear &r){
     os << "ID = " << r.mId << " Name = " << r.mName << " Type = " << r.mType;
     switch (r.mType)

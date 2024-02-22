@@ -36,8 +36,8 @@ public:
 
     std::vector<Connection> allConnections;
     
-    std::unordered_map<Tile *, Rectilinear*> blockTilePayload;
-    std::unordered_map<Tile *, std::vector<Rectilinear*>> overlapTilePayload;
+    std::unordered_map<Tile *, Rectilinear *> blockTilePayload;
+    std::unordered_map<Tile *, std::vector<Rectilinear *>> overlapTilePayload;
 
 
     Floorplan();
@@ -46,7 +46,6 @@ public:
     ~Floorplan();
 
     Floorplan& operator = (const Floorplan &other);
-    bool operator == (const Floorplan &comp) const;
 
     Rectangle getChipContour() const;
     int getAllRectilinearCount() const;
@@ -58,9 +57,9 @@ public:
     int getGlobalAspectRatioMax() const;
     int getGlobalUtilizationMin() const;
 
-    int setGlobalAspectRatioMin(int globalAspectRatioMin);
-    int setGlobalAspectRatioMax(int globalAspectRatioMax);
-    int setGlobalUtilizationMin(int globalUtilizationMin);
+    void setGlobalAspectRatioMin(int globalAspectRatioMin);
+    void setGlobalAspectRatioMax(int globalAspectRatioMax);
+    void setGlobalUtilizationMin(int globalUtilizationMin);
 
     Rectilinear *placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin);
 

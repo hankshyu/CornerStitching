@@ -99,7 +99,12 @@ public:
     
     void reshapeContainedTiles();
 };
-
+namespace std{
+    template<>
+    struct hash<Rectilinear>{
+        size_t operator()(const Rectilinear &key) const;
+    };
+}
 std::ostream &operator << (std::ostream &os, const Rectilinear &t);
 std::ostream &operator << (std::ostream &os, const rectilinearType &t);
 std::ostream &operator << (std::ostream &os, const rectilinearIllegalType &t);
