@@ -9,15 +9,31 @@
 #include "rectilinear.h"
 #include "connection.h"
 #include "cornerStitching.h"
+#include "globalResult.h"
 
 class Floorplan{
 private:
-    std::string mName;
-    Rectangle mContour;
+    Rectangle mChipContour;
+
+    int mAllRectilinearCount;
+    int mSoftRectilinearCount;
+    int mHardRectilinearCount;
+    int mPreplacedRectilinearCount;
+
+    int mConnectionCount;
+
+    int mGlobalAspectRatioMin;
+    int mGlobalAspectRatioMax;
+    int mGlobalUtilizationMin;
     
 public:
     CornerStitching cs;
-    std::vector<Rectilinear> allRectilinears;
+
+    std::vector<Rectilinear *> allRectilinears;
+    std::vector<Rectilinear *> softRectilinears;
+    std::vector<Rectilinear *> hardRectilinears;
+    std::vector<Rectilinear *> preplacedRectilinears;
+
     std::vector<Connection> allConnections;
     
     std::unordered_map<Tile *, Rectilinear*> blockTilePayload;
@@ -25,17 +41,28 @@ public:
 
 
     Floorplan();
-    Floorplan(std::string name, Rectangle contour);
+    Floorplan(GlobalResult gr);
     Floorplan(const Floorplan &other);
+    ~Floorplan();
 
     Floorplan& operator = (const Floorplan &other);
     bool operator == (const Floorplan &comp) const;
 
-    std::string getName() const;
-    Rectangle getContour() const;
+    Rectangle getChipContour() const;
+    int getAllRectilinearCount() const;
+    int getSoftRectilinearCount() const;
+    int getHardRectilinearCount() const;
+    int getPreplacedRectilinearCount() const;
+    int getConnectionCount() const;
+    int getGlobalAspectRatioMin() const;
+    int getGlobalAspectRatioMax() const;
+    int getGlobalUtilizationMin() const;
 
-    void setName(std::string name);
-    void setContour(Rectangle contour);
+    int setGlobalAspectRatioMin(int globalAspectRatioMin);
+    int setGlobalAspectRatioMax(int globalAspectRatioMax);
+    int setGlobalUtilizationMin(int globalUtilizationMin);
+
+    Rectilinear *placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin);
 
     double calculateHPWL();
     

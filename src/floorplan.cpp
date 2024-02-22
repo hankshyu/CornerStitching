@@ -1,28 +1,64 @@
+#include <assert.h>
 #include "floorplan.h"
 
 Floorplan::Floorplan()
-    : mName(""), mContour(Rectangle(0, 0, 0, 0)) {
+    : mChipContour(Rectangle(0, 0, 0, 0)) , mAllRectilinearCount(0), mSoftRectilinearCount(0), mHardRectilinearCount(0), mPreplacedRectilinearCount(0), mConnectionCount(0) {
 }
 
-Floorplan::Floorplan(std::string name, Rectangle contour)
-    : mName(name), mContour(contour) {
+Floorplan::Floorplan(GlobalResult gr)
+    :mChipContour(Rectangle(0, 0, gr.chipWidth, gr.chipHeight)), mAllRectilinearCount(gr.blockCount), mConnectionCount(gr.connectionCount) {
+    
+    assert(mAllRectilinearCount == gr.blocks.size());
+    assert(mConnectionCount == gr.connections.size());
+
+    
+
 }
 
-std::string Floorplan::getName() const {
-    return this->mName;
+Rectangle Floorplan::getChipContour() const {
+    return this->mChipContour;
 }
 
-Rectangle Floorplan::getContour() const {
-    return this->mContour;
+int Floorplan::getAllRectilinearCount() const {
+    return this->mAllRectilinearCount;
 }
 
-void Floorplan::setName(std::string name){
-    this->mName = name;
+int Floorplan::getSoftRectilinearCount() const {
+    return this->mSoftRectilinearCount;
 }
 
-void Floorplan::setContour(Rectangle contour){
-    this->mContour = contour;
+int Floorplan::getHardRectilinearCount() const {
+    return this->mHardRectilinearCount;
 }
+
+int Floorplan::getConnectionCount() const {
+    return this->mConnectionCount;
+}
+
+
+int Floorplan::getGlobalAspectRatioMin() const {
+    return this->mGlobalAspectRatioMin;
+}
+int Floorplan::getGlobalAspectRatioMax() const {
+    return this->mGlobalAspectRatioMax;
+}
+int Floorplan::getGlobalUtilizationMin() const {
+    return this->mGlobalUtilizationMin;
+}
+
+int Floorplan::setGlobalAspectRatioMin(int globalAspectRatioMin){
+    this->mGlobalAspectRatioMin = globalAspectRatioMin;
+}
+int Floorplan::setGlobalAspectRatioMax(int globalAspectRatioMax){
+    this->mGlobalAspectRatioMax = globalAspectRatioMax;
+
+}
+int Floorplan::setGlobalUtilizationMin(int globalUtilizationMin){
+    this->mGlobalUtilizationMin = globalUtilizationMin;
+}
+
+
+
 
 double Floorplan::calculateHPWL(){
     double floorplanHPWL = 0;
