@@ -1,4 +1,5 @@
 #include <assert.h>
+
 #include "floorplan.h"
 #include "cSException.h"
 
@@ -8,6 +9,8 @@ Floorplan::Floorplan()
 
 Floorplan::Floorplan(GlobalResult gr)
     :mChipContour(Rectangle(0, 0, gr.chipWidth, gr.chipHeight)), mAllRectilinearCount(gr.blockCount), mConnectionCount(gr.connectionCount) {
+
+    cs = new CornerStitching(gr.chipWidth, gr.chipHeight);
     
     assert(mAllRectilinearCount == gr.blocks.size());
     assert(mConnectionCount == gr.connections.size());
@@ -35,20 +38,21 @@ Floorplan::Floorplan(GlobalResult gr)
         nameToRectilinear[grb.name] = newRect;
     }
 
-    // create Connections
-    for(int i = 0; i < mConnectionCount; ++i){
-        GlobalResultConnection grc = gr.connections[i];
-        std::vector<Rectilinear *> connVertices;
-        for(std::string str : grc.vertices){
-            connVertices.push_back(nameToRectilinear[str]);
-        }
+    // // create Connections
+    // for(int i = 0; i < mConnectionCount; ++i){
+    //     GlobalResultConnection grc = gr.connections[i];
+    //     std::vector<Rectilinear *> connVertices;
+    //     for(std::string str : grc.vertices){
+    //         connVertices.push_back(nameToRectilinear[str]);
+    //     }
 
-        this->allConnections.push_back(Connection(connVertices, grc.weight));
-    }
+    //     this->allConnections.push_back(Connection(connVertices, grc.weight));
+    // }
 }
 
 Floorplan::Floorplan(const Floorplan &other){
 
+    // copy basic attributes
     this->mChipContour = Rectangle(other.mChipContour);
     this->mAllRectilinearCount = other.mAllRectilinearCount;
     this->mSoftRectilinearCount = other.mSoftRectilinearCount;
@@ -61,7 +65,7 @@ Floorplan::Floorplan(const Floorplan &other){
     this->mGlobalAspectRatioMax = other.mGlobalAspectRatioMax;
     this->mGlobalUtilizationMin = other.mGlobalUtilizationMin;
 
-    this->cs = CornerStitching(other.cs);
+    this->cs = new CornerStitching(*other.cs);
 
     // build maps to assist copy
     std::unordered_map<Rectilinear *, Rectilinear*> rectMap;
@@ -73,7 +77,7 @@ Floorplan::Floorplan(const Floorplan &other){
         // re-consruct the block tiles pointers using the new CornerStitching System
         nR->blockTiles.clear();
         for(Tile *oldT : oldRect->blockTiles){
-            Tile *newT = this->cs.findPoint(oldT->getLowerLeft());
+            Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->blockTiles.insert(newT);
         }
@@ -81,7 +85,7 @@ Floorplan::Floorplan(const Floorplan &other){
         // re-consruct the overlap tiles pointers using the new CornerStitching System
         nR->overlapTiles.clear();
         for(Tile *oldT : oldRect->overlapTiles){
-            Tile *newT = this->cs.findPoint(oldT->getLowerLeft());
+            Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->overlapTiles.insert(newT);
         }
@@ -151,10 +155,110 @@ Floorplan::~Floorplan(){
     for(Rectilinear *rt : this->allRectilinears){
         delete(rt);
     }
+
+    delete(cs);
 }
 
+Floorplan &Floorplan::operator = (const Floorplan &other){
+    // copy basic attributes
+    this->mChipContour = Rectangle(other.mChipContour);
+    this->mAllRectilinearCount = other.mAllRectilinearCount;
+    this->mSoftRectilinearCount = other.mSoftRectilinearCount;
+    this->mHardRectilinearCount = other.mHardRectilinearCount;
+    this->mPreplacedRectilinearCount = other.mPreplacedRectilinearCount;
 
+    this->mConnectionCount = other.mConnectionCount;
 
+    this->mGlobalAspectRatioMin = other.mGlobalAspectRatioMin;
+    this->mGlobalAspectRatioMax = other.mGlobalAspectRatioMax;
+    this->mGlobalUtilizationMin = other.mGlobalUtilizationMin;
+
+    this->cs = new CornerStitching(*other.cs);
+
+    // build maps to assist copy
+    std::unordered_map<Rectilinear *, Rectilinear*> rectMap;
+    std::unordered_map<Tile *, Tile *> tileMap;
+
+    for(Rectilinear *oldRect : other.allRectilinears){
+        Rectilinear *nR = new Rectilinear(*oldRect);
+
+        // re-consruct the block tiles pointers using the new CornerStitching System
+        nR->blockTiles.clear();
+        for(Tile *oldT : oldRect->blockTiles){
+            Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
+            tileMap[oldT] = newT;
+            nR->blockTiles.insert(newT);
+        }
+
+        // re-consruct the overlap tiles pointers using the new CornerStitching System
+        nR->overlapTiles.clear();
+        for(Tile *oldT : oldRect->overlapTiles){
+            Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
+            tileMap[oldT] = newT;
+            nR->overlapTiles.insert(newT);
+        }
+
+        rectMap[oldRect] = nR;
+    }
+    // rework pointers for rectilinear vectors to point to new CornerStitching System
+    this->allRectilinears.clear();
+    this->softRectilinears.clear();
+    this->hardRectilinears.clear();
+    this->preplacedRectilinears.clear();
+
+    for(Rectilinear *oldR : other.allRectilinears){
+        Rectilinear *newR = rectMap[oldR];
+        this->allRectilinears.push_back(rectMap[oldR]);
+        
+        // categorize types
+        switch (newR->getType()){
+        case rectilinearType::SOFT:
+            this->softRectilinears.push_back(newR);
+            break;
+        case rectilinearType::HARD:
+            this->hardRectilinears.push_back(newR);
+            break;
+        case rectilinearType::PREPLACED:
+            this->preplacedRectilinears.push_back(newR);
+            break;
+        default:
+            break;
+        }
+    }
+
+    // rebuild connections
+    this->allConnections.clear();
+    for(Connection cn : other.allConnections){
+        Connection newCN = Connection(cn);
+        newCN.vertices.clear();
+        for(Rectilinear *oldRT : cn.vertices){
+            newCN.vertices.push_back(rectMap[oldRT]);
+        }
+        this->allConnections.push_back(newCN);
+    }
+
+    // rebuid Tile payloads section  
+    this->blockTilePayload.clear();
+    for(std::unordered_map<Tile *, Rectilinear *>::const_iterator it = other.blockTilePayload.begin(); it != other.blockTilePayload.end(); ++it){
+        Tile *nT = tileMap[it->first];
+        Rectilinear *nR = rectMap[it->second];
+
+        this->blockTilePayload[nT] = nR;
+    }
+
+    this->overlapTilePayload.clear();
+    for(std::unordered_map<Tile *, std::vector<Rectilinear *>>::const_iterator it = other.overlapTilePayload.begin(); it != other.overlapTilePayload.end(); ++it){
+        Tile *nT = tileMap[it->first];
+        std::vector<Rectilinear *> nRectVec;
+        for(Rectilinear *oldR : it->second){
+            nRectVec.push_back(rectMap[oldR]);
+        }
+        
+        this->overlapTilePayload[nT] = nRectVec;
+    }
+
+    return (*this);
+}
 
 Rectangle Floorplan::getChipContour() const {
     return this->mChipContour;
@@ -198,8 +302,42 @@ void Floorplan::setGlobalUtilizationMin(int globalUtilizationMin){
     this->mGlobalUtilizationMin = globalUtilizationMin;
 }
 
+Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin){
+    if(!rec::isContained(mChipContour,placement)){
+        throw CSException("FLOORPLAN_02");
+    }
+    
+    Rectilinear *newRect = new Rectilinear(mIDCounter++, name, type, placement, legalArea, aspectRatioMin, aspectRatioMax, mUtilizationMin); 
+    std::vector<Tile *> lappingTiles;
+    
+    cs->enumerateDirectedArea(placement, lappingTiles);
+    if(lappingTiles.empty()){
+        Tile *newT = cs->insertTile(Tile(tileType::BLOCK, placement));
+        newRect->blockTiles.insert(newT);
+        blockTilePayload[newT] = newRect;
+    }else{
+        throw CSException("FLOORPLAN_03");
+    }
+    
+    allRectilinears.push_back(newRect);
+    switch (type)
+    {
+    case rectilinearType::SOFT:
+        this->softRectilinears.push_back(newRect);
+        break;
+    case rectilinearType::HARD:
+        this->hardRectilinears.push_back(newRect);
+        break;
+    case rectilinearType::PREPLACED:
+        this->preplacedRectilinears.push_back(newRect);
+        break;
+    default:
+        break;
+    }
 
+    return newRect;
 
+}
 
 double Floorplan::calculateHPWL(){
     double floorplanHPWL = 0;

@@ -15,10 +15,11 @@ debug: csrun_debug
 LINKFLAGS = -O3
 
 _OBJS =	main.o \
-		cord.o line.o rectangle.o tile.o globalPhaseAdapter.o \
-		tessera.o cornerStitching.o cSException.o rectilinear.o \
-		floorplan.o connection.o globalResult.o
-
+		cSException.o globalResult.o \
+		cord.o line.o rectangle.o tile.o \
+		cornerStitching.o rectilinear.o connection.o \
+		floorplan.o
+		
 OBJS = $(patsubst %,$(OBJPATH)/%,$(_OBJS))
 DBG_OBJS = $(patsubst %.o, $(OBJPATH)/%_dbg.o, $(_OBJS))
 

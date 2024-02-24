@@ -1,7 +1,8 @@
+#include <iostream>
+
 #include "tile.h"
 #include "cSException.h"
 
-#include <iostream>
 
 Tile::Tile()
     : mType(tileType::BLANK), mRectangle(Rectangle(0, 0, 0, 0)), rt(nullptr), tr(nullptr), bl(nullptr), lb(nullptr) {

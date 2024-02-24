@@ -1,6 +1,7 @@
+#include <climits>
+
 #include "rectilinear.h"
 #include "cSException.h"
-#include "limits.h"
 #include "doughnutPolygon.h"
 #include "doughnutPolygonSet.h"
 

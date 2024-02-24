@@ -1,24 +1,23 @@
 #include <iostream>
+#include <random>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "boost/polygon/polygon.hpp"
 #include "colours.h"
 #include "units.h"
-
 #include "cord.h"
 #include "line.h"
 #include "rectangle.h"
 #include "tile.h"
-#include "globalPhaseAdapter.h"
 #include "cornerStitching.h"
 #include "cSException.h"
 #include "rectilinear.h"
 #include "doughnutPolygon.h"
 #include "globalResult.h"
+#include "floorplan.h"
 
-#include <unordered_map>
-#include <unordered_set>
-#include <random>
 
 void genEncoder(int bits, unsigned int num, std::vector<int> &answer){
 	unsigned int filter = 1;
@@ -62,7 +61,9 @@ int main(int argc, char const *argv[]) {
 
 		GlobalResult gr;
 		gr.readGlobalResult("./inputs/case09-output.txt");
+		Floorplan fp (gr);
 		std::cout << gr << std::endl;
+		fp.cs->visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
 
 
 

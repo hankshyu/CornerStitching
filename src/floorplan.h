@@ -13,6 +13,8 @@
 
 class Floorplan{
 private:
+    int mIDCounter;
+
     Rectangle mChipContour;
 
     int mAllRectilinearCount;
@@ -27,7 +29,7 @@ private:
     int mGlobalUtilizationMin;
     
 public:
-    CornerStitching cs;
+    CornerStitching *cs;
 
     std::vector<Rectilinear *> allRectilinears;
     std::vector<Rectilinear *> softRectilinears;

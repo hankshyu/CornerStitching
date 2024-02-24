@@ -46,6 +46,8 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CONNECTION_01", "calculateCost(): Connection has < 2 vertices"},
 
     {"FLOORPLAN_01", "Floorplan(GlobalResult gr): undefined gr.type"},
+    {"FLOORPLAN_02", "placeRectilinear(...): placement is not contained in the chip"},
+    {"FLOORPLAN_03", "phony mistake..."},
 
 };
 
