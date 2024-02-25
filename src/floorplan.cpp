@@ -2,15 +2,21 @@
 
 #include <algorithm>
 
+#include "boost/polygon/polygon.hpp"
 #include "floorplan.h"
 #include "cSException.h"
+#include "doughnutPolygon.h"
+#include "doughnutPolygonSet.h"
 
 Floorplan::Floorplan()
     : mChipContour(Rectangle(0, 0, 0, 0)) , mAllRectilinearCount(0), mSoftRectilinearCount(0), mHardRectilinearCount(0), mPreplacedRectilinearCount(0), mConnectionCount(0) {
 }
 
-Floorplan::Floorplan(GlobalResult gr)
-    :mChipContour(Rectangle(0, 0, gr.chipWidth, gr.chipHeight)), mAllRectilinearCount(gr.blockCount), mConnectionCount(gr.connectionCount) {
+Floorplan::Floorplan(GlobalResult gr){
+
+    mChipContour = Rectangle(0, 0, gr.chipWidth, gr.chipHeight);
+    mAllRectilinearCount = gr.blockCount;
+    mConnectionCount = gr.connectionCount;
 
     cs = new CornerStitching(gr.chipWidth, gr.chipHeight);
     
@@ -304,16 +310,17 @@ void Floorplan::setGlobalUtilizationMin(int globalUtilizationMin){
     this->mGlobalUtilizationMin = globalUtilizationMin;
 }
 
-Tile *Floorplan::addBlockTile(Rectilinear *rt, const Tile &tilePrototype){
-    if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
+Tile *Floorplan::addBlockTile(const Rectangle &tilePosition, Rectilinear *rt){
+    if(!rec::isContained(this->mChipContour, tilePosition)){
         throw CSException("FLOORPLAN_03");
     }
 
-    if(tilePrototype.getType() != tileType::BLOCK){
+    if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
         throw CSException("FLOORPLAN_04");
     }
 
     // use the prototype to insert the tile onto the cornerstitching system, receive the actual pointer as return
+    Tile tilePrototype(tileType::BLOCK, tilePosition);
     Tile *newTile = cs->insertTile(tilePrototype);
     // register the pointer to the rectilienar system 
     rt->blockTiles.insert(newTile);
@@ -323,23 +330,24 @@ Tile *Floorplan::addBlockTile(Rectilinear *rt, const Tile &tilePrototype){
     return newTile;
 }
 
-Tile *Floorplan::addOverlapTile(Rectilinear *rt, const Tile &tilePrototype, const std::vector<Rectilinear*> payload){
-    if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
+Tile *Floorplan::addOverlapTile(const Rectangle &tilePosition, const std::vector<Rectilinear*> payload){
+    if(!rec::isContained(this->mChipContour, tilePosition)){
         throw CSException("FLOORPLAN_05");
     }
 
-    if(tilePrototype.getType() != tileType::OVERLAP){
-        throw CSException("FLOORPLAN_06");
-    }
-
-    if(std::find(payload.begin(), payload.end(), rt) == payload.end()){
-        throw CSException("FLOORPLAN_07");
+    for(Rectilinear *rt : payload){
+        if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
+            throw CSException("FLOORPLAN_06");
+        }
     }
 
     // use the prototype to insert the tile onto the cornerstitching system, receive the actual pointer as return
+    Tile tilePrototype(tileType::OVERLAP, tilePosition);
     Tile *newTile = cs->insertTile(tilePrototype);
-    // register the pointe to the rectilinear system
-    rt->overlapTiles.insert(newTile);
+    // register the pointer to all Rectilinears
+    for(Rectilinear *rt : payload){
+        rt->overlapTiles.insert(newTile);
+    }
     // connect tile's payload 
     this->overlapTilePayload[newTile] = std::vector<Rectilinear *>(payload);
 
@@ -452,34 +460,11 @@ Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type,
     if(!rec::isContained(mChipContour,placement)){
         throw CSException("FLOORPLAN_02");
     }
-    
+
+    // register the Rectilinear container into the floorplan data structure
     Rectilinear *newRect = new Rectilinear(mIDCounter++, name, type, placement, legalArea, aspectRatioMin, aspectRatioMax, mUtilizationMin); 
-    std::vector<Tile *> lappingTiles;
-    
-    cs->enumerateDirectedArea(placement, lappingTiles);
-    if(lappingTiles.empty()){
-        Tile *newT = cs->insertTile(Tile(tileType::BLOCK, placement));
-        newRect->blockTiles.insert(newT);
-        blockTilePayload[newT] = newRect;
-    }else{
-        std::cout << "Placement of " << name << " (" << Tile(tileType::BLOCK, placement) << ") has encourntered overlap: ";
-        for(Tile *t : lappingTiles){
-            std::cout << *t;
-        }
-        std::cout << std::endl;
-
-
-
-
-
-
-
-    }
-
-    // add the rectilinear structure into the floorplan rectilinear storage 
-    allRectilinears.push_back(newRect);
-    switch (type)
-    {
+    this->allRectilinears.push_back(newRect);
+    switch (type){
     case rectilinearType::SOFT:
         this->softRectilinears.push_back(newRect);
         break;
@@ -493,8 +478,99 @@ Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type,
         break;
     }
 
-    return newRect;
+    std::vector<Tile *> lappingTiles;
+    cs->enumerateDirectedArea(placement, lappingTiles);
+    if(lappingTiles.empty()){
+        // placement of the rectilinear is in an area whether no other tiles are present
+        addBlockTile(placement, newRect);
+    }else{
+        std::cout << "Placement of " << name << " (" << Tile(tileType::BLOCK, placement) << ") has encourntered overlap: ";
+        for(Tile *t : lappingTiles){
+            std::cout << *t;
+        }
+        std::cout << std::endl;
 
+        using namespace boost::polygon::operators;
+        DoughnutPolygonSet insertSet;
+        insertSet += placement;
+
+        // process all overlap parts with other tles
+        for(int i = 0; i < lappingTiles.size(); ++i){
+            Tile *lapTile = lappingTiles[i];
+
+            DoughnutPolygonSet origTileSet;
+            origTileSet += lapTile->getRectangle();
+
+            DoughnutPolygonSet overlapSet;
+            boost::polygon::assign(overlapSet, insertSet & origTileSet);
+
+            if(boost::polygon::equivalence(origTileSet, overlapSet)){
+                // the insertion of such piece would not cause new fragments
+                increaseTileOverlap(lapTile, newRect);
+            }else{
+                // the insertion has overlap with some existing tiles
+                // 1. remove the original whole block 
+                // 2. place the intersection part
+                // 3. place the rest part, dice into small rectangles if necessary
+
+                tileType lapTileType = lapTile->getType();
+                if(lapTileType == tileType::BLOCK){
+                    Rectilinear *origPayload = this->blockTilePayload[lapTile];
+
+                    deleteTile(lapTile);
+
+                    // add the intersection part first
+                    std::vector<Rectangle> intersectRect;
+                    dps::diceIntoRectangles(overlapSet, intersectRect);
+                    assert(intersectRect.size() == 1);
+                    addOverlapTile(intersectRect[0], std::vector<Rectilinear *>({origPayload, newRect}));
+
+                    // process the remains of the overlapSet
+                    origTileSet -= overlapSet;
+                    std::vector<Rectangle> restRect;
+                    dps::diceIntoRectangles(origTileSet, restRect);
+                    for(const Rectangle &rt : restRect){
+                        addBlockTile(rt, newRect);
+                    }
+                }else if(lapTileType == tileType::OVERLAP){
+                    std::vector<Rectilinear *> origPaylaod = this->overlapTilePayload[lapTile];
+
+                    deleteTile(lapTile);
+
+                    // add the intersection part first
+                    std::vector<Rectangle> intersectRect;
+                    dps::diceIntoRectangles(overlapSet, intersectRect);
+                    assert(intersectRect.size() == 1);
+                    std::vector<Rectilinear *> newPayload(origPaylaod);
+                    newPayload.push_back(newRect);
+                    addOverlapTile(intersectRect[0], newPayload);
+
+                    // process the remains of the overlapSet
+                    origTileSet -= overlapSet;
+                    std::vector<Rectangle> restRect;
+                    dps::diceIntoRectangles(origTileSet, restRect);
+                    for(const Rectangle &rt : restRect){
+                        addOverlapTile(rt, origPaylaod);
+                    }
+
+                }else{
+                    throw CSException("FLOORPLAN_14");
+                }
+                
+            }
+
+            // removed the processed part from insertSet
+            insertSet -= overlapSet;
+        }
+
+        std::vector<Rectangle> remainInsertRect;
+        dps::diceIntoRectangles(insertSet, remainInsertRect);
+        for(const Rectangle &rt : remainInsertRect){
+            addBlockTile(rt, newRect);
+        }
+    }
+
+    return newRect;
 }
 
 double Floorplan::calculateHPWL(){
