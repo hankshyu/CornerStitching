@@ -47,7 +47,17 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
 
     {"FLOORPLAN_01", "Floorplan(GlobalResult gr): undefined gr.type"},
     {"FLOORPLAN_02", "placeRectilinear(...): placement is not contained in the chip"},
-    {"FLOORPLAN_03", "phony mistake..."},
+    {"FLOORPLAN_03", "addBlockTile(Rectilinear *rt, const Tile &tilePrototype): such Rectilinear structure is not present"},
+    {"FLOORPLAN_04", "addBlockTile(Rectilinear *rt, const Tile &tilePrototype): only tileType::BLOCK is accepted"},
+    {"FLOORPLAN_05", "addOverlapTile(...): such Rectilinear structure is not present"},
+    {"FLOORPLAN_06", "addOverlapTile(...): only tileType::OVERLAP is accepted"},
+    {"FLOORPLAN_07", "addOverlapTile(...): input paylaod shoud contain the Rectiliear *rt"},
+    {"FLOORPLAN_08", "deleteTile(Tile *tile): tile type should be tileType::BLOCK or tileType::OVERLAP"},
+    {"FLOORPLAN_09", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile has tileType::BLOCK but not logged in blocTilePayload, tile is unregistered"},
+    {"FLOORPLAN_10", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile has tileType::OVERLAP but not logged in overlapTilePayload, tile is unregistered"},
+    {"FLOORPLAN_11", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile's type is not tileType::OVERLAP"},
+    {"FLOORPLAN_12", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile has tileType::OVERLAP but not logged in overlapTilePayload, tile is unregistered"},
+    {"FLOORPLAN_13", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): the tile's payload (overlapTilePayload[tile]) does not include the removeal target, removeRect"},
 
 };
 

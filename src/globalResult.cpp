@@ -119,7 +119,6 @@ void GlobalResult::readGlobalResult(std::ifstream &ifs){
     for(int i = 0; i < this->connectionCount; ++i){
         GlobalResultConnection grc;
         std::getline(ifs, rawLine);
-        std::cout << "Raw getline(" << i << "/" << this->connectionCount << ") -> " << rawLine << std::endl;
         ss = std::stringstream(rawLine);
         while(ss >> tword){
             grc.vertices.push_back(tword);

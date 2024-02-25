@@ -5,17 +5,18 @@
 
 #include "boost/polygon/polygon.hpp"
 #include "units.h"
+#include "rectangle.h"
 #include "doughnutPolygon.h"
 
-typedef std::vector<DoughnutPolygon> doughnutPolygonSet;
+typedef std::vector<DoughnutPolygon> DoughnutPolygonSet;
 
 namespace dps{
 
-    inline bool oneShape(const doughnutPolygonSet &dpSet){
+    inline bool oneShape(const DoughnutPolygonSet &dpSet){
         return (dpSet.size() == 1);
     }
 
-    inline bool noHole(const doughnutPolygonSet &dpSet){
+    inline bool noHole(const DoughnutPolygonSet &dpSet){
 
         for(int i = 0; i < dpSet.size(); ++i){
             DoughnutPolygon curSegment = dpSet[i];
@@ -23,6 +24,10 @@ namespace dps{
         }
 
         return true;
+    }
+
+    inline void diceIntoRectangles(const DoughnutPolygonSet &dpSet, std::vector<Rectangle> &fragments){
+        boost::polygon::get_rectangles(fragments, dpSet);
     }
     
 }

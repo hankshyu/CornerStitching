@@ -2,9 +2,11 @@
 boost_1_84_0/
 boost_1_84_0.tar
 inputs/Global_Floorplanning/
+cs/*
 outputs/*
 inputs/*
 bin/csrun
 bin/csrun_debug
 obj/*.o
 .DS_Store
+utils/__pycache__/*

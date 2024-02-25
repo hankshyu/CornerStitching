@@ -16,7 +16,7 @@ LINKFLAGS = -O3
 
 _OBJS =	main.o \
 		cSException.o globalResult.o \
-		cord.o line.o rectangle.o tile.o \
+		cord.o line.o rectangle.o doughnutPolygon.o tile.o \
 		cornerStitching.o rectilinear.o connection.o \
 		floorplan.o
 		

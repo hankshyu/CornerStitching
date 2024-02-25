@@ -161,7 +161,7 @@ double Rectilinear::calculateUtilization() const {
 bool Rectilinear::isLegalNoOverlap() const {
     using namespace boost::polygon::operators;
 
-    doughnutPolygonSet dpSet, unionSet;
+    DoughnutPolygonSet dpSet, unionSet;
 
     for(Tile *t : this->blockTiles){
         Rectangle rt = t->getRectangle();
@@ -195,7 +195,7 @@ bool Rectilinear::isLegalUtilization() const {
 
 bool Rectilinear::isLegalNoHole() const {
     using namespace boost::polygon::operators;
-    doughnutPolygonSet curRectSet;
+    DoughnutPolygonSet curRectSet;
 
     for(Tile *t : this->blockTiles){
         curRectSet += t->getRectangle();
@@ -210,7 +210,7 @@ bool Rectilinear::isLegalNoHole() const {
 
 bool Rectilinear::isLegalOneShape() const {
     using namespace boost::polygon::operators;
-    doughnutPolygonSet curRectSet;
+    DoughnutPolygonSet curRectSet;
 
     for(Tile *t : this->blockTiles){
         curRectSet += t->getRectangle();
@@ -226,7 +226,7 @@ bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
 
     // check if any tiles overlap
     using namespace boost::polygon::operators;
-    doughnutPolygonSet curRectSet, unionSet;
+    DoughnutPolygonSet curRectSet, unionSet;
 
     for(Tile *t : this->blockTiles){
         Rectangle rt = t->getRectangle();
@@ -293,7 +293,7 @@ void Rectilinear::acquireWinding(std::vector<Cord> &winding, windingDirection wd
     }
 
     using namespace boost::polygon::operators;
-    doughnutPolygonSet curRectSet;
+    DoughnutPolygonSet curRectSet;
 
     for(Tile *t : this->blockTiles){
         curRectSet += t->getRectangle();

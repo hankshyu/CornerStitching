@@ -1,5 +1,7 @@
 #include <assert.h>
 
+#include <algorithm>
+
 #include "floorplan.h"
 #include "cSException.h"
 
@@ -302,6 +304,150 @@ void Floorplan::setGlobalUtilizationMin(int globalUtilizationMin){
     this->mGlobalUtilizationMin = globalUtilizationMin;
 }
 
+Tile *Floorplan::addBlockTile(Rectilinear *rt, const Tile &tilePrototype){
+    if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
+        throw CSException("FLOORPLAN_03");
+    }
+
+    if(tilePrototype.getType() != tileType::BLOCK){
+        throw CSException("FLOORPLAN_04");
+    }
+
+    // use the prototype to insert the tile onto the cornerstitching system, receive the actual pointer as return
+    Tile *newTile = cs->insertTile(tilePrototype);
+    // register the pointer to the rectilienar system 
+    rt->blockTiles.insert(newTile);
+    // connect tile's payload as the rectilinear on the floorplan system 
+    this->blockTilePayload[newTile] = rt;
+
+    return newTile;
+}
+
+Tile *Floorplan::addOverlapTile(Rectilinear *rt, const Tile &tilePrototype, const std::vector<Rectilinear*> payload){
+    if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
+        throw CSException("FLOORPLAN_05");
+    }
+
+    if(tilePrototype.getType() != tileType::OVERLAP){
+        throw CSException("FLOORPLAN_06");
+    }
+
+    if(std::find(payload.begin(), payload.end(), rt) == payload.end()){
+        throw CSException("FLOORPLAN_07");
+    }
+
+    // use the prototype to insert the tile onto the cornerstitching system, receive the actual pointer as return
+    Tile *newTile = cs->insertTile(tilePrototype);
+    // register the pointe to the rectilinear system
+    rt->overlapTiles.insert(newTile);
+    // connect tile's payload 
+    this->overlapTilePayload[newTile] = std::vector<Rectilinear *>(payload);
+
+    return newTile;
+}
+
+void Floorplan::deleteTile(Tile *tile){
+    tileType toDeleteType = tile->getType();
+    if(!((toDeleteType == tileType::BLOCK) || (toDeleteType == tileType::OVERLAP))){
+        throw CSException("FLOORPLAN_08");
+    }
+    // clean-up the payload information stored inside the floorplan system
+    if(toDeleteType == tileType::BLOCK){
+        // erase the tile from the rectilinear structure
+        Rectilinear *rt = this->blockTilePayload[tile];
+        rt->blockTiles.erase(tile);
+        // erase the payload from the floorplan structure
+        this->blockTilePayload.erase(tile);
+    }else{
+        // erase the tiles from the rectiliear structures
+        for(Rectilinear *rt : this->overlapTilePayload[tile]){
+            rt->overlapTiles.erase(tile);
+        }
+
+        // erase the payload from the floorplan structure
+        this->overlapTilePayload.erase(tile);
+
+    }
+
+    // remove the tile from the cornerStitching structure
+    cs->removeTile(tile);
+    
+}
+
+void Floorplan::increaseTileOverlap(Tile *tile, Rectilinear *newRect){
+
+    if(tile->getType() == tileType::BLOCK){
+        // check if the tile is present in the floorplan structure
+        if(this->blockTilePayload.find(tile) == this->blockTilePayload.end()){
+            throw CSException("FLOORPLAN_09");
+        }
+
+        Rectilinear *oldRect = this->blockTilePayload[tile];
+        oldRect->blockTiles.erase(tile);
+
+        // change the tile's type attribute 
+        tile->setType(tileType::OVERLAP);
+
+        // fill in rectilinear data types for both rectilinears
+        oldRect->overlapTiles.insert(tile);
+        newRect->overlapTiles.insert(tile);
+
+        this->blockTilePayload.erase(tile);
+        this->overlapTilePayload[tile] = {oldRect, newRect};
+    }else{
+        if(this->overlapTilePayload.find(tile) == this->overlapTilePayload.end()){
+            throw CSException("FLOORPLAN_10");
+        }
+
+        newRect->overlapTiles.insert(tile);
+        this->overlapTilePayload[tile].push_back(newRect);
+
+    }
+}
+
+void Floorplan::decreaseTileOverlap(Tile *tile, Rectilinear *removeRect){
+    if(tile->getType() != tileType::OVERLAP){
+        throw CSException("FLOORPLAN_11");
+    }
+
+    if(this->overlapTilePayload.find(tile) == this->overlapTilePayload.end()){
+        throw CSException("FLOORPLAN_12");
+    }
+
+    std::vector<Rectilinear *> oldPayload = this->overlapTilePayload[tile];
+    if(std::find(oldPayload.begin(), oldPayload.end(), removeRect) == oldPayload.end()){
+        throw CSException("FLOORPLAN_13");
+    }
+
+
+    if(oldPayload.size() == 2){
+        // ready to change tile's type to tileType::BLOCK
+        Rectilinear *solePayload = (oldPayload[0] == removeRect)? oldPayload[1] : oldPayload[1];
+        // remove tile payload from floorplan structure
+        this->overlapTilePayload.erase(tile);
+
+        // remove from rectilinear structure
+        removeRect->overlapTiles.erase(tile);
+        solePayload->overlapTiles.erase(tile);
+
+        // change type of the tile
+        tile->setType(tileType::BLOCK);
+
+        solePayload->blockTiles.insert(tile);
+        this->blockTilePayload[tile] = solePayload;
+    }else{
+        // the tile has 2 or more rectilinear after removal, keep type as tileType::OVERLAP
+
+        std::vector<Rectilinear *> *toChange = &(this->overlapTilePayload[tile]);
+        // apply erase-remove idiom to delete removeRect from the payload from floorplan 
+        toChange->erase(std::remove(toChange->begin(), toChange->end(), removeRect));
+
+        removeRect->overlapTiles.erase(tile);
+
+    }
+}
+
+
 Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin){
     if(!rec::isContained(mChipContour,placement)){
         throw CSException("FLOORPLAN_02");
@@ -316,9 +462,21 @@ Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type,
         newRect->blockTiles.insert(newT);
         blockTilePayload[newT] = newRect;
     }else{
-        throw CSException("FLOORPLAN_03");
+        std::cout << "Placement of " << name << " (" << Tile(tileType::BLOCK, placement) << ") has encourntered overlap: ";
+        for(Tile *t : lappingTiles){
+            std::cout << *t;
+        }
+        std::cout << std::endl;
+
+
+
+
+
+
+
     }
-    
+
+    // add the rectilinear structure into the floorplan rectilinear storage 
     allRectilinears.push_back(newRect);
     switch (type)
     {

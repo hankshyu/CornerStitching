@@ -13,6 +13,6 @@ typedef boost::polygon::polygon_90_with_holes_data<len_t> DoughnutPolygon;
 //     };
 // }
 
-// std::ostream &operator << (std::ostream &os, const DoughnutPolygon &dp);
+std::ostream &operator << (std::ostream &os, const DoughnutPolygon &dp);
 
 #endif  // #define __DOUGHNUTPOLYGON_H__
