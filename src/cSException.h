@@ -46,20 +46,22 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CONNECTION_01", "calculateCost(): Connection has < 2 vertices"},
 
     {"FLOORPLAN_01", "Floorplan(GlobalResult gr): undefined gr.type"},
-    {"FLOORPLAN_02", "placeRectilinear(...): placement is not contained in the chip"},
-    {"FLOORPLAN_03", "addBlockTile(const Rectangle &tilePosition, Rectilinear *rt): input tilePosition is not within the chip"},
-    {"FLOORPLAN_04", "addBlockTile(const Rectangle &tilePosition, Rectilinear *rt): input Rectilinear *rt is not present in floorplan data structure"},
-
-    {"FLOORPLAN_05", "addOverlapTile(...): input tilePosition is not within the chip"},
-    {"FLOORPLAN_06", "addOverlapTile(...): payload containes some Rectilinear* that is not registered in the floorplan system"},
-
-    {"FLOORPLAN_08", "deleteTile(Tile *tile): tile type should be tileType::BLOCK or tileType::OVERLAP"},
+    {"FLOORPLAN_02", "addBlockTile(const Rectangle &tilePosition, Rectilinear *rt): input tilePosition is not within the chip"},
+    {"FLOORPLAN_03", "addBlockTile(const Rectangle &tilePosition, Rectilinear *rt): input Rectilinear *rt is not present in floorplan data structure"},
+    {"FLOORPLAN_04", "addOverlapTile(...): input tilePosition is not within the chip"},
+    {"FLOORPLAN_05", "addOverlapTile(...): payload containes some Rectilinear* that is not registered in the floorplan system"},
+    {"FLOORPLAN_06", "deleteTile(Tile *tile): tile type should be tileType::BLOCK or tileType::OVERLAP"},
+    {"FLOORPLAN_07", "deleteTile(Tile *tile): tile type is tile::BLOCK but not entry found in floorplan->blockTilePayload"},
+    {"FLOORPLAN_08", "deleteTile(Tile *tile): tile type is tile::OVERLAP but not entry found in floorplan->overlapTilePayload"},
     {"FLOORPLAN_09", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile has tileType::BLOCK but not logged in blocTilePayload, tile is unregistered"},
     {"FLOORPLAN_10", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile has tileType::OVERLAP but not logged in overlapTilePayload, tile is unregistered"},
-    {"FLOORPLAN_11", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile's type is not tileType::OVERLAP"},
-    {"FLOORPLAN_12", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile has tileType::OVERLAP but not logged in overlapTilePayload, tile is unregistered"},
-    {"FLOORPLAN_13", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): the tile's payload (overlapTilePayload[tile]) does not include the removeal target, removeRect"},
-    {"FLOORPLAN_14", "placeRectilinear(...): tile.type could only be tileType::BLOCK or tileType::OVERLAP"},
+    {"FLOORPLAN_11", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile's type is neither tileType::BLOCK nor tileType::OVERLAP"},
+    {"FLOORPLAN_12", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile's type is not tileType::OVERLAP"},
+    {"FLOORPLAN_13", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile has tileType::OVERLAP but not logged in overlapTilePayload, tile is unregistered"},
+    {"FLOORPLAN_14", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): the tile's payload (overlapTilePayload[tile]) does not include the removeal target, removeRect"},
+    {"FLOORPLAN_15", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile's type is tileType::OVERLAP but the payload in floorplan system has entry < 2"},
+    {"FLOORPLAN_16", "placeRectilinear(...): input placement is not within the chip"},
+    {"FLOORPLAN_17", "placeRectilinear(...): return tiles from cornerStitching.enumerateDirectArea() tile.type could only be tileType::BLOCK or tileType::OVERLAP"},
 
 };
 

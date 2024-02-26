@@ -44,11 +44,11 @@ int main(int argc, char const *argv[]) {
 
 		std::cout << "Overlap stuff: " << std::endl;
 		for(auto p : fp.overlapTilePayload){
-			std::cout << *(p.first) << "->";
-			for(auto pp : p.second){
-				std::cout << pp->getName() << " ";
+			std::cout << *(p.first) << "-> {";
+			for(auto const &pp : p.second){
+				std::cout << pp->getName() << ", ";
 			}
-			std::cout << std::endl;
+			std::cout << "}" << std::endl;
 		}
 
 

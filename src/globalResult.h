@@ -9,7 +9,6 @@ struct GlobalResultBlock{
     std::string name;
     std::string type;
 
-    // This shall be filled
     int legalArea;
     int llx, lly;
     int width, height;

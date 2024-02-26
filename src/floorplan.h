@@ -28,6 +28,9 @@ private:
     int mGlobalAspectRatioMax;
     int mGlobalUtilizationMin;
     
+    // function that places a rectilinear into the floorplan system. It automatically resolves overlaps by splittng and divide existing tiles
+    Rectilinear *placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin);
+
 public:
     CornerStitching *cs;
 
@@ -63,15 +66,16 @@ public:
     void setGlobalAspectRatioMax(int globalAspectRatioMax);
     void setGlobalUtilizationMin(int globalUtilizationMin);
 
-    // insert a tleType::BLOCK tile at tilePosition into cornerStitching & rectilinear system,
-    // and record rt as it's payload into blockTilePayload
+    // insert a tleType::BLOCK tile at tilePosition into cornerStitching & rectilinear (*rt) system,
+    // record rt as it's payload into floorplan system (into blockTilePayload) and return new tile's pointer
     Tile *addBlockTile(const Rectangle &tilePosition, Rectilinear *rt);
 
-    // insert a tleType::OVERLAP tile at tilePosition into cornerStitching & rectilinear system,
-    // and record payload as it's payload into overlapTilePayload
-    Tile *addOverlapTile(const Rectangle &tilePosition, const std::vector<Rectilinear*> payload);
+    // insert a tleType::OVERLAP tile at tilePosition into cornerStitching & rectilinear (•rt) system,
+    // record payload as it's payload into floorplan system (into overlapTilePayload) and return new tile's pointer
+    Tile *addOverlapTile(const Rectangle &tilePosition, const std::vector<Rectilinear*> &payload);
 
-    // remove the tile from certain rectilinear structure
+    // remove tile data payload at floorplan system, the rectilienar that records it and lastly remove from cornerStitching,
+    // only tile.type == tileType::BLOCK or tileType::OVERLAP is accepted
     void deleteTile(Tile *tile);
 
     // log rt as it's overlap tiles and update Rectilinear structure & floorplan paylaod, upgrade tile to tile::OVERLAP if necessary 
@@ -80,8 +84,8 @@ public:
     // remove rt as tile's overlap and update Rectilinear structure & floorplan payload, make tile tile::BLOCK if necessary
     void decreaseTileOverlap(Tile *tile, Rectilinear *removeRect);
 
-    // function that places a rectilinear into the floorplan system. It automatically resolves overlaps by splittng and divide existing tiles
-    Rectilinear *placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin);
+    // TODOs:
+    void cleanUpRectiliear(Rectilinear *rect);
 
     // calculate the HPWL (cost) of the floorplan system, using the connections information stored inside "allConnections"
     double calculateHPWL();
