@@ -91,7 +91,7 @@ void GlobalResult::readGlobalResult(std::ifstream &ifs){
     for(int i = 0; i < this->blockCount; ++i){
         GlobalResultBlock grb;
         double initX, initY, initW, initH;
-        ifs >> grb.name >> grb.type>> initX >> initY >> initW >> initH;
+        ifs >> grb.name >> grb.type >> grb.legalArea >> initX >> initY >> initW >> initH;
         initX = round(initX);
         initY = round(initY);
 

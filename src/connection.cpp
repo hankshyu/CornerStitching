@@ -52,7 +52,7 @@ double Connection::calculateCost() const {
         if(boundingBoxCentreY > maxY) maxY = boundingBoxCentreY;
     }
 
-    return this->weight * ((maxX = minX)+(maxY = minY));
+    return this->weight * ((maxX - minX)+(maxY - minY));
 }
 
 size_t std::hash<Connection>::operator()(const Connection &key) const {
@@ -72,7 +72,7 @@ std::ostream &operator << (std::ostream &os, const Connection &c){
     for(int i = 0; i < c.vertices.size() - 1; ++i){
         os << c.vertices[i]->getName() << ", ";
     }
-    os << c.vertices[c.vertices.size() - 1]->getName() << "]";
+    os << c.vertices[c.vertices.size() - 1]->getName() << " = " << c.calculateCost() << "]";
 
     return os;
 }

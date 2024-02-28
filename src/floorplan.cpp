@@ -46,16 +46,16 @@ Floorplan::Floorplan(GlobalResult gr){
         nameToRectilinear[grb.name] = newRect;
     }
 
-    // // create Connections
-    // for(int i = 0; i < mConnectionCount; ++i){
-    //     GlobalResultConnection grc = gr.connections[i];
-    //     std::vector<Rectilinear *> connVertices;
-    //     for(std::string str : grc.vertices){
-    //         connVertices.push_back(nameToRectilinear[str]);
-    //     }
+    // create Connections
+    for(int i = 0; i < mConnectionCount; ++i){
+        GlobalResultConnection grc = gr.connections[i];
+        std::vector<Rectilinear *> connVertices;
+        for(std::string str : grc.vertices){
+            connVertices.push_back(nameToRectilinear[str]);
+        }
 
-    //     this->allConnections.push_back(Connection(connVertices, grc.weight));
-    // }
+        this->allConnections.push_back(Connection(connVertices, grc.weight));
+    }
 }
 
 Floorplan::Floorplan(const Floorplan &other){

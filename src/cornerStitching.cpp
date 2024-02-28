@@ -1147,7 +1147,6 @@ void CornerStitching::removeTile(Tile *tile){
 		}
 		deadTileRemains.push_back(mergeLeft);
 	}
-	visualiseTileDistribution("./outputs/case09/case09-output-debug-0.txt");
 
 	/*  STEP 4)
 		Scan upwards along the left edge of the original dead tile to find all the space tiles that are left 
@@ -1161,7 +1160,8 @@ void CornerStitching::removeTile(Tile *tile){
 		It is also necessary to do vertical merging in STEP 5). After each horizontal merge in STEP 5), check to see if 
 		the result tile can be merged with the tiles just above and below it, and merge if possible.
 	*/
-	int debugFileIdx = 1;
+
+	// int debugFileIdx = 1;
 
 	bool foundFirstRightDeadTile = false;
 	for(int leftTileIdx = 0; leftTileIdx < leftNeighbors.size(); ++leftTileIdx){
@@ -1242,9 +1242,10 @@ void CornerStitching::removeTile(Tile *tile){
 					}
 				}
 			}
-			std::string outFileName = "./outputs/case09/case09-output-debug-" + std::to_string(debugFileIdx) + ".txt";
-			debugFileIdx++;
-			visualiseTileDistribution(outFileName);
+			// std::string outFileName = "./outputs/case09/case09-output-debug-" + std::to_string(debugFileIdx) + ".txt";
+			// debugFileIdx++;
+			// visualiseTileDistribution(outFileName);
+
 			if(rDeadTile->getYHigh() >= origDeadTileYH) break;
 		}
 

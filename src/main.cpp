@@ -31,13 +31,11 @@ int main(int argc, char const *argv[]) {
 
 	try{
 
-
 		GlobalResult gr;
-		gr.readGlobalResult("./inputs/case09-output.txt");
+		gr.readGlobalResult("./inputs/case02-output.txt");
 
 		Floorplan fp (gr);
-		fp.cs->visualiseTileDistribution("./outputs/case09/case09-output-0.txt");
-
+		fp.cs->visualiseTileDistribution("outputs/case02/case02-output.txt");
 		for(auto p : fp.blockTilePayload){
 			std::cout << *(p.first) << "->" << p.second->getName() << std::endl;
 		}
@@ -51,6 +49,8 @@ int main(int argc, char const *argv[]) {
 			std::cout << "}" << std::endl;
 		}
 
+		std::cout << "Estimiate Corner Stitching HPWL: " << fp.calculateHPWL() << std::endl;
+		std::cout << GREEN << "Corner Stitching Exit normally" << COLORRST << std::endl;
 
 
 
