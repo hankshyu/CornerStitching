@@ -84,12 +84,12 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
 
 Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 
-	// check if the cut is valid due to the height of origTop and expect newDownHeight
+	// check if the cut is valid on the Y axis
 	if(origTop->getHeight() <= newDownHeight){
-		throw CSException("CORNERSTITCHING_09");
+		throw CSException("CORNERSTITCHING_08");
 	}
 
-	Tile *newDown = new Tile(tileType::BLANK, origTop->getLowerLeft(),origTop->getWidth(), newDownHeight);
+	Tile *newDown = new Tile(origTop->getType(), origTop->getLowerLeft(),origTop->getWidth(), newDownHeight);
 
 	newDown->rt = origTop;
 	newDown->lb = origTop->lb;
@@ -100,7 +100,7 @@ Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 	// change lower-neighbors' rt pointer to newDown
 	std::vector <Tile *> origDownNeighbors;
 	findDownNeighbors(origTop, origDownNeighbors);
-	for(Tile *t : origDownNeighbors){
+	for(Tile *&t : origDownNeighbors){
 		if(t->rt == origTop) t->rt = newDown;
 	}
 
@@ -111,14 +111,16 @@ Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 	
 	bool rightModified = false;
 	for(int i = 0; i < origRightNeighbors.size(); ++i){
-		if(origRightNeighbors[i]->getYLow() < newDown->getYHigh()){
+		Tile *rNeighbor = origRightNeighbors[i];
+		len_t rNeighborYLow = rNeighbor->getYLow();
+		if(rNeighborYLow < newDown->getYHigh()){
 			if(!rightModified){
 				rightModified = true;
-				newDown->tr = origRightNeighbors[i];
+				newDown->tr = rNeighbor;
 			}
 			// 08/06/2023 bug fix: change "tile" -> "newDown", add break statement to terminate unecessary serarch early
-			if(origRightNeighbors[i]->getYLow() >= newDown->getYLow()){
-				origRightNeighbors[i]->bl = newDown;
+			if(rNeighborYLow >= newDown->getYLow()){
+				rNeighbor->bl = newDown;
 			}else{
 				break;
 			}
@@ -130,16 +132,14 @@ Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 	std::vector <Tile *> origLeftNeighbors;
 	findLeftNeighbors(origTop, origLeftNeighbors);
 
-	bool leftModified = false;
 	for(int i = 0; i < origLeftNeighbors.size(); ++i){
-		if(origLeftNeighbors[i]->getYHigh() > newDown->getYHigh()){
-			if(!leftModified){
-				leftModified = true;
-				origTop->bl = origLeftNeighbors[i];
-				break;
-			}
+		Tile *lNeighbor = origLeftNeighbors[i];
+		if(lNeighbor->getYHigh() > newDown->getYHigh()){
+			// 02/29/2024: remove unecessary flag variable
+			origTop->bl = lNeighbor;
+			break;
 		}else{
-			origLeftNeighbors[i]->tr = newDown;
+			lNeighbor->tr = newDown;
 		}
 	}
 
@@ -148,6 +148,73 @@ Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 	origTop->lb = newDown;
 
 	return newDown;
+}
+
+Tile *CornerStitching::cutTileVertically(Tile *origRight, len_t newLeftWidth){
+
+	// check if the cut is valid on the X axis
+	if(origRight->getWidth() <= newLeftWidth){
+		throw CSException("CORNERSTITCHING_09");
+	}
+
+	Tile *newLeft = new Tile(origRight->getType(), origRight->getLowerLeft(), newLeftWidth, origRight->getHeight());
+
+	newLeft->tr = origRight;
+	newLeft->lb = origRight->lb;
+	newLeft->bl = origRight->bl;
+
+	// manipulate the surrounding tiles of origRight and newLeft
+
+	// change left-neighbors' tr pointer to newLeft
+	std::vector<Tile *> origLeftNeighbors;
+	findLeftNeighbors(origRight, origLeftNeighbors);
+	for(Tile *&t : origLeftNeighbors){
+		if(t->tr == origRight) t->tr = newLeft;
+	}
+
+	// 1. find the correct rt for newRight
+	// 2. change top neighbors to point their lb to the correct tile (whether to switch to newLeft or keep origRight)
+	std::vector<Tile *> origTopNeighbors;
+	findTopNeighbors(origRight, origTopNeighbors);
+	
+	bool topModified = false;
+	for(int i = 0; i < origTopNeighbors.size(); ++i){
+		Tile *tNeighbor = origTopNeighbors[i];
+		len_t tNeighborXLow = tNeighbor->getXLow();
+		if(tNeighborXLow < newLeft->getXHigh()){
+			if(!topModified){
+				topModified = true;
+				newLeft->rt = tNeighbor;
+			}
+			if(tNeighborXLow >= newLeft->getXLow()){
+				tNeighbor->lb = newLeft;
+			}else{
+				break;
+			}
+		}
+	}
+
+	// 1. find the new correct lb for origRight
+	// 2. change down neighbors to point their rt to the correct tile (whether to switch to newLeft or keep origRight)
+	std::vector<Tile *> origDownNeighbors;
+	findDownNeighbors(origRight, origDownNeighbors);
+
+	for(int i = 0; i < origDownNeighbors.size(); ++i){
+		Tile *dNeighbor = origDownNeighbors[i];
+		if(dNeighbor->getXHigh() > newLeft->getXHigh()){
+			origRight->lb = dNeighbor;	
+			break;
+		}else{
+			dNeighbor->rt = newLeft;
+		}
+	}
+
+	origRight->setLowerLeft(newLeft->getLowerRight());
+	origRight->setWidth(origRight->getWidth() - newLeftWidth);
+	origRight->bl = newLeft;
+
+	return newLeft;
+	
 }
 
 Tile *CornerStitching::mergeTilesVertically(Tile *mergeUp, Tile *mergeDown){
@@ -1065,11 +1132,11 @@ void CornerStitching::removeTile(Tile *tile){
 	std::unordered_map<Cord, Tile*>::iterator deadTileIt = mAllNonBlankTilesMap.find(tileLL);
 	// there is no such index
 	if(deadTileIt == mAllNonBlankTilesMap.end()){
-		throw (CSException("CORNERSTITCHING_15"));
+		throw (CSException("CORNERSTITCHING_17"));
 	}
 	// the index does not point to the tile to delete
 	if(mAllNonBlankTilesMap[tileLL] != tile){
-		throw (CSException("CORNERSTITCHING_15"));
+		throw (CSException("CORNERSTITCHING_18"));
 	}	
 
 	// special case when there is only one noeBlank tile left in the cornerStitching system

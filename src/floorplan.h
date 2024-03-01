@@ -24,9 +24,9 @@ private:
 
     int mConnectionCount;
 
-    int mGlobalAspectRatioMin;
-    int mGlobalAspectRatioMax;
-    int mGlobalUtilizationMin;
+    double mGlobalAspectRatioMin;
+    double mGlobalAspectRatioMax;
+    double mGlobalUtilizationMin;
     
     // function that places a rectilinear into the floorplan system. It automatically resolves overlaps by splittng and divide existing tiles
     Rectilinear *placeRectilinear(std::string name, rectilinearType type, Rectangle placement, area_t legalArea, double aspectRatioMin, double aspectRatioMax, double mUtilizationMin);
@@ -36,7 +36,7 @@ public:
 
     std::vector<Rectilinear *> allRectilinears;
     std::vector<Rectilinear *> softRectilinears;
-    std::vector<Rectilinear *> hardRectilinears;
+    // std::vector<Rectilinear *> hardRectilinears;
     std::vector<Rectilinear *> preplacedRectilinears;
 
     std::vector<Connection> allConnections;
@@ -46,7 +46,7 @@ public:
 
 
     Floorplan();
-    Floorplan(GlobalResult gr);
+    Floorplan(GlobalResult gr, double aspectRatioMin, double aspectRatioMax, double utilizationMin);
     Floorplan(const Floorplan &other);
     ~Floorplan();
 
@@ -58,13 +58,13 @@ public:
     int getHardRectilinearCount() const;
     int getPreplacedRectilinearCount() const;
     int getConnectionCount() const;
-    int getGlobalAspectRatioMin() const;
-    int getGlobalAspectRatioMax() const;
-    int getGlobalUtilizationMin() const;
+    double getGlobalAspectRatioMin() const;
+    double getGlobalAspectRatioMax() const;
+    double getGlobalUtilizationMin() const;
 
-    void setGlobalAspectRatioMin(int globalAspectRatioMin);
-    void setGlobalAspectRatioMax(int globalAspectRatioMax);
-    void setGlobalUtilizationMin(int globalUtilizationMin);
+    void setGlobalAspectRatioMin(double globalAspectRatioMin);
+    void setGlobalAspectRatioMax(double globalAspectRatioMax);
+    void setGlobalUtilizationMin(double globalUtilizationMin);
 
     // insert a tleType::BLOCK tile at tilePosition into cornerStitching & rectilinear (*rt) system,
     // record rt as it's payload into floorplan system (into blockTilePayload) and return new tile's pointer
@@ -84,8 +84,12 @@ public:
     // remove rt as tile's overlap and update Rectilinear structure & floorplan payload, make tile tile::BLOCK if necessary
     void decreaseTileOverlap(Tile *tile, Rectilinear *removeRect);
 
-    // TODOs:
-    void cleanUpRectiliear(Rectilinear *rect);
+    // collect all blocks within a rectilinear, reDice them into Rectangles. (may reduce Tile count)
+    void reshapeRectilinear(Rectilinear *rt);
+
+    Tile *divideTileHorizontally(Tile *origTop, len_t newDownHeight);
+
+    Tile *divideTileVertically(Tile *origRight, len_t newLeftWidth);
 
     // calculate the HPWL (cost) of the floorplan system, using the connections information stored inside "allConnections"
     double calculateHPWL();

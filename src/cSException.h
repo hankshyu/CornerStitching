@@ -25,14 +25,18 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_05", "visualiseArtpiece(): outputFileName invalid, cannot open file"},
     {"CORNERSTITCHING_06", "insertTile(): input tile prototype is out of canvas"},
     {"CORNERSTITCHING_07", "insertTile(): input tile's position already exist another tile on canvas"},
-    {"CORNERSTITCHING_08", "cutTileHorizontally(): victim tile (origTop) is not tileType::BLANK"},
-    {"CORNERSTITCHING_09", "cutTileHorizontally(): there is no enough height for newDownHeight to cut from origTop (victim tile)"},
+    {"CORNERSTITCHING_08", "cutTileHorizontally(): there is no enough height for newDownHeight to cut from origTop (victim tile)"},
+    {"CORNERSTITCHING_09", "cutTileVertically(): there is no enough width for newLeftHeight to cut from origRight (victim tile)"},
     {"CORNERSTITCHING_10", "mergeTilesHorizontally(): input mergeUp is not above input mergeDown"},
     {"CORNERSTITCHING_11", "mergeTilesHorizontally(): two input tiles (mergeUp and mergeDown) are not mergable"},
     {"CORNERSTITCHING_12", "insertTile(): input tile's type shall not be tileType::BLANK, blank tile is prohibited from insertion"},
     {"CORNERSTITCHING_13", "mergeTilesVertically(): input mergeLeft is not at the left of input mergeRight"},
     {"CORNERSTITCHING_14", "mergeTilesVertically(): two input tiles (mergeLeft and mergeRight) are not mergable"},
-    {"CORNERSTITCHING_15", "removeTile(): input tile is not in the cornerStitching system"},
+    {"CORNERSTITCHING_15", "cutTileVertically(): victim tile"},
+
+    
+    {"CORNERSTITCHING_17", "removeTile(Tile *tile): input tile is not in the cornerStitching system"},
+    {"CORNERSTITCHING_18", "removeTile(Tile *tile): cornerStitching exist a tile that has same LowerLeft Cord with input Tile* Tile"},
 
     {"RECTILINEAR_01", "calculateBoundingBox(): there exist no tile in rectilinear"},
     {"RECTILINEAR_02", "acquireWinding(): there exist no tile in rectilinear"},
@@ -62,7 +66,9 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"FLOORPLAN_15", "decreaseTileOverlap(Tile *tile, Rectilinear *removeRect): tile's type is tileType::OVERLAP but the payload in floorplan system has entry < 2"},
     {"FLOORPLAN_16", "placeRectilinear(...): input placement is not within the chip"},
     {"FLOORPLAN_17", "placeRectilinear(...): return tiles from cornerStitching.enumerateDirectArea() tile.type could only be tileType::BLOCK or tileType::OVERLAP"},
-
+    {"FLOORPLAN_18", "divideTileHorizontally(Tile *origTop, len_t newDownHeight): Tile origTop cannot be tileType::BLANK type, only tileType::BLOCK or tileType::OVERLAP is accepted"},
+    {"FLOORPLAN_19", "divideTileVertically(Tile *origRight, len_t newLeftWidth): Tile origRight cannot be tileType::BLANK type, only tileType::BLOCK or tileType::OVERLAP is accepted"},
+    {"FLOORPLAN_20", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile payload already contained such Rectilinear"},
 };
 
 class CSException : public std::exception{

@@ -26,17 +26,6 @@ private:
     // Helper function of enumerateDirectArea
     void enumerateDirectedAreaRProcedure(Rectangle box, std::vector <Tile *> &allTiles, Tile *targetTile) const;
 
-    // Pass in a victim tile through origTop, it will split the victim into two pieces:
-    // 1. origTop represents the top portion of the split, with height (origTop.height - newDownHeight)
-    // 2. newDown represents the lower portion of the split, with height newDownHeight, is the return value
-    Tile *cutTileHorizontally(Tile *origTop, len_t newDownHeight);
-
-    // Merges two tiles (up, down), mergeDown is merged into mergeUp, mergeDown is deleted and the new merged tile is the return value
-    Tile *mergeTilesVertically(Tile *mergeUp, Tile *mergeDown);
-
-    // Merges two tiles (left, right), mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
-    Tile *mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight);
-
 public:
     CornerStitching();
     CornerStitching(len_t chipWidth, len_t chipHeight);
@@ -77,6 +66,21 @@ public:
     // Removes the tile within system, retunrs false if Tile not within cornerStitching System. true if succes
     void removeTile(Tile *tile);
 
+    // Pass in a victim tile through origTop, it will split the victim into two pieces:
+    // 1. origTop represents the top portion of the split, with height (origTop.height - newDownHeight)
+    // 2. newDown represents the lower portion of the split, with height newDownHeight, is the return value
+    Tile *cutTileHorizontally(Tile *origTop, len_t newDownHeight);
+
+    // Pass in a victim tile through origRight, it will stplit the victim into two pieces:
+    // 1. origRight represents the right portion of the split, with width (origRight.width - newLeftWidth)
+    // 2. newLeft represents the left portion of the split, with width newLeftWidth, is the return value
+    Tile *cutTileVertically(Tile *origRight, len_t newLeftWidth);
+
+    // Merges two tiles (up, down), mergeDown is merged into mergeUp, mergeDown is deleted and the new merged tile is the return value
+    Tile *mergeTilesVertically(Tile *mergeUp, Tile *mergeDown);
+
+    // Merges two tiles (left, right), mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
+    Tile *mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight);
     // Output format for presenting software (renderTiles)
     void visualiseTileDistribution(const std::string ouputFileName) const;
     

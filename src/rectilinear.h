@@ -8,7 +8,7 @@
 #include "tile.h"
 
 enum class rectilinearType{
-    EMPTY, SOFT, HARD, PREPLACED
+    EMPTY, SOFT, PREPLACED
 };
 
 enum class rectilinearIllegalType{

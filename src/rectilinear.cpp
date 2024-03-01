@@ -345,23 +345,6 @@ size_t std::hash<Rectilinear>::operator()(const Rectilinear &key) const {
 
 std::ostream &operator << (std::ostream &os, const Rectilinear &r){
     os << "ID = " << r.mId << " Name = " << r.mName << " Type = " << r.mType;
-    switch (r.mType)
-    {
-    case rectilinearType::EMPTY:
-        os << "EMPTY";
-        break;
-    case rectilinearType::SOFT:
-        os << "SOFT";
-        break;
-    case rectilinearType::HARD:
-        os << "HARD";
-        break;
-    case rectilinearType::PREPLACED:
-        os << "PREPLACED";
-        break;
-    default:
-        break;
-    }
 
     os << " Global Placement = " << r.mGlobalPlacement << std::endl;
     os << "Aspect Ratio: " << r.mAspectRatioMin << " ~ " << r.mAspectRatioMax << ", Utilization Min = " << r.mUtilizationMin << std::endl; 
@@ -386,9 +369,6 @@ std::ostream &operator << (std::ostream &os, const rectilinearType &t){
         break;
     case rectilinearType::SOFT:
         os << "SOFT"; 
-        break;
-    case rectilinearType::HARD:
-        os << "HARD"; 
         break;
     case rectilinearType::PREPLACED:
         os << "PREPLACED"; 
