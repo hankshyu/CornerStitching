@@ -100,7 +100,7 @@ public:
     double calculateHPWL();
 
     // write Floorplan class for presenting software (renderFloorplan.py)
-    void visualiseFloorplan(const std::string &outputFileName) const;
+    void visualiseLegalFloorplan(const std::string &outputFileName) const;
     
 };
 

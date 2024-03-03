@@ -680,7 +680,7 @@ double Floorplan::calculateHPWL(){
     return floorplanHPWL;
 }
 
-void Floorplan::visualiseFloorplan(const std::string &outputFileName) const {
+void Floorplan::visualiseLegalFloorplan(const std::string &outputFileName) const {
     using namespace boost::polygon::operators;
 	std::ofstream ofs;
 	ofs.open(outputFileName, std::fstream::out);
