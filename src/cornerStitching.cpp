@@ -1352,7 +1352,7 @@ void CornerStitching::removeTile(Tile *tile){
 
 }
 
-void CornerStitching::visualiseTileDistribution(const std::string outputFileName) const{
+void CornerStitching::visualiseCornerStitching(const std::string &outputFileName) const{
 	std::ofstream ofs;
 	ofs.open(outputFileName, std::fstream::out);
 	if(!ofs.is_open()) throw(CSException("CORNERSTITCHING_05"));

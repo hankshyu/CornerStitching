@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <algorithm>
+#include <fstream>
 
 #include "boost/polygon/polygon.hpp"
 #include "floorplan.h"
@@ -117,7 +118,7 @@ Rectilinear *Floorplan::placeRectilinear(std::string name, rectilinearType type,
 }
 
 Floorplan::Floorplan()
-    : mChipContour(Rectangle(0, 0, 0, 0)) , mAllRectilinearCount(0), mSoftRectilinearCount(0), mHardRectilinearCount(0), mPreplacedRectilinearCount(0), mConnectionCount(0) {
+    : mChipContour(Rectangle(0, 0, 0, 0)) , mAllRectilinearCount(0), mSoftRectilinearCount(0), mPreplacedRectilinearCount(0), mConnectionCount(0) {
 }
 
 Floorplan::Floorplan(GlobalResult gr, double aspectRatioMin, double aspectRatioMax, double utilizationMin)
@@ -152,7 +153,11 @@ Floorplan::Floorplan(GlobalResult gr, double aspectRatioMin, double aspectRatioM
 
         nameToRectilinear[grb.name] = newRect;
     }
-
+    // Reshape all Rectilinears after insertion complete, order of insertion causes excessive splitting
+    for(Rectilinear* const &rect : this->allRectilinears){
+        reshapeRectilinear(rect);
+    }
+    
     // create Connections
     for(int i = 0; i < mConnectionCount; ++i){
         GlobalResultConnection grc = gr.connections[i];
@@ -171,7 +176,7 @@ Floorplan::Floorplan(const Floorplan &other){
     this->mChipContour = Rectangle(other.mChipContour);
     this->mAllRectilinearCount = other.mAllRectilinearCount;
     this->mSoftRectilinearCount = other.mSoftRectilinearCount;
-    this->mHardRectilinearCount = other.mHardRectilinearCount;
+    // this->mHardRectilinearCount = other.mHardRectilinearCount;
     this->mPreplacedRectilinearCount = other.mPreplacedRectilinearCount;
 
     this->mConnectionCount = other.mConnectionCount;
@@ -275,7 +280,7 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
     this->mChipContour = Rectangle(other.mChipContour);
     this->mAllRectilinearCount = other.mAllRectilinearCount;
     this->mSoftRectilinearCount = other.mSoftRectilinearCount;
-    this->mHardRectilinearCount = other.mHardRectilinearCount;
+    // this->mHardRectilinearCount = other.mHardRectilinearCount;
     this->mPreplacedRectilinearCount = other.mPreplacedRectilinearCount;
 
     this->mConnectionCount = other.mConnectionCount;
@@ -377,10 +382,6 @@ int Floorplan::getAllRectilinearCount() const {
 
 int Floorplan::getSoftRectilinearCount() const {
     return this->mSoftRectilinearCount;
-}
-
-int Floorplan::getHardRectilinearCount() const {
-    return this->mHardRectilinearCount;
 }
 
 int Floorplan::getPreplacedRectilinearCount() const {
@@ -679,6 +680,93 @@ double Floorplan::calculateHPWL(){
     return floorplanHPWL;
 }
 
+void Floorplan::visualiseFloorplan(const std::string &outputFileName) const {
+    using namespace boost::polygon::operators;
+	std::ofstream ofs;
+	ofs.open(outputFileName, std::fstream::out);
+	if(!ofs.is_open()){
+        throw(CSException("CORNERSTITCHING_21"));
+    } 
+
+    ofs << "BLOCK " << mAllRectilinearCount << std::endl;
+    ofs << rec::getWidth(mChipContour) << " " << rec::getHeight(mChipContour) << std::endl;
+
+    ofs << "SOFTBLOCK " << mSoftRectilinearCount << std::endl;
+    for(Rectilinear *const &rect : softRectilinears){
+        DoughnutPolygonSet dps;
+        if(!rect->overlapTiles.empty()){
+            throw(CSException("CORNERSTITCHING_22"));
+        }
+        for(Tile *const &t : rect->blockTiles){
+            dps += t->getRectangle();
+        }
+
+        if(dps.size() != 1){
+            throw(CSException("CORNERSTITCHING_23"));
+        }
+        DoughnutPolygon dp = dps[0];
+
+        boost::polygon::direction_1d direction = boost::polygon::winding(dp);
+        ofs << rect->getName() << " " << dp.size() << std::endl;  
+        
+        if(direction == boost::polygon::direction_1d_enum::CLOCKWISE){
+            for(auto it = dp.begin(); it != dp.end(); ++it){
+                ofs << (*it).x() << (*it).y() << std::endl;
+            }
+        }else{
+            std::vector<Cord> buffer;
+            for(auto it = dp.begin(); it != dp.end(); ++it){
+                buffer.push_back(*it);
+            }
+            for(std::vector<Cord>::reverse_iterator it = buffer.rbegin(); it != buffer.rend(); ++it){
+                ofs << (*it).x() << (*it).y() << std::endl;
+            }
+        }
+    }
+
+    ofs << "PREPLACEDBLOCK " << mPreplacedRectilinearCount << std::endl;
+    for(Rectilinear *const &rect : preplacedRectilinears){
+        DoughnutPolygonSet dps;
+        if(!rect->overlapTiles.empty()){
+            throw(CSException("CORNERSTITCHING_22"));
+        }
+        for(Tile *const &t : rect->blockTiles){
+            dps += t->getRectangle();
+        }
+
+        if(dps.size() != 1){
+            throw(CSException("CORNERSTITCHING_23"));
+        }
+        DoughnutPolygon dp = dps[0];
+
+        boost::polygon::direction_1d direction = boost::polygon::winding(dp);
+        ofs << rect->getName() << " " << dp.size() << std::endl;  
+        
+        if(direction == boost::polygon::direction_1d_enum::CLOCKWISE){
+            for(auto it = dp.begin(); it != dp.end(); ++it){
+                ofs << (*it).x() << (*it).y() << std::endl;
+            }
+        }else{
+            std::vector<Cord> buffer;
+            for(auto it = dp.begin(); it != dp.end(); ++it){
+                buffer.push_back(*it);
+            }
+            for(std::vector<Cord>::reverse_iterator it = buffer.rbegin(); it != buffer.rend(); ++it){
+                ofs << (*it).x() << (*it).y() << std::endl;
+            }
+        }
+    }
+
+    ofs << "CONNECTION " << mConnectionCount << std::endl;
+    for(Connection const &conn : allConnections){
+        for(Rectilinear *const &rect : conn.vertices){
+            ofs << rect->getName() << " ";
+        }
+        ofs << conn.weight << std::endl; 
+    }
+}
+
 size_t std::hash<Floorplan>::operator()(const Floorplan&key) const {
     return std::hash<Rectangle>()(key.getChipContour()) ^ std::hash<int>()(key.getAllRectilinearCount()) ^ std::hash<int>()(key.getConnectionCount());
 }
+

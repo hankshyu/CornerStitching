@@ -22,7 +22,7 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_02", "searchArea(): function's input box, the searching area, is out of canvas"},
     {"CORNERSTITCHING_03", "enumerateDirectArea(): function's input box, the searching area, is out of canvas"},
     {"CORNERSTITCHING_04", "CornerStitching(): input chipWidth or chipHeight should > 0"},
-    {"CORNERSTITCHING_05", "visualiseArtpiece(): outputFileName invalid, cannot open file"},
+    {"CORNERSTITCHING_05", "visualiseCornerStitching(): outputFileName invalid, cannot open file"},
     {"CORNERSTITCHING_06", "insertTile(): input tile prototype is out of canvas"},
     {"CORNERSTITCHING_07", "insertTile(): input tile's position already exist another tile on canvas"},
     {"CORNERSTITCHING_08", "cutTileHorizontally(): there is no enough height for newDownHeight to cut from origTop (victim tile)"},
@@ -33,8 +33,6 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"CORNERSTITCHING_13", "mergeTilesVertically(): input mergeLeft is not at the left of input mergeRight"},
     {"CORNERSTITCHING_14", "mergeTilesVertically(): two input tiles (mergeLeft and mergeRight) are not mergable"},
     {"CORNERSTITCHING_15", "cutTileVertically(): victim tile"},
-
-    
     {"CORNERSTITCHING_17", "removeTile(Tile *tile): input tile is not in the cornerStitching system"},
     {"CORNERSTITCHING_18", "removeTile(Tile *tile): cornerStitching exist a tile that has same LowerLeft Cord with input Tile* Tile"},
 
@@ -69,6 +67,9 @@ inline std::unordered_map<std::string, const char*> CSEXCEPTION_LUT = {
     {"FLOORPLAN_18", "divideTileHorizontally(Tile *origTop, len_t newDownHeight): Tile origTop cannot be tileType::BLANK type, only tileType::BLOCK or tileType::OVERLAP is accepted"},
     {"FLOORPLAN_19", "divideTileVertically(Tile *origRight, len_t newLeftWidth): Tile origRight cannot be tileType::BLANK type, only tileType::BLOCK or tileType::OVERLAP is accepted"},
     {"FLOORPLAN_20", "increaseTileOverlap(Tile *tile, Rectilinear *newRect): tile payload already contained such Rectilinear"},
+    {"FLOORPLAN_21", "visualiseFloorplan(...): outputFileName invalid, cannot open file"},
+    {"FLOORPLAN_22", "visualiseFloorplan(...): some Rectilinear in the system contains overlap tiles, cannot output"},
+    {"FLOORPLAN_23", "visualiseFloorplan(...): some Rectilinear is not in one piece"},
 };
 
 class CSException : public std::exception{

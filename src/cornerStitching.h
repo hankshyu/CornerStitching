@@ -81,8 +81,9 @@ public:
 
     // Merges two tiles (left, right), mergeRight is merged into mergeLeft, mergeRight is deleted and the new merged tile is the return value
     Tile *mergeTilesHorizontally(Tile *mergeLeft, Tile *mergeRight);
-    // Output format for presenting software (renderTiles)
-    void visualiseTileDistribution(const std::string ouputFileName) const;
+
+    // write cornerStitching class (composed of Tiles) for presenting software (renderCornerStitching.py)
+    void visualiseCornerStitching(const std::string &ouputFileName) const;
     
     // Check globally if any two tiles is mergable, returns true if no fails found, else return false and
     // two unmergable tiles is returned through tile1 and tile2

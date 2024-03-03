@@ -119,7 +119,7 @@ std::ostream &operator<<(std::ostream &os, const Tile &tile) {
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const enum tileType &t) {
+std::ostream &operator << (std::ostream &os, const enum tileType &t){
     switch (t){
         case tileType::BLOCK:
             os << "BLOCK";

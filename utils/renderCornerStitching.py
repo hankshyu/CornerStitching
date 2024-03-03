@@ -387,6 +387,7 @@ def hideAllTiles(event):
         Tess.dlb[1].set_visible(Tess.dlb[0])
 
     fig.canvas.draw()
+
 if __name__ == '__main__':
 
     # A ColourGenerator class generates colors that are visually seperate, using precomputed LUT
@@ -394,32 +395,50 @@ if __name__ == '__main__':
 
     # Parse input arguments
     parser = ArgumentParser()
-    parser.add_argument('-i', '--interactive', action='store_true', help='interactive mode', dest='interactiveFlag')
-    parser.add_argument('-a', '--arrow', action='store_true', help='show arrow mode', dest='arrowFlag')
     parser.add_argument('inFile', help='visualization input file')
-    parser.add_argument('-o', '--output', help='visualization output file', dest='outFile')
+    parser.add_argument('-o', help='visualization output file', dest='outFile')
+    parser.add_argument('-g', '--gui', action='store_true', help='GUI mode', dest='guiFlag')
+    parser.add_argument('-a', '--arrow', action='store_true', help='show arrow mode', dest='arrowFlag')
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbosely show input parsing results', dest='verboseFlag')
+    parser.add_argument('-w', '--white_blank', action='store_true', help='BLANK Tile pale white mode', dest='whiteBlankFlag')
     args = parser.parse_args()
 
-    print(CYAN, "IRISLAB Tile Rendering Program", COLORRST)
+    print(CYAN, "IRISLAB Corner-Stitching Rendering Program", COLORRST)
     print("Input File: ", args.inFile)
-    if args.interactiveFlag == True:
-        print("Interactive mode: ", GREEN, "ON", COLORRST)
-    else:
-        print("Interactive mode: ", RED, "OFF", COLORRST)
 
     if args.outFile == None:
-        print("Rendering Results not saved")
-    elif args.arrowFlag == True:
-        print("Rendering Result with arrows ", GREEN, "ON", COLORRST, " saved to: ", args.outFile)
+        print("Rendering Results saved to: ", RED, "Not saved", COLORRST)
     else:
-        print("Rendering Result with arrows ", RED, "OFF", COLORRST, " saved to: ", args.outFile)
-    
+        print("Rendering Results saved to: ", args.outFile)
+
+    if args.guiFlag == True:
+        print("GUI Interactive mode: ", GREEN, "ON", COLORRST)
+    else:
+        print("GUI Interactive mode: ", RED, "OFF", COLORRST)
+
+    if args.arrowFlag == True:
+        print("Rendering Result with arrows ", GREEN, "ON", COLORRST)
+    else:
+        print("Rendering Result with arrows ", RED, "OFF", COLORRST)
+
+    if args.verboseFlag == True:
+        print("Verbose mode: ", GREEN, "ON", COLORRST)
+    else:
+        print("Verbose mode: ", RED, "OFF", COLORRST)
+
+    if args.whiteBlankFlag == True:
+        print("BLANK Tile plae white mode: ", GREEN, "ON", COLORRST)
+    else:
+        print("BLANK Tile plae white mode: ", RED, "OFF", COLORRST)
+
+    # start parsing inputs 
     file_read_case = open(args.inFile, 'r')
     fin_case = file_read_case.read().split("\n")
 
     myChip = Chip()
     myChip.readChip(fin_case)
-    myChip.showChip()
+    if args.verboseFlag == True:
+        myChip.showChip()
 
     fig, ax = plt.subplots()
     BORDER = int((myChip.chipHeight + myChip.chipWidth)/20)
@@ -443,15 +462,22 @@ if __name__ == '__main__':
     )
 
     ClickElements = []
+    faceColorChoice = 0
     # Plot the tiles
     for tIdx, tl in enumerate(myChip.tileArr):
         if tl.blockType == "BLANK":
-            adaptAlpha = 0.15
+            if args.whiteBlankFlag == True:
+                faceColorChoice = '#FFFFFF'
+            else:
+                faceColorChoice = colourG.getColour()
+            adaptAlpha = 0.10
             representColour = 'black'
         elif tl.blockType == "BLOCK":
+            faceColorChoice = colourG.getColour()
             adaptAlpha = 0.60
             representColour = 'blue'
         else:
+            faceColorChoice = colourG.getColour()
             adaptAlpha = 0.95
             representColour = 'red'
         
@@ -460,7 +486,7 @@ if __name__ == '__main__':
         tl.dShape[1] = patches.Polygon(tl.Corner,
                                        closed=True,
                                        fill=True,
-                                       facecolor=colourG.getColour(),
+                                       facecolor=faceColorChoice,
                                        edgecolor="#000000",
                                        alpha=adaptAlpha,
                                        label=tl.LL.__str__())
@@ -511,32 +537,32 @@ if __name__ == '__main__':
             lbTile = myChip.tileDict[tl.lb]
             tl.dlb[1] = plt.arrow(lbRoot.x, lbRoot.y, (lbTile.centre.x - lbRoot.x), (lbTile.centre.y - lbRoot.y), width=representLenghIdx*0.1, head_width=representLenghIdx*0.4, color="slategray", linestyle="-")
 
+    # Adjustments for "-a", arrow option
+    if args.arrowFlag == False:
+        global_myChip.avrt = not global_myChip.avrt
+        for tl in global_myChip.tileArr:
+            tl.drt[0] = global_myChip.avrt and tl.drt[0] 
+            tl.drt[1].set_visible(tl.drt[0])
+
+        global_myChip.avtr = not global_myChip.avtr
+        for tl in global_myChip.tileArr:
+            tl.dtr[0] = global_myChip.avtr and tl.dtr[0] 
+            tl.dtr[1].set_visible(tl.dtr[0])
+        
+        global_myChip.avbl = not global_myChip.avbl
+        for tl in global_myChip.tileArr:
+            tl.dbl[0] = global_myChip.avbl and tl.dbl[0] 
+            tl.dbl[1].set_visible(tl.dbl[0])
+
+        global_myChip.avlb = not global_myChip.avlb
+        for tl in global_myChip.tileArr:
+            tl.dlb[0] = global_myChip.avlb and tl.dlb[0] 
+            tl.dlb[1].set_visible(tl.dlb[0])
+        plt.draw()
+
     # For using '-o' flag to save output file
-    if args.outFile != None :
-        if args.arrowFlag == True:
-            plt.savefig(args.outFile, dpi = 1200)
-        else:
-            global_myChip.avrt = not global_myChip.avrt
-            for tl in global_myChip.tileArr:
-                tl.drt[0] = global_myChip.avrt and tl.drt[0] 
-                tl.drt[1].set_visible(tl.drt[0])
-
-            global_myChip.avtr = not global_myChip.avtr
-            for tl in global_myChip.tileArr:
-                tl.dtr[0] = global_myChip.avtr and tl.dtr[0] 
-                tl.dtr[1].set_visible(tl.dtr[0])
-            
-            global_myChip.avbl = not global_myChip.avbl
-            for tl in global_myChip.tileArr:
-                tl.dbl[0] = global_myChip.avbl and tl.dbl[0] 
-                tl.dbl[1].set_visible(tl.dbl[0])
-
-            global_myChip.avlb = not global_myChip.avlb
-            for tl in global_myChip.tileArr:
-                tl.dlb[0] = global_myChip.avlb and tl.dlb[0] 
-                tl.dlb[1].set_visible(tl.dlb[0])
-            plt.draw()
-            plt.savefig(args.outFile, dpi = 1200)
+    if args.outFile != None:
+        plt.savefig(args.outFile, dpi = 1200)
 
     # Create checkboxes to select/unselect certain Tile attributes
     rax = fig.add_axes([0.6, 0.05, 0.15, 0.15])
@@ -569,7 +595,6 @@ if __name__ == '__main__':
     buttonHideAll.on_clicked(hideAllTiles)
 
   
-    if args.interactiveFlag == True:
+    if args.guiFlag == True:
         plt.show()
-
 

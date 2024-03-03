@@ -19,7 +19,7 @@ private:
 
     int mAllRectilinearCount;
     int mSoftRectilinearCount;
-    int mHardRectilinearCount;
+    // int mHardRectilinearCount;
     int mPreplacedRectilinearCount;
 
     int mConnectionCount;
@@ -55,7 +55,6 @@ public:
     Rectangle getChipContour() const;
     int getAllRectilinearCount() const;
     int getSoftRectilinearCount() const;
-    int getHardRectilinearCount() const;
     int getPreplacedRectilinearCount() const;
     int getConnectionCount() const;
     double getGlobalAspectRatioMin() const;
@@ -99,6 +98,9 @@ public:
 
     // calculate the HPWL (cost) of the floorplan system, using the connections information stored inside "allConnections"
     double calculateHPWL();
+
+    // write Floorplan class for presenting software (renderFloorplan.py)
+    void visualiseFloorplan(const std::string &outputFileName) const;
     
 };
 
