@@ -108,25 +108,6 @@ double Tile::calAspectRatio() const {
     return rec::calculateAspectRatio(this->mRectangle);
 };
 
-
-// bool Tile::checkXCordInTile(const Cord &point) const{
-//     Rectangle thisRec = this->getRectangle();
-//     bool xLeftInRange = (point.x() >= boost::polygon::xl(thisRec));
-//     bool xRightInRange = (point.x() < boost::polygon::xh(thisRec));
-//     return(xLeftInRange && xRightInRange);
-// }
-
-// bool Tile::checkYCordInTile(const Cord &point) const{
-//     Rectangle thisRec = this->getRectangle();
-//     bool yDownInRange = (point.y() >= boost::polygon::yl(thisRec));
-//     bool yUpInRange = (point.y() < boost::polygon::yh(thisRec));
-//     return(yDownInRange && yUpInRange);
-// }
-
-// bool Tile::checkCordInTile(const Cord &point) const{
-//     return (checkXCordInTile(point) && checkYCordInTile(point));
-// }
-
 size_t std::hash<Tile>::operator()(const Tile &key) const {
     return (std::hash<int>()((int)key.getType())) ^ (std::hash<Rectangle>()(key.getRectangle()));
 }
@@ -139,9 +120,7 @@ std::ostream &operator<<(std::ostream &os, const Tile &tile) {
 }
 
 std::ostream &operator<<(std::ostream &os, const enum tileType &t) {
-
-    switch (t)
-    {
+    switch (t){
         case tileType::BLOCK:
             os << "BLOCK";
             break;
@@ -155,49 +134,4 @@ std::ostream &operator<<(std::ostream &os, const enum tileType &t) {
             throw CSException("TILE_01");
     }
     return os;
-}
-
-std::vector<Tile> mergeCutTiles(std::vector<Tile> toMerge, std::vector<Tile> toCut) {
-
-    using namespace boost::polygon::operators;
-
-    namespace gtl = boost::polygon;
-
-    typedef gtl::polygon_data<len_t>                 Polygon;
-    typedef gtl::point_data<len_t> Point;
-    typedef std::vector<Polygon>                     PolygonSet;
-
-    PolygonSet manipPoly;
-    for ( auto &tile : toMerge ) {
-        Rectangle mergeRect(tile.getLowerLeft().x(), tile.getLowerLeft().y(), tile.getUpperRight().x(), tile.getUpperRight().y());
-        manipPoly += mergeRect;
-    }
-    for ( auto &tile : toCut ) {
-        Rectangle cutRect(tile.getLowerLeft().x(), tile.getLowerLeft().y(), tile.getUpperRight().x(), tile.getUpperRight().y());
-        manipPoly -= cutRect;
-    }
-
-    std::vector<Tile> manipTiles;
-    std::set<len_t> yCord;
-
-    for ( Polygon poly : manipPoly ) {
-        for ( const Point &point : poly ) {
-            yCord.insert(point.y());
-        }
-        std::vector<len_t> yCordVec(yCord.begin(), yCord.end());
-        std::sort(yCordVec.begin(), yCordVec.end());
-        for ( int i = 0; i < yCordVec.size() - 1; i++ ) {
-            int lowY = yCordVec[i];
-            int highY = yCordVec[i + 1];
-            Rectangle mask(0, lowY, 100000000, highY);
-            PolygonSet maskedPoly;
-            maskedPoly += poly & mask;
-
-            Rectangle maskedRect;
-            gtl::extents(maskedRect, maskedPoly);
-            manipTiles.push_back(Tile(tileType::OVERLAP, Cord(gtl::xl(maskedRect), gtl::yl(maskedRect)), gtl::xh(maskedRect) - gtl::xl(maskedRect), gtl::yh(maskedRect) - gtl::yl(maskedRect)));
-        }
-    }
-
-    return manipTiles;
 }

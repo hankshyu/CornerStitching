@@ -64,7 +64,7 @@ void CornerStitching::enumerateDirectedAreaRProcedure(Rectangle box, std::vector
 
 	Rectangle targetTileRect = targetTile->getRectangle();
 
-	for(Tile *t : rightNeighbors){
+	for(Tile *const &t : rightNeighbors){
 		// make sure the tile is in the AOI
 		if(!rec::hasIntersect(t->getRectangle(), box, false)) continue;
 
@@ -100,7 +100,7 @@ Tile *CornerStitching::cutTileHorizontally(Tile *origTop, len_t newDownHeight){
 	// change lower-neighbors' rt pointer to newDown
 	std::vector <Tile *> origDownNeighbors;
 	findDownNeighbors(origTop, origDownNeighbors);
-	for(Tile *&t : origDownNeighbors){
+	for(Tile *const &t : origDownNeighbors){
 		if(t->rt == origTop) t->rt = newDown;
 	}
 
@@ -337,7 +337,7 @@ CornerStitching::CornerStitching(const CornerStitching &other){
 	other.collectAllTiles(oldAllTiles);
 
 	std::unordered_map <Tile *, Tile *> oldNewPairs;
-	for(Tile *oldTile : oldAllTiles){
+	for(Tile *const &oldTile : oldAllTiles){
 		oldNewPairs[oldTile] = new Tile(*oldTile);
 	}
 
@@ -376,7 +376,7 @@ CornerStitching::~CornerStitching(){
 	
 	std::unordered_set<Tile *> allOldTiles;
 	collectAllTiles(allOldTiles);
-	for(Tile *oldTiles : allOldTiles){
+	for(Tile *const &oldTiles : allOldTiles){
 		delete(oldTiles);
 	}
 
@@ -399,7 +399,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 	std::vector<Tile *>ourBlockArr;
 	std::vector<Tile *>ourBlankArr;
 	std::vector<Tile *>ourOverlapArr;
-	for(Tile *t : oursAllTiles){
+	for(Tile *const &t : oursAllTiles){
 		tileType tType = t->getType();
 		if(tType == tileType::BLOCK) ourBlockArr.push_back(t);
 		else if(tType == tileType::BLANK) ourBlankArr.push_back(t);
@@ -409,7 +409,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 	std::unordered_map <Cord, Tile *> theirBlockMap;
 	std::unordered_map <Cord, Tile *> theirBlankMap;
 	std::unordered_map <Cord, Tile *> theirOverlapMap;
-	for(Tile *t : theirsAllTiles){
+	for(Tile *const &t : theirsAllTiles){
 		tileType tType = t->getType();
 		if(tType == tileType::BLOCK) theirBlockMap[t->getLowerLeft()] = t;
 		else if(tType == tileType::BLANK) theirBlankMap[t->getLowerLeft()] = t;
@@ -424,7 +424,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 	std::unordered_map <Tile *, Tile *> tileMap;
 
 	// Map tileType::BLOCK tiles from ours to theirs
-	for(Tile *t : ourBlockArr){
+	for(Tile *const &t : ourBlockArr){
 		std::unordered_map <Cord, Tile *>::iterator it = theirBlockMap.find(t->getLowerLeft());
 		// if not found than there is no matching tile in ours and thiers
 		if(it == theirBlockMap.end()) return false;
@@ -442,7 +442,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 
 
 	// Map tileType::BLANK tiles from ours to theirs
-	for(Tile *t : ourBlankArr){
+	for(Tile *const &t : ourBlankArr){
 		std::unordered_map <Cord, Tile *>::iterator it = theirBlankMap.find(t->getLowerLeft());
 		// if not found than there is no matching tile in ours and thiers
 		if(it == theirBlankMap.end()) return false;
@@ -458,7 +458,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 	if(!theirBlankMap.empty()) return false;
 
 	// Map tileType::OVERLAP tiles from ours to theirs
-	for(Tile *t : ourOverlapArr){
+	for(Tile *const &t : ourOverlapArr){
 		std::unordered_map <Cord, Tile *>::iterator it = theirOverlapMap.find(t->getLowerLeft());
 		// if not found than there is no matching tile in ours and thiers
 		if(it == theirOverlapMap.end()) return false;
@@ -474,7 +474,7 @@ bool CornerStitching::operator == (const CornerStitching &other) const{
 	if(!theirOverlapMap.empty()) return false;
 
 	// Check the links are consistent
-	for(Tile *t : oursAllTiles){
+	for(Tile *const &t : oursAllTiles){
 	   Tile *theirTile = tileMap[t]; 
 
 	   // check rt links is correct
@@ -1365,7 +1365,7 @@ void CornerStitching::visualiseTileDistribution(const std::string outputFileName
 	// write the chip contour 
 	ofs << mCanvasWidth << " " << mCanvasHeight << std::endl;
 	// Then start to write info for each file
-	for(Tile *tile : allTiles){
+	for(Tile *const &tile : allTiles){
 		unsigned long long tileHash;
 		ofs << *tile << std::endl;
 
@@ -1410,12 +1410,6 @@ bool CornerStitching::debugBlankMerged(Tile *&tile1, Tile *&tile2) const{
 
 	std::vector<Tile *> allTilesArr (allTilesSet.begin(), allTilesSet.end());
 	
-	// this is for checking the copying works
-	// std::cout << "allTilesArr: " << std::endl;
-	// for(Tile *t : allTilesArr){
-	//     std::cout << *t << std::endl;
-	// }
-
 	for(int i = 0; i < allTilesArr.size(); ++i){
 		for(int j = (i+1); j < allTilesArr.size(); ++j){
 			tile1 = allTilesArr[i];

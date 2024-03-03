@@ -18,18 +18,9 @@ private:
     tileType mType;
     Rectangle mRectangle;
 
-    /* data payload */
-    
-    // int mTessIndex;
-    // void *mTess;
-
 public:
-
     Tile *rt, *tr, *bl, *lb;
 
-    std::vector <int> OverlapFixedTesseraeIdx;
-    std::vector <int> OverlapSoftTesseraeIdx;
-    
     Tile();
     Tile(tileType t, Rectangle rect);
     Tile(tileType t, Cord ll, len_t w, len_t h);
@@ -64,11 +55,6 @@ public:
 
     double calAspectRatio() const;
     
-    // checks if a point is contained inside the tile
-    // bool checkXCordInTile(const Cord &point) const;
-    // bool checkYCordInTile(const Cord &point) const;
-    // bool checkCordInTile(const Cord &point) const;
-
 };
 
 // Implement hash function for map and set data structure
@@ -82,5 +68,4 @@ namespace std{
 std::ostream &operator << (std::ostream &os, const Tile &t);
 std::ostream &operator << (std::ostream &os, const enum tileType &t);
 
-std::vector<Tile> mergeCutTiles(std::vector<Tile> toMerge, std::vector<Tile> toCut);
 #endif // __TILE_H__

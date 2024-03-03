@@ -117,7 +117,7 @@ Rectangle Rectilinear::calculateBoundingBox() const {
     BBXH = (randomTile)->getXHigh();
     BBYH = (randomTile)->getYHigh();
 
-    for(Tile *t : blockTiles){
+    for(Tile *const &t : blockTiles){
         len_t xl = t->getXLow();
         len_t yl = t->getYLow();
         len_t xh = t->getXHigh();
@@ -128,7 +128,7 @@ Rectangle Rectilinear::calculateBoundingBox() const {
         if(xh > BBXH) BBXH = xh;
         if(yh > BBYH) BBYH = yh;
     }
-    for(Tile *t : overlapTiles){
+    for(Tile *const &t : overlapTiles){
         len_t xl = t->getXLow();
         len_t yl = t->getYLow();
         len_t xh = t->getXHigh();
@@ -145,10 +145,10 @@ Rectangle Rectilinear::calculateBoundingBox() const {
 
 area_t Rectilinear::calculateActualArea() const {
     area_t actualArea = 0;
-    for(Tile *t : blockTiles){
+    for(Tile *const &t : blockTiles){
         actualArea += t->getArea();
     }
-    for(Tile *t : overlapTiles){
+    for(Tile *const &t : overlapTiles){
         actualArea += t->getArea();
     }
     return actualArea;
@@ -163,13 +163,13 @@ bool Rectilinear::isLegalNoOverlap() const {
 
     DoughnutPolygonSet dpSet, unionSet;
 
-    for(Tile *t : this->blockTiles){
+    for(Tile *const &t : this->blockTiles){
         Rectangle rt = t->getRectangle();
         assign(unionSet, dpSet&rt);
         if(!unionSet.empty()) return false;
         dpSet += rt;
     }
-    for(Tile *t : this->overlapTiles){
+    for(Tile *const &t : this->overlapTiles){
         Rectangle rt = t->getRectangle();
         assign(unionSet, dpSet&rt);
         if(!unionSet.empty()) return false;
@@ -197,10 +197,10 @@ bool Rectilinear::isLegalNoHole() const {
     using namespace boost::polygon::operators;
     DoughnutPolygonSet curRectSet;
 
-    for(Tile *t : this->blockTiles){
+    for(Tile *const &t : this->blockTiles){
         curRectSet += t->getRectangle();
     }
-    for(Tile *t : this->overlapTiles){
+    for(Tile *const &t : this->overlapTiles){
         curRectSet += t->getRectangle();
     }
 
@@ -212,10 +212,10 @@ bool Rectilinear::isLegalOneShape() const {
     using namespace boost::polygon::operators;
     DoughnutPolygonSet curRectSet;
 
-    for(Tile *t : this->blockTiles){
+    for(Tile *const &t : this->blockTiles){
         curRectSet += t->getRectangle();
     }
-    for(Tile *t : this->overlapTiles){
+    for(Tile *const &t : this->overlapTiles){
         curRectSet += t->getRectangle();
     }
 
@@ -228,7 +228,7 @@ bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
     using namespace boost::polygon::operators;
     DoughnutPolygonSet curRectSet, unionSet;
 
-    for(Tile *t : this->blockTiles){
+    for(Tile *const &t : this->blockTiles){
         Rectangle rt = t->getRectangle();
         assign(unionSet, curRectSet&rt);
         if(!unionSet.empty()){
@@ -237,7 +237,7 @@ bool Rectilinear::isLegal(rectilinearIllegalType &illegalCode) const {
         }
         curRectSet += rt;
     }
-    for(Tile *t : this->overlapTiles){
+    for(Tile *const &t : this->overlapTiles){
         Rectangle rt = t->getRectangle();
         assign(unionSet, curRectSet&rt);
         if(!unionSet.empty()){
@@ -295,10 +295,10 @@ void Rectilinear::acquireWinding(std::vector<Cord> &winding, windingDirection wd
     using namespace boost::polygon::operators;
     DoughnutPolygonSet curRectSet;
 
-    for(Tile *t : this->blockTiles){
+    for(Tile *const &t : this->blockTiles){
         curRectSet += t->getRectangle();
     }
-    for(Tile *t : this->overlapTiles){
+    for(Tile *const &t : this->overlapTiles){
         curRectSet += t->getRectangle();
     }
 
@@ -350,12 +350,12 @@ std::ostream &operator << (std::ostream &os, const Rectilinear &r){
     os << "Aspect Ratio: " << r.mAspectRatioMin << " ~ " << r.mAspectRatioMax << ", Utilization Min = " << r.mUtilizationMin << std::endl; 
 
     os << "BLOCK Tiles (" << r.blockTiles.size() << ")" << std::endl;
-    for(Tile *t : r.blockTiles){
+    for(Tile *const &t : r.blockTiles){
         os << *t << std::endl;
     }
 
     os << "OVERLAP Tiles (" << r.overlapTiles.size() << ")";
-    for(Tile *t : r.overlapTiles){
+    for(Tile *const &t : r.overlapTiles){
         os << std::endl << *t; 
     }
     return os;

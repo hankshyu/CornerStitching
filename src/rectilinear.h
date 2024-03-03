@@ -98,7 +98,6 @@ public:
     // acquire the windings of rectiinear, may choose winding direction, points pass through vector "winding"
     void acquireWinding(std::vector<Cord> &winding, windingDirection wd) const;
     
-    void reshapeContainedTiles();
 };
 namespace std{
     template<>

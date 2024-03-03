@@ -6,12 +6,12 @@
 
 typedef boost::polygon::polygon_90_with_holes_data<len_t> DoughnutPolygon;
 
-// namespace std{
-//     template<>
-//     struct hash<DoughnutPolygon>{
-//         size_t operator()(const DoughnutPolygon &key) const;
-//     };
-// }
+namespace std{
+    template<>
+    struct hash<DoughnutPolygon>{
+        size_t operator()(const DoughnutPolygon &key) const;
+    };
+}
 
 std::ostream &operator << (std::ostream &os, const DoughnutPolygon &dp);
 

@@ -33,6 +33,4 @@ namespace dps{
 }
 
 
-
-
 #endif // __DOUGHNUTPOLYGONSET_H__

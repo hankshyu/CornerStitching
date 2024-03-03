@@ -130,24 +130,38 @@ void GlobalResult::readGlobalResult(std::ifstream &ifs){
 
 }
 
+size_t std::hash<GlobalResult>::operator()(const GlobalResult &key) const {
+    return std::hash<int>()(key.blockCount) ^ std::hash<int>()(key.connectionCount) ^ std::hash<int>()(key.chipWidth) ^ std::hash<int>()(key.chipHeight);
+}
+
+std::ostream &operator << (std::ostream &os, const GlobalResultBlock &grb){
+    os << grb.name << " " << grb.type << " " << grb.llx << " " << grb.lly << " " << grb.width << " " << grb.height;
+    return os;
+
+}
+std::ostream &operator << (std::ostream &os, const GlobalResultConnection &grc){
+    for(std::string const &vertex : grc.vertices){
+        os << vertex << " ";
+    }
+    os << grc.weight;
+
+    return os;
+}
+
 std::ostream &operator << (std::ostream &os, const GlobalResult &gr){
     os << "BLOCK " << gr.blockCount << " CONNECTION " << gr.connectionCount << std::endl;
     os << gr.chipWidth << " " << gr.chipHeight << std::endl;
 
-    for(GlobalResultBlock grb : gr.blocks){
-        os << grb.name << " " << grb.type << " " << grb.llx << " " << grb.lly << " " << grb.width << " " << grb.height << std::endl;
+    for(GlobalResultBlock const &grb : gr.blocks){
+        os << grb << std::endl;
     }
 
     GlobalResultConnection grc;
     int connectionNum = gr.connections.size();
     for(int i = 0; i < connectionNum; ++i){
         grc = gr.connections[i]; 
-        for(std::string vertex : grc.vertices){
-            os << vertex << " ";
-        }
-        os << grc.weight;
-        if(i != (connectionNum-1)) os << std::endl;
-        
+        os << grc;
+        if(i != (connectionNum - 1)) os << std::endl;
     }
 
     return os;

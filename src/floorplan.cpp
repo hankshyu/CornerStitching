@@ -157,7 +157,7 @@ Floorplan::Floorplan(GlobalResult gr, double aspectRatioMin, double aspectRatioM
     for(int i = 0; i < mConnectionCount; ++i){
         GlobalResultConnection grc = gr.connections[i];
         std::vector<Rectilinear *> connVertices;
-        for(std::string str : grc.vertices){
+        for(std::string const &str : grc.vertices){
             connVertices.push_back(nameToRectilinear[str]);
         }
 
@@ -186,12 +186,12 @@ Floorplan::Floorplan(const Floorplan &other){
     std::unordered_map<Rectilinear *, Rectilinear*> rectMap;
     std::unordered_map<Tile *, Tile *> tileMap;
 
-    for(Rectilinear *oldRect : other.allRectilinears){
+    for(Rectilinear *const &oldRect : other.allRectilinears){
         Rectilinear *nR = new Rectilinear(*oldRect);
 
         // re-consruct the block tiles pointers using the new CornerStitching System
         nR->blockTiles.clear();
-        for(Tile *oldT : oldRect->blockTiles){
+        for(Tile *const &oldT : oldRect->blockTiles){
             Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->blockTiles.insert(newT);
@@ -199,7 +199,7 @@ Floorplan::Floorplan(const Floorplan &other){
 
         // re-consruct the overlap tiles pointers using the new CornerStitching System
         nR->overlapTiles.clear();
-        for(Tile *oldT : oldRect->overlapTiles){
+        for(Tile *const &oldT : oldRect->overlapTiles){
             Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->overlapTiles.insert(newT);
@@ -212,7 +212,7 @@ Floorplan::Floorplan(const Floorplan &other){
     this->softRectilinears.clear();
     this->preplacedRectilinears.clear();
 
-    for(Rectilinear *oldR : other.allRectilinears){
+    for(Rectilinear *const &oldR : other.allRectilinears){
         Rectilinear *newR = rectMap[oldR];
         this->allRectilinears.push_back(rectMap[oldR]);
         
@@ -231,10 +231,10 @@ Floorplan::Floorplan(const Floorplan &other){
 
     // rebuild connections
     this->allConnections.clear();
-    for(Connection cn : other.allConnections){
+    for(Connection const &cn : other.allConnections){
         Connection newCN = Connection(cn);
         newCN.vertices.clear();
-        for(Rectilinear *oldRT : cn.vertices){
+        for(Rectilinear *const &oldRT : cn.vertices){
             newCN.vertices.push_back(rectMap[oldRT]);
         }
         this->allConnections.push_back(newCN);
@@ -253,7 +253,7 @@ Floorplan::Floorplan(const Floorplan &other){
     for(std::unordered_map<Tile *, std::vector<Rectilinear *>>::const_iterator it = other.overlapTilePayload.begin(); it != other.overlapTilePayload.end(); ++it){
         Tile *nT = tileMap[it->first];
         std::vector<Rectilinear *> nRectVec;
-        for(Rectilinear *oldR : it->second){
+        for(Rectilinear *const &oldR : it->second){
             nRectVec.push_back(rectMap[oldR]);
         }
         
@@ -263,7 +263,7 @@ Floorplan::Floorplan(const Floorplan &other){
 }
 
 Floorplan::~Floorplan(){
-    for(Rectilinear *rt : this->allRectilinears){
+    for(Rectilinear *&rt : this->allRectilinears){
         delete(rt);
     }
 
@@ -290,12 +290,12 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
     std::unordered_map<Rectilinear *, Rectilinear*> rectMap;
     std::unordered_map<Tile *, Tile *> tileMap;
 
-    for(Rectilinear *oldRect : other.allRectilinears){
+    for(Rectilinear *const &oldRect : other.allRectilinears){
         Rectilinear *nR = new Rectilinear(*oldRect);
 
         // re-consruct the block tiles pointers using the new CornerStitching System
         nR->blockTiles.clear();
-        for(Tile *oldT : oldRect->blockTiles){
+        for(Tile *const &oldT : oldRect->blockTiles){
             Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->blockTiles.insert(newT);
@@ -303,7 +303,7 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
 
         // re-consruct the overlap tiles pointers using the new CornerStitching System
         nR->overlapTiles.clear();
-        for(Tile *oldT : oldRect->overlapTiles){
+        for(Tile *const &oldT : oldRect->overlapTiles){
             Tile *newT = this->cs->findPoint(oldT->getLowerLeft());
             tileMap[oldT] = newT;
             nR->overlapTiles.insert(newT);
@@ -316,7 +316,7 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
     this->softRectilinears.clear();
     this->preplacedRectilinears.clear();
 
-    for(Rectilinear *oldR : other.allRectilinears){
+    for(Rectilinear *const &oldR : other.allRectilinears){
         Rectilinear *newR = rectMap[oldR];
         this->allRectilinears.push_back(rectMap[oldR]);
         
@@ -335,10 +335,10 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
 
     // rebuild connections
     this->allConnections.clear();
-    for(Connection cn : other.allConnections){
+    for(Connection const &cn : other.allConnections){
         Connection newCN = Connection(cn);
         newCN.vertices.clear();
-        for(Rectilinear *oldRT : cn.vertices){
+        for(Rectilinear *const &oldRT : cn.vertices){
             newCN.vertices.push_back(rectMap[oldRT]);
         }
         this->allConnections.push_back(newCN);
@@ -357,7 +357,7 @@ Floorplan &Floorplan::operator = (const Floorplan &other){
     for(std::unordered_map<Tile *, std::vector<Rectilinear *>>::const_iterator it = other.overlapTilePayload.begin(); it != other.overlapTilePayload.end(); ++it){
         Tile *nT = tileMap[it->first];
         std::vector<Rectilinear *> nRectVec;
-        for(Rectilinear *oldR : it->second){
+        for(Rectilinear *const &oldR : it->second){
             nRectVec.push_back(rectMap[oldR]);
         }
         
@@ -438,7 +438,7 @@ Tile *Floorplan::addOverlapTile(const Rectangle &tilePosition, const std::vector
         throw CSException("FLOORPLAN_04");
     }
 
-    for(Rectilinear *rt : payload){
+    for(Rectilinear *const &rt : payload){
         if(std::find(allRectilinears.begin(), allRectilinears.end(), rt) == allRectilinears.end()){
             throw CSException("FLOORPLAN_05");
         }
@@ -672,9 +672,13 @@ Tile *Floorplan::divideTileVertically(Tile *origRight, len_t newLeftWidth){
 
 double Floorplan::calculateHPWL(){
     double floorplanHPWL = 0;
-    for(Connection c : this->allConnections){
+    for(Connection const &c : this->allConnections){
         floorplanHPWL += c.calculateCost();
     }
     
     return floorplanHPWL;
+}
+
+size_t std::hash<Floorplan>::operator()(const Floorplan&key) const {
+    return std::hash<Rectangle>()(key.getChipContour()) ^ std::hash<int>()(key.getAllRectilinearCount()) ^ std::hash<int>()(key.getConnectionCount());
 }

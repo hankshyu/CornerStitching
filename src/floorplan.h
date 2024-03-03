@@ -84,16 +84,29 @@ public:
     // remove rt as tile's overlap and update Rectilinear structure & floorplan payload, make tile tile::BLOCK if necessary
     void decreaseTileOverlap(Tile *tile, Rectilinear *removeRect);
 
-    // collect all blocks within a rectilinear, reDice them into Rectangles. (may reduce Tile count)
+    // collect all blocks within a rectilinear, reDice them into Rectangles. (potentially reduce Tile count)
     void reshapeRectilinear(Rectilinear *rt);
 
+    // Pass in the victim tile pointer through origTop, it will split the tile into two pieces:
+    // 1. origTop represents the top portion of the split, with height (origTop.height - newDownHeight)
+    // 2. newDown represents the lower portion of the split, with height newDownHeight, is the return value
     Tile *divideTileHorizontally(Tile *origTop, len_t newDownHeight);
 
+    // Pass in the victim tile pointer through origRight, it will stplit the tile into two pieces:
+    // 1. origRight represents the right portion of the split, with width (origRight.width - newLeftWidth)
+    // 2. newLeft represents the left portion of the split, with width newLeftWidth, is the return value
     Tile *divideTileVertically(Tile *origRight, len_t newLeftWidth);
 
     // calculate the HPWL (cost) of the floorplan system, using the connections information stored inside "allConnections"
     double calculateHPWL();
     
 };
+
+namespace std{
+    template<>
+    struct hash<Floorplan>{
+        size_t operator()(const Floorplan &key) const;
+    };
+}
 
 #endif // #define __FLOORPLAN_H__

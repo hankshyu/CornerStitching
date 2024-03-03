@@ -34,68 +34,76 @@ int main(int argc, char const *argv[]) {
 		GlobalResult gr;
 		gr.readGlobalResult("./inputs/case11-output.txt");
 
-		Floorplan fp (gr, 0.5, 2, 0.8);
-		Tile *t1 = fp.addBlockTile(Rectangle(0, 13, 2, 14), fp.allRectilinears[1]);
-		Tile *t2 = fp.addOverlapTile(Rectangle(24, 2, 25, 7), {fp.allRectilinears[0], fp.allRectilinears[1]});
-		fp.cs->visualiseTileDistribution("outputs/case11/case11-output.txt");
-		std::cout << "Floorplan blockTilePayload: " << std::endl;
-		for(auto p : fp.blockTilePayload){
-			std::cout << *(p.first) << "->" << p.second->getName() << std::endl;
-		}
+		using namespace boost::polygon::operators;
+		std::unordered_set<DoughnutPolygon> dpus;
+		DoughnutPolygonSet dp;
+		dp += Rectangle(0, 0, 10, 20);
+		dp += Rectangle(10, 10, 30, 20);
+		dpus.insert(dp[0]);
+		std::cout << dp[0] << std::endl;
 
-		std::cout << "Overlap stuff: " << std::endl;
-		for(auto p : fp.overlapTilePayload){
-			std::cout << *(p.first) << "-> {";
-			for(auto const &pp : p.second){
-				std::cout << pp->getName() << ", ";
-			}
-			std::cout << "}" << std::endl;
-		}
-		std::cout << "All Rectilinear structure: " << std::endl;
-		for(int i = 0; i < fp.allRectilinears.size(); ++i){
-			Rectilinear *rect = fp.allRectilinears[i];
+		// Floorplan fp (gr, 0.5, 2, 0.8);
+		// Tile *t1 = fp.addBlockTile(Rectangle(0, 13, 2, 14), fp.allRectilinears[1]);
+		// Tile *t2 = fp.addOverlapTile(Rectangle(24, 2, 25, 7), {fp.allRectilinears[0], fp.allRectilinears[1]});
+		// fp.cs->visualiseTileDistribution("outputs/case11/case11-output.txt");
+		// std::cout << "Floorplan blockTilePayload: " << std::endl;
+		// for(auto p : fp.blockTilePayload){
+		// 	std::cout << *(p.first) << "->" << p.second->getName() << std::endl;
+		// }
 
-			std::cout << "[" << i << "]" << rect->getName() << " " << rect->getLegalArea() << std::endl;
+		// std::cout << "Overlap stuff: " << std::endl;
+		// for(auto p : fp.overlapTilePayload){
+		// 	std::cout << *(p.first) << "-> {";
+		// 	for(auto const &pp : p.second){
+		// 		std::cout << pp->getName() << ", ";
+		// 	}
+		// 	std::cout << "}" << std::endl;
+		// }
+		// std::cout << "All Rectilinear structure: " << std::endl;
+		// for(int i = 0; i < fp.allRectilinears.size(); ++i){
+		// 	Rectilinear *rect = fp.allRectilinears[i];
+
+		// 	std::cout << "[" << i << "]" << rect->getName() << " " << rect->getLegalArea() << std::endl;
 			
-			for(Tile *t : rect->blockTiles){
-				std::cout << *t << std::endl;
-			}
-			for(Tile *t : rect->overlapTiles){
-				std::cout << *t << std::endl;
-			}
-		}
-		std::cout << "Estimiate Corner Stitching HPWL: " << fp.calculateHPWL() << std::endl;
-		std::cout << GREEN << "Corner Stitching Exit normally" << COLORRST << std::endl;
+		// 	for(Tile *t : rect->blockTiles){
+		// 		std::cout << *t << std::endl;
+		// 	}
+		// 	for(Tile *t : rect->overlapTiles){
+		// 		std::cout << *t << std::endl;
+		// 	}
+		// }
+		// std::cout << "Estimiate Corner Stitching HPWL: " << fp.calculateHPWL() << std::endl;
+		// std::cout << GREEN << "Corner Stitching Exit normally" << COLORRST << std::endl;
 
-		std::cout << "Start Testing: " << std::endl;
-		fp.reshapeRectilinear(fp.allRectilinears[0]);
-		fp.cs->visualiseTileDistribution("./outputs/case11/case11-output1.txt");
-		std::cout << "Floorplan blockTilePayload: " << std::endl;
-		for(auto p : fp.blockTilePayload){
-			std::cout << *(p.first) << "->" << p.second->getName() << std::endl;
-		}
+		// std::cout << "Start Testing: " << std::endl;
+		// fp.reshapeRectilinear(fp.allRectilinears[0]);
+		// fp.cs->visualiseTileDistribution("./outputs/case11/case11-output1.txt");
+		// std::cout << "Floorplan blockTilePayload: " << std::endl;
+		// for(auto p : fp.blockTilePayload){
+		// 	std::cout << *(p.first) << "->" << p.second->getName() << std::endl;
+		// }
 
-		std::cout << "Overlap stuff: " << std::endl;
-		for(auto p : fp.overlapTilePayload){
-			std::cout << *(p.first) << "-> {";
-			for(auto const &pp : p.second){
-				std::cout << pp->getName() << ", ";
-			}
-			std::cout << "}" << std::endl;
-		}
-		std::cout << "All Rectilinear structure: " << std::endl;
-		for(int i = 0; i < fp.allRectilinears.size(); ++i){
-			Rectilinear *rect = fp.allRectilinears[i];
+		// std::cout << "Overlap stuff: " << std::endl;
+		// for(auto p : fp.overlapTilePayload){
+		// 	std::cout << *(p.first) << "-> {";
+		// 	for(auto const &pp : p.second){
+		// 		std::cout << pp->getName() << ", ";
+		// 	}
+		// 	std::cout << "}" << std::endl;
+		// }
+		// std::cout << "All Rectilinear structure: " << std::endl;
+		// for(int i = 0; i < fp.allRectilinears.size(); ++i){
+		// 	Rectilinear *rect = fp.allRectilinears[i];
 
-			std::cout << "[" << i << "]" << rect->getName() << " " << rect->getLegalArea() << std::endl;
+		// 	std::cout << "[" << i << "]" << rect->getName() << " " << rect->getLegalArea() << std::endl;
 			
-			for(Tile *t : rect->blockTiles){
-				std::cout << *t << std::endl;
-			}
-			for(Tile *t : rect->overlapTiles){
-				std::cout << *t << std::endl;
-			}
-		}
+		// 	for(Tile *t : rect->blockTiles){
+		// 		std::cout << *t << std::endl;
+		// 	}
+		// 	for(Tile *t : rect->overlapTiles){
+		// 		std::cout << *t << std::endl;
+		// 	}
+		// }
 
 
 		
